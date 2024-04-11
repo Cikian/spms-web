@@ -1,60 +1,50 @@
 <template>
   <div class="common-layout">
     <el-container>
-      <el-aside width="">
-        <el-radio-button @click="isCollapse = !isCollapse">expand</el-radio-button>
+      <el-aside width=" ">
 
         <el-menu
-            default-active="1"
+            default-active="/workTable"
             class="el-menu-vertical-demo"
             :collapse="isCollapse"
             @open="handleOpen"
             @close="handleClose"
             background-color="#1c2b45"
             active-text-color="red"
+            text-color="#d2d2d2"
+            style="border: none"
+            :router="true"
         >
-          <el-sub-menu index="1">
-            <template #title>
-              <el-icon>
-                <location/>
-              </el-icon>
-              <span>Navigator One</span>
-            </template>
-            <el-menu-item-group>
-              <template #title><span>Group One</span></template>
-              <el-menu-item index="1-1">item one</el-menu-item>
-              <el-menu-item index="1-2">item two</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="Group Two">
-              <el-menu-item index="1-3">item three</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="1-4">
-              <template #title><span>item four</span></template>
-              <el-menu-item index="1-4-1">item one</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
-          <el-menu-item index="2">
+          <div style="width: 100%; height: 72px">1</div>
+          <el-menu-item index="/workTable">
+            <el-icon>
+              <location/>
+            </el-icon>
+            <template #title>工作台</template>
+          </el-menu-item>
+          <el-menu-item index="/proman/home">
             <el-icon>
               <icon-menu/>
             </el-icon>
-            <template #title>Navigator Two</template>
+            <template #title>项目管理</template>
           </el-menu-item>
-          <el-menu-item index="3" disabled>
+          <el-menu-item index="3">
             <el-icon>
               <document/>
             </el-icon>
-            <template #title>Navigator Three</template>
+            <template #title>测试管理</template>
           </el-menu-item>
           <el-menu-item index="4">
             <el-icon>
               <setting/>
             </el-icon>
-            <template #title>Navigator Four</template>
+            <template #title>设置</template>
           </el-menu-item>
+          <el-button class="change-btn" text @click="changeMenu">{{ btext }}</el-button>
         </el-menu>
       </el-aside>
-      <el-main>
-        <router-view/>
+      <el-main style="margin: 0; padding: 0;">
+        <router-view />
       </el-main>
     </el-container>
   </div>
@@ -70,17 +60,29 @@ import {
   Location,
   Setting,
 } from '@element-plus/icons-vue'
+import router from "../router";
 
+router.push("/workTable")
 const isCollapse = ref(true)
+const btext = ref("展开")
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
 const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
+
+const changeMenu = () => {
+  isCollapse.value = !isCollapse.value
+  if (btext.value == "展开") {
+    btext.value = "收起"
+  } else {
+    btext.value = "展开"
+  }
+}
 </script>
 
-<style>
+<style scoped>
 .el-menu-vertical-demo:not(.el-menu--collapse) {
   width: 200px;
   min-height: 100vh;
@@ -94,5 +96,9 @@ const handleClose = (key: string, keyPath: string[]) => {
   width: 500px;
   height: 500px;
   background-color: aqua;
+}
+
+.change-btn{
+  float: right;
 }
 </style>
