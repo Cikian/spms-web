@@ -14,42 +14,47 @@ const router = createRouter({
                     component: () => import('../views/work_table/workTable.vue'),
                     children: [
                         {
-                            path: 'workTable/wtHome',
+                            path: '/workTable/wtHome',
                             name: 'wtHome',
-                            component: () => import('../views/work_table/wt-home.vue')
+                            component: () => import('../views/work_table/wt-home.vue'),
+                            children: [
+                                {
+                                    path: '/workTable/overView',
+                                    name: 'overView',
+                                    component: () => import('../views/work_table/overView.vue')
+                                },
+                                {
+                                    path: '/workTable/reqNeedCom',
+                                    name: 'reqNeedCom',
+                                    component: () => import('../views/work_table/reqNeedComplete.vue')
+                                },
+                                {
+                                    path: '/workTable/proNeedCom',
+                                    name: 'proNeedCom',
+                                    component: () => import('../views/work_table/proNeedComplete.vue')
+                                },
+                                {
+                                    path: '/workTable/myReq',
+                                    name: 'myReq',
+                                    component: () => import('../views/work_table/myReq.vue')
+                                },
+                                {
+                                    path: '/workTable/partIn',
+                                    name: 'partIn',
+                                    component: () => import('../views/work_table/partInPro.vue')
+                                }
+                            ]
                         },
                         {
-                            path: 'workTable/wtPanel',
+                            path: '/workTable/wtPanel',
                             name: 'wtPanel',
                             component: () => import('../views/work_table/wt-panel.vue')
                         },
-
-
                         {
-                            path: '/workTable/overView',
-                            name: 'overView',
-                            component: () => import('../views/work_table/overView.vue')
+                            path: '/workTable/wtUndefine',
+                            name: 'wtUndefine',
+                            component: () => import('../views/work_table/wt-undefine.vue')
                         },
-                        {
-                            path: '/workTable/reqNeedCom',
-                            name: 'reqNeedCom',
-                            component: () => import('../views/work_table/reqNeedComplete.vue')
-                        },
-                        {
-                            path: '/workTable/proNeedCom',
-                            name: 'proNeedCom',
-                            component: () => import('../views/work_table/proNeedComplete.vue')
-                        },
-                        {
-                            path: '/workTable/myReq',
-                            name: 'myReq',
-                            component: () => import('../views/work_table/myReq.vue')
-                        },
-                        {
-                            path: '/workTable/partIn',
-                            name: 'partIn',
-                            component: () => import('../views/work_table/partInPro.vue')
-                        }
                     ]
                 },
                 {

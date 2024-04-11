@@ -3,16 +3,16 @@
     <el-container>
       <el-header style="margin: 0; padding: 0; height: 52px">
         <el-menu
-            :default-active="activeIndex"
+            default-active="/workTable/wtHome"
             class="el-menu-demo"
             mode="horizontal"
             @select="handleSelect"
             style="height: 52px"
             :router="true"
         >
-          <el-menu-item index="">首页</el-menu-item>
-          <el-menu-item index="2-1">仪表盘</el-menu-item>
-          <el-menu-item index="2-2">item two</el-menu-item>
+          <el-menu-item index="/workTable/wtHome">首页</el-menu-item>
+          <el-menu-item index="/workTable/wtPanel">仪表盘</el-menu-item>
+          <el-menu-item index="/workTable/wtUndefine">未定义</el-menu-item>
         </el-menu>
       </el-header>
       <el-main style="margin: 0; padding: 0">
@@ -27,7 +27,6 @@
 import {Document, Location, Setting} from "@element-plus/icons-vue";
 import {ref} from 'vue'
 
-const activeIndex = ref('1')
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
