@@ -31,7 +31,7 @@
                 <div class="form-control">
                   <el-input
                       class="form-control-input"
-                      v-model="input"
+                      v-model="usernameInput"
                       placeholder="请输入用户名"
                       clearable
                   />
@@ -42,14 +42,16 @@
                 <div class="form-control">
                   <el-input
                       class="form-control-input"
-                      v-model="input"
+                      v-model="passwordInput"
                       placeholder="请输入密码"
                       type="password"
                       show-password
                   />
                 </div>
               </div>
-              <el-button color="#6698ff" :dark="isDark">Default</el-button>
+              <div class="form-submit">
+                <el-button color="#6698ff" class="form-submit-button">登录</el-button>
+              </div>
             </div>
           </div>
         </div>
@@ -64,7 +66,8 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 
-const input = ref('')
+const usernameInput = ref('')
+const passwordInput = ref('')
 </script>
 
 <style scoped>
@@ -182,6 +185,23 @@ label {
   width: 100%;
   height: 48px;
   font-size: 16px;
+}
+
+.form-submit{
+  width: 100%;
+}
+
+.form-submit-button{
+  width: 100%;
+  height: 48px;
+  background-color: #6698ff;
+  color: #fff;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.form-submit-button:hover{
+  box-shadow: 0 0 10px 0 rgba(102, 152, 255, 0.5);
 }
 
 </style>
