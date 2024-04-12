@@ -77,7 +77,6 @@ const passwordInput = ref('')
 
 const login = () => {
   console.log('username:', usernameInput.value)
-  console.log('password:', passwordInput.value)
 }
 </script>
 
