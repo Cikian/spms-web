@@ -50,10 +50,16 @@
                 </div>
               </div>
               <div class="form-submit">
-                <el-button color="#6698ff" class="form-submit-button">登录</el-button>
+                <el-button color="#6698ff" class="form-submit-button" @click="login()">登录</el-button>
+              </div>
+              <div class="form-footer">
+                <a href="forget-password.vue" class="forget-password">忘记密码？</a>
               </div>
             </div>
           </div>
+        </div>
+        <div class="login-body-footer">
+          <span class="login-body-footer-tip">如您没有账号，请联系管理员申请账号</span>
         </div>
       </div>
     </div>
@@ -68,6 +74,11 @@ import {ref} from 'vue'
 
 const usernameInput = ref('')
 const passwordInput = ref('')
+
+const login = () => {
+  console.log('username:', usernameInput.value)
+  console.log('password:', passwordInput.value)
+}
 </script>
 
 <style scoped>
@@ -129,13 +140,11 @@ const passwordInput = ref('')
 }
 
 .login-body-content-main {
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .login-body-content-form-container {
-  margin-top: 100px;
   display: flex;
   flex-direction: column;
 }
@@ -167,6 +176,7 @@ const passwordInput = ref('')
 }
 
 .form-group {
+  margin-top: 20px;
   margin-bottom: 24px;
 }
 
@@ -187,11 +197,11 @@ label {
   font-size: 16px;
 }
 
-.form-submit{
+.form-submit {
   width: 100%;
 }
 
-.form-submit-button{
+.form-submit-button {
   width: 100%;
   height: 48px;
   background-color: #6698ff;
@@ -200,8 +210,29 @@ label {
   transition: all 0.3s;
 }
 
-.form-submit-button:hover{
+.form-submit-button:hover {
   box-shadow: 0 0 10px 0 rgba(102, 152, 255, 0.5);
 }
 
+.form-footer {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.forget-password {
+  color: #6698ff;
+  font-size: 14px;
+}
+
+.login-body-footer{
+  margin-top: 80px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+.login-body-footer-tip {
+  color: #999;
+  font-size: 14px;
+}
 </style>
