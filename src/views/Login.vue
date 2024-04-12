@@ -67,12 +67,13 @@
       @ SPMS
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
 import {ref} from 'vue'
 import {login} from "../api/homeApi.ts";
+import {ElNotification} from "element-plus";
+
 
 const usernameInput = ref('')
 const passwordInput = ref('')
@@ -82,10 +83,16 @@ const userLogin = () => {
     userName: usernameInput.value,
     password: passwordInput.value
   }
-  console.log(formData)
-  login(formData).then(res => {
-    console.log(res)
-  })
+  login(formData)
+      .then(res => {
+        if (res.data.code === 400) {
+          ElNotification({
+            title: '警告',
+            message: res.data.message,
+            type: 'warning',
+          })
+        }
+      })
 }
 </script>
 
@@ -232,7 +239,7 @@ label {
   font-size: 14px;
 }
 
-.login-body-footer{
+.login-body-footer {
   margin-top: 80px;
   text-align: center;
   color: #999;
