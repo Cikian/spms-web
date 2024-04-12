@@ -76,6 +76,7 @@ const usernameInput = ref('')
 const passwordInput = ref('')
 
 const login = () => {
+  console.log('username:', usernameInput.value)
 }
 </script>
 
