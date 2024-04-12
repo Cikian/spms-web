@@ -14,7 +14,7 @@
             <el-avatar style="width: 44px; height: 44px; float: left; margin-right: 12px" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
             <div class="user-desc">
               <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ name }}, 上午好</div>
-              <div class="user-role">今天是{{currentDate}}, 星期{{week}}</div>
+              <div class="user-role" style="font-size: 12px">今天是{{currentDate}}, 星期{{week}}</div>
             </div>
           </div>
         </div>
@@ -72,7 +72,6 @@ const name = ref("Cikian")
 let currentDate: string = ref("")
 
 const date = new Date();
-let year = date.getFullYear();
 let month = date.getMonth() + 1;
 let day = date.getDate();
 let week: number = date.getDay();
@@ -99,7 +98,7 @@ switch (week) {
     week = "日";
     break;
 }
-currentDate = year + '年' + month + '月' + day + '日';
+currentDate = month + '月' + day + '日';
 </script>
 
 <style scoped>

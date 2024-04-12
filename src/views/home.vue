@@ -53,6 +53,8 @@ import {
 } from '@element-plus/icons-vue'
 import router from "../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import axios from "axios";
+import {login} from "../api/homeApi.ts";
 
 router.push("/workTable")
 const isCollapse = ref(true)
@@ -71,7 +73,12 @@ const changeMenu = () => {
   } else {
     btext.value = "展开"
   }
+
+  login(1).then(res => {
+
+  })
 }
+
 </script>
 
 <style scoped>

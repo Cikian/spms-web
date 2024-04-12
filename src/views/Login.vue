@@ -50,7 +50,7 @@
                 </div>
               </div>
               <div class="form-submit">
-                <el-button color="#6698ff" class="form-submit-button">登录</el-button>
+                <el-button color="#6698ff" class="form-submit-button" @click="userLogin">登录</el-button>
               </div>
             </div>
           </div>
@@ -65,9 +65,22 @@
 
 <script setup lang="ts">
 import {ref} from 'vue'
+import axios from "axios";
+import {login} from "../api/homeApi.ts";
 
 const usernameInput = ref('')
 const passwordInput = ref('')
+
+const userLogin = () => {
+  let formData = {
+    userName: usernameInput.value,
+    password: passwordInput.value
+  }
+  console.log(formData)
+  login(formData).then(res => {
+    console.log(res)
+  })
+}
 </script>
 
 <style scoped>
