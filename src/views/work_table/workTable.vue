@@ -7,12 +7,13 @@
             class="el-menu-demo"
             mode="horizontal"
             @select="handleSelect"
-            style="height: 52px"
+            style="height: 52px; padding: 0 20px"
             :router="true"
         >
-          <el-menu-item index="/workTable/wtHome">首页</el-menu-item>
-          <el-menu-item index="/workTable/wtPanel">仪表盘</el-menu-item>
-          <el-menu-item index="/workTable/wtUndefine">未定义</el-menu-item>
+          <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d" icon="fa-solid fa-house" />&nbsp;&nbsp;&nbsp;工作台<el-divider style="margin: 0 16px" direction="vertical" /></span>
+          <el-menu-item class="h-menu-item" index="/workTable/wtHome">首页</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/workTable/wtPanel">仪表盘</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/workTable/wtUndefine">未定义</el-menu-item>
         </el-menu>
       </el-header>
       <el-main style="margin: 0; padding: 0">
@@ -26,20 +27,18 @@
 <script setup lang="ts">
 import {Document, Location, Setting} from "@element-plus/icons-vue";
 import {ref} from 'vue'
+import router from "../../router";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
+router.push('/workTable/wtHome')
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
 </script>
 
 <style scoped>
-.el-menu-vertical-demo {
-  width: 260px;
-  min-height: calc(100vh - 52px);
-}
-
-.home-user {
-  width: 100%;
-  height: 144px;
+.h-menu-item{
+  padding: 0 16px;
+  margin-right: 20px;
 }
 </style>

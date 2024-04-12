@@ -10,34 +10,25 @@
             @open="handleOpen"
             @close="handleClose"
             background-color="#1c2b45"
-            active-text-color="red"
             text-color="#d2d2d2"
             style="border: none"
             :router="true"
         >
           <div style="width: 100%; height: 72px">1</div>
           <el-menu-item index="/workTable">
-            <el-icon>
-              <location/>
-            </el-icon>
+            <font-awesome-icon class="home-icon" icon="fa-solid fa-layer-group" />
             <template #title>工作台</template>
           </el-menu-item>
           <el-menu-item index="/proman/home">
-            <el-icon>
-              <icon-menu/>
-            </el-icon>
+            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-diagram-project" />
             <template #title>项目管理</template>
           </el-menu-item>
           <el-menu-item index="3">
-            <el-icon>
-              <document/>
-            </el-icon>
+            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines" />
             <template #title>测试管理</template>
           </el-menu-item>
           <el-menu-item index="4">
-            <el-icon>
-              <setting/>
-            </el-icon>
+            <font-awesome-icon class="home-icon" icon="fa-solid fa-gear" />
             <template #title>设置</template>
           </el-menu-item>
           <el-button class="change-btn" text @click="changeMenu">{{ btext }}</el-button>
@@ -61,6 +52,7 @@ import {
   Setting,
 } from '@element-plus/icons-vue'
 import router from "../router";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 router.push("/workTable")
 const isCollapse = ref(true)
@@ -92,13 +84,16 @@ const changeMenu = () => {
   min-height: 100vh;
 }
 
-.ddd {
-  width: 500px;
-  height: 500px;
-  background-color: aqua;
+.is-active{
+  background-color: #21324e;
 }
 
 .change-btn{
   float: right;
 }
+.home-icon{
+  font-size: 18px;
+  margin-right: 20px;
+}
+
 </style>
