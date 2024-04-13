@@ -27,7 +27,15 @@
             <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines" />
             <template #title>测试管理</template>
           </el-menu-item>
-          <el-menu-item index="4">
+          <el-menu-item index="/user">
+            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user" />
+            <template #title>用户管理</template>
+          </el-menu-item>
+          <el-menu-item index="5">
+            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group" />
+            <template #title>角色管理</template>
+          </el-menu-item>
+          <el-menu-item index="6">
             <font-awesome-icon class="home-icon" icon="fa-solid fa-gear" />
             <template #title>设置</template>
           </el-menu-item>
@@ -73,10 +81,6 @@ const changeMenu = () => {
   } else {
     btext.value = "展开"
   }
-
-  login(1).then(res => {
-
-  })
 }
 
 </script>
