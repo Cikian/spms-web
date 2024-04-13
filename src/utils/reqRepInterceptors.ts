@@ -24,10 +24,6 @@ service.interceptors.response.use(function (response) {
     console.log("响应拦截器")
 
 
-    if (response.data.data.token) {
-        console.log("响应有token")
-        localStorage.setItem("token", response.data.data.token)
-    }
     // 2xx 范围内的状态码都会触发该函数。
     // 对响应数据做点什么
     return response;
