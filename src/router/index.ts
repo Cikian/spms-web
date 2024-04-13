@@ -78,5 +78,20 @@ const router = createRouter({
     ]
 })
 
+router.beforeEach((to, from, next) => {
+    let token = localStorage.getItem("token")
+    if (!token && to.path !== '/login') {
+        ElNotification({
+            title: '警告',
+            message: '登录失效，请重新登录',
+            type: 'warning',
+        })
+        next('/login')
+    } else {
+        next()
+    }
+
+})
+
 
 export default router;
