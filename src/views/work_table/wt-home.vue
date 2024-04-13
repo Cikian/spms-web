@@ -11,21 +11,24 @@
       >
         <div class="home-user" style="padding: 24px 0 24px 12px">
           <div class="user-info">
-            <el-avatar style="width: 44px; height: 44px; float: left; margin-right: 12px" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
+            <el-avatar style="width: 44px; height: 44px; float: left; margin-right: 12px"
+                       src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
             <div class="user-desc">
               <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ name }}, 上午好</div>
-              <div class="user-role" style="font-size: 12px">今天是{{currentDate}}, 星期{{week}}</div>
+              <div class="user-role" style="font-size: 12px">今天是{{ currentDate }}, 星期{{ week }}</div>
+              <!--              退出登录-->
+              <el-button type="text" style="font-size: 12px; color: #6698ff" @click="userLogout()">退出登录</el-button>
             </div>
           </div>
         </div>
-        <el-divider />
+        <el-divider/>
         <el-menu-item style="margin: 12px 0;" index="/workTable/overView">
           <el-icon>
             <location/>
           </el-icon>
           <template #title>概览</template>
         </el-menu-item>
-        <el-divider />
+        <el-divider/>
         <div class="group-title">待办</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/reqNeedCom">
           <el-icon>
@@ -39,7 +42,7 @@
           </el-icon>
           <template #title>待完成项目</template>
         </el-menu-item>
-        <el-divider />
+        <el-divider/>
         <div class="group-title">我的</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/myReq">
           <el-icon>
@@ -64,7 +67,8 @@
 <script setup lang="ts">
 import {Document, Location, Setting} from "@element-plus/icons-vue";
 import router from "../../router";
-import { ref } from "vue";
+import {ref} from "vue";
+import {logout} from "../../api/homeApi.ts";
 
 router.push('/workTable/overView')
 
@@ -99,6 +103,28 @@ switch (week) {
     break;
 }
 currentDate = month + '月' + day + '日';
+
+const userLogout = () => {
+  logout()
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success',
+          })
+
+          localStorage.removeItem("token")
+          router.push('/login')
+        } else {
+          ElNotification({
+            title: '警告',
+            message: res.data.message,
+            type: 'warning',
+          })
+        }
+      })
+}
 </script>
 
 <style scoped>
@@ -111,21 +137,26 @@ currentDate = month + '月' + day + '日';
   width: 100%;
   height: 144px;
 }
-.el-divider{
+
+.el-divider {
   margin: auto;
 }
-.el-menu-item{
+
+.el-menu-item {
   height: 36px;
 }
-.el-menu-item:hover{
+
+.el-menu-item:hover {
   background-color: #f5f5f5;
   border-radius: 5px;
 }
-.is-active{
+
+.is-active {
   background-color: #ebf0fb;
   border-radius: 5px;
 }
-.group-title{
+
+.group-title {
   height: 48px;
   font-size: 11px;
   line-height: 48px;

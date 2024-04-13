@@ -50,10 +50,17 @@
                 </div>
               </div>
               <div class="form-submit">
-                <el-button color="#6698ff" class="form-submit-button" @click="userLogin">登录</el-button>
+                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="userLogin()">登录
+                </el-button>
+              </div>
+              <div class="form-footer">
+                <a href="forget-password.vue" class="forget-password">忘记密码？</a>
               </div>
             </div>
           </div>
+        </div>
+        <div class="login-body-footer">
+          <span class="login-body-footer-tip">如您没有账号，请联系管理员申请账号</span>
         </div>
       </div>
     </div>
@@ -65,21 +72,44 @@
 
 <script setup lang="ts">
 import {ref} from 'vue'
-import axios from "axios";
 import {login} from "../api/homeApi.ts";
+import router from "../router";
 
 const usernameInput = ref('')
 const passwordInput = ref('')
+const isDisabled = ref(false)
 
 const userLogin = () => {
+  isDisabled.value = true
+
   let formData = {
     userName: usernameInput.value,
     password: passwordInput.value
   }
-  console.log(formData)
-  login(formData).then(res => {
-    console.log(res)
-  })
+
+  login(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success',
+          })
+
+          let token = res.data.data.token;
+          localStorage.setItem("token", token)
+          router.push('/home')
+
+        } else if (res.data.code === 400) {
+          ElNotification({
+            title: '警告',
+            message: res.data.message,
+            type: 'warning',
+          })
+        }
+
+        isDisabled.value = false
+      })
 }
 </script>
 
@@ -142,13 +172,11 @@ const userLogin = () => {
 }
 
 .login-body-content-main {
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .login-body-content-form-container {
-  margin-top: 100px;
   display: flex;
   flex-direction: column;
 }
@@ -180,6 +208,7 @@ const userLogin = () => {
 }
 
 .form-group {
+  margin-top: 20px;
   margin-bottom: 24px;
 }
 
@@ -200,11 +229,11 @@ label {
   font-size: 16px;
 }
 
-.form-submit{
+.form-submit {
   width: 100%;
 }
 
-.form-submit-button{
+.form-submit-button {
   width: 100%;
   height: 48px;
   background-color: #6698ff;
@@ -213,8 +242,29 @@ label {
   transition: all 0.3s;
 }
 
-.form-submit-button:hover{
+.form-submit-button:hover {
   box-shadow: 0 0 10px 0 rgba(102, 152, 255, 0.5);
 }
 
+.form-footer {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.forget-password {
+  color: #6698ff;
+  font-size: 14px;
+}
+
+.login-body-footer {
+  margin-top: 80px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+.login-body-footer-tip {
+  color: #999;
+  font-size: 14px;
+}
 </style>
