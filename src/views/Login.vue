@@ -50,7 +50,8 @@
                 </div>
               </div>
               <div class="form-submit">
-                <el-button color="#6698ff" class="form-submit-button" @click="userLogin()">登录</el-button>
+                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="userLogin()">登录
+                </el-button>
               </div>
               <div class="form-footer">
                 <a href="forget-password.vue" class="forget-password">忘记密码？</a>
@@ -72,26 +73,42 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import {login} from "../api/homeApi.ts";
-import {ElNotification} from "element-plus";
-
+import router from "../router";
 
 const usernameInput = ref('')
 const passwordInput = ref('')
+const isDisabled = ref(false)
 
 const userLogin = () => {
+  isDisabled.value = true
+
   let formData = {
     userName: usernameInput.value,
     password: passwordInput.value
   }
+
   login(formData)
       .then(res => {
-        if (res.data.code === 400) {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success',
+          })
+
+          let token = res.data.data.token;
+          localStorage.setItem("token", token)
+          router.push('/home')
+
+        } else if (res.data.code === 400) {
           ElNotification({
             title: '警告',
             message: res.data.message,
             type: 'warning',
           })
         }
+
+        isDisabled.value = false
       })
 }
 </script>
