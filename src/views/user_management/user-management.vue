@@ -3,7 +3,7 @@
     <el-container>
       <el-header style="margin: 0; padding: 0; height: 52px">
         <el-menu
-            default-active="/workTable/wtHome"
+            default-active="/user/management/userList"
             class="el-menu-demo"
             mode="horizontal"
             @select="handleSelect"
@@ -15,9 +15,8 @@
             用户管理
             <el-divider style="margin: 0 16px" direction="vertical"/>
           </span>
-          <el-menu-item class="h-menu-item" index="/workTable/wtHome">首页</el-menu-item>
-          <el-menu-item class="h-menu-item" index="/workTable/wtPanel">仪表盘</el-menu-item>
-          <el-menu-item class="h-menu-item" index="/workTable/wtUndefine">未定义</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/user/management/userList">用户列表</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/user/management/userAdd">新增用户</el-menu-item>
         </el-menu>
       </el-header>
       <el-main style="margin: 0; padding: 0">
@@ -28,8 +27,10 @@
 </template>
 
 <script setup lang="ts">
-
+import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+
+router.push("/user/management/userList")
 
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
@@ -37,5 +38,8 @@ const handleSelect = (key: string, keyPath: string[]) => {
 </script>
 
 <style scoped>
-
+.h-menu-item {
+  padding: 0 16px;
+  margin-right: 20px;
+}
 </style>

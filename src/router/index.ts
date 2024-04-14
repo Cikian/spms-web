@@ -63,7 +63,7 @@ const router = createRouter({
                         {
                             path: '/workTable/wtUndefine',
                             name: 'wtUndefine',
-                            component: () => import('../views/work_table/wt-undefine.vue')
+                            component: () => import('../views/work_table/wt-undefine.vue'),
                         },
                     ]
                 },
@@ -80,7 +80,19 @@ const router = createRouter({
                         {
                             path: '/user/management',
                             name: 'userManagement',
-                            component: () => import('../views/user_management/user-management.vue')
+                            component: () => import('../views/user_management/user-management.vue'),
+                            children: [
+                                {
+                                    path: '/user/management/userList',
+                                    name: 'userList',
+                                    component: () => import('../views/user_management/user-list.vue')
+                                },
+                                {
+                                    path: '/user/management/userAdd',
+                                    name: 'userAdd',
+                                    component: () => import('../views/user_management/user-add.vue')
+                                }
+                            ]
                         }
                     ]
                 },
