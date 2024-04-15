@@ -22,9 +22,7 @@
         </div>
         <el-divider/>
         <el-menu-item style="margin: 12px 0;" index="/workTable/overView">
-          <el-icon>
-            <location/>
-          </el-icon>
+          <font-awesome-icon :icon="['far', 'eye']" />
           <template #title>概览</template>
         </el-menu-item>
         <el-divider/>
@@ -58,7 +56,9 @@
       </el-menu>
     </el-aside>
     <el-main style="padding: 0">
-      <router-view></router-view>
+      <el-scrollbar max-height="calc(100vh - 52px)">
+        <router-view></router-view>
+      </el-scrollbar>
     </el-main>
   </el-container>
 </template>
@@ -68,6 +68,7 @@ import {Document, Location, Setting} from "@element-plus/icons-vue";
 import router from "../../router";
 import {ref} from "vue";
 import {logout} from "../../api/homeApi.ts";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 router.push('/workTable/overView')
 
