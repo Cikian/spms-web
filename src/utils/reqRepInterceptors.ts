@@ -32,7 +32,6 @@ service.interceptors.response.use(function (response) {
 
     let newToken = response.headers.get("newToken");
     if (newToken) {
-        console.log("有新token")
         localStorage.setItem("token", newToken)
     }
     return response;

@@ -4,8 +4,12 @@
 
 <script setup lang="ts">
 import router from "../../router";
+import {onMounted} from "vue";
 
-router.push("/user/management")
+onMounted(() => {
+  router.push("/user/management")
+})
+
 </script>
 
 <style scoped>
