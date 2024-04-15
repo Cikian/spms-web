@@ -82,6 +82,40 @@ const isDisabled = ref(false)
 const userLogin = () => {
   isDisabled.value = true
 
+  if (usernameInput.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入用户名',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
+  }
+
+  if (passwordInput.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入密码',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
+  }
+
+  const usernameRegex = /^spms\d{6}$/;
+  const passwordRegex = /^[a-zA-Z0-9]{6,32}$/;
+  if (usernameInput.value !== "admin" && usernameInput.value !== "cikican") {
+    if (!usernameRegex.test(usernameInput.value) || !passwordRegex.test(passwordInput.value)) {
+      ElNotification({
+        title: '提示',
+        message: '用户名或密码错误',
+        type: 'warning',
+      })
+      isDisabled.value = false
+      return
+    }
+  }
+
   let formData = {
     userName: usernameInput.value,
     password: passwordInput.value

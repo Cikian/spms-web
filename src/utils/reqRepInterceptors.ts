@@ -21,6 +21,11 @@ service.interceptors.request.use(function (config) {
 
 service.interceptors.response.use(function (response) {
     if (response.data.code === 401) {
+        ElNotification({
+            title: '警告',
+            message: response.data.message,
+            type: 'warning',
+        })
         localStorage.removeItem("token")
         router.push("/login")
     }

@@ -16,7 +16,6 @@
             <div class="user-desc">
               <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ name }}, 上午好</div>
               <div class="user-role" style="font-size: 12px">今天是{{ currentDate }}, 星期{{ week }}</div>
-              <!--              退出登录-->
               <el-button type="text" style="font-size: 12px; color: #6698ff" @click="userLogout()">退出登录</el-button>
             </div>
           </div>

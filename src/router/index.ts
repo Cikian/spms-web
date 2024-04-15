@@ -63,7 +63,7 @@ const router = createRouter({
                         {
                             path: '/workTable/wtUndefine',
                             name: 'wtUndefine',
-                            component: () => import('../views/work_table/wt-undefine.vue')
+                            component: () => import('../views/work_table/wt-undefine.vue'),
                         },
                     ]
                 },
@@ -71,11 +71,50 @@ const router = createRouter({
                     path: '/proman/home',
                     name: 'promanHome',
                     component: () => import('../views/project_management/pro-home.vue')
-                }
+                },
+                {
+                    path: '/user',
+                    name: 'user',
+                    component: () => import('../views/user_management/user-home.vue'),
+                    children: [
+                        {
+                            path: '/user/management',
+                            name: 'userManagement',
+                            component: () => import('../views/user_management/user-management.vue'),
+                            children: [
+                                {
+                                    path: '/user/management/userList',
+                                    name: 'userList',
+                                    component: () => import('../views/user_management/user-list.vue')
+                                },
+                                {
+                                    path: '/user/management/userAdd',
+                                    name: 'userAdd',
+                                    component: () => import('../views/user_management/user-add.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
             ]
         },
 
     ]
+})
+
+router.beforeEach((to, from, next) => {
+    let token = localStorage.getItem("token")
+    if (!token && to.path !== '/login') {
+        ElNotification({
+            title: '警告',
+            message: '登录失效，请重新登录',
+            type: 'warning',
+        })
+        next('/login')
+    } else {
+        next()
+    }
+
 })
 
 
