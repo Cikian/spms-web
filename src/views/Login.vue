@@ -132,6 +132,7 @@ const userLogin = () => {
           localStorage.setItem("token", token)
 
           if (res.data.data.isFirstLogin) {
+            localStorage.setItem("isFirstLogin", 'true')
             router.push('/resetPassword')
             return
           }

@@ -210,6 +210,7 @@ const resetPasswod = () => {
             type: 'success',
           })
           localStorage.removeItem('token')
+          localStorage.removeItem('isFirstLogin')
           router.push('/login')
         } else {
           ElNotification({

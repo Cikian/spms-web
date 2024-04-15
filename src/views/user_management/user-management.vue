@@ -16,7 +16,7 @@
             <el-divider style="margin: 0 16px" direction="vertical"/>
           </span>
           <el-menu-item class="h-menu-item" index="/user/management/userList">用户列表</el-menu-item>
-          <el-menu-item class="h-menu-item" index="/user/management/userAdd">新增用户</el-menu-item>
+<!--          <el-menu-item class="h-menu-item" index="/user/management/userAdd">新增用户</el-menu-item>-->
         </el-menu>
       </el-header>
       <el-main style="margin: 0; padding: 0">

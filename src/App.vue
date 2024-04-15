@@ -7,5 +7,7 @@
 </script>
 
 <style>
-
+.el-dialog {
+  border-radius: 20px;
+}
 </style>
