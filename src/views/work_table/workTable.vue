@@ -1,7 +1,7 @@
 <template>
   <div class="common-layout">
     <el-container>
-      <el-header style="margin: 0; padding: 0; height: 52px">
+      <el-header style="margin: 0; padding: 0; height: 52px; box-shadow: 0 4px 8px #00000008; z-index: 99">
         <el-menu
             default-active="/workTable/wtHome"
             class="el-menu-demo"
@@ -25,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import {Document, Location, Setting} from "@element-plus/icons-vue";
-import {ref} from 'vue'
 import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 

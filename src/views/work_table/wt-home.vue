@@ -22,35 +22,27 @@
         </div>
         <el-divider/>
         <el-menu-item style="margin: 12px 0;" index="/workTable/overView">
-          <font-awesome-icon :icon="['far', 'eye']" />
+          <font-awesome-icon class="list-icons" :icon="['far', 'eye']" />
           <template #title>概览</template>
         </el-menu-item>
         <el-divider/>
         <div class="group-title">待办</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/reqNeedCom">
-          <el-icon>
-            <icon-menu/>
-          </el-icon>
+          <font-awesome-icon class="list-icons" :icon="['fas', 'list-check']" />
           <template #title>待完成需求</template>
         </el-menu-item>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/proNeedCom">
-          <el-icon>
-            <document/>
-          </el-icon>
+          <font-awesome-icon class="list-icons" :icon="['fas', 'terminal']" />
           <template #title>待完成项目</template>
         </el-menu-item>
         <el-divider/>
         <div class="group-title">我的</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/myReq">
-          <el-icon>
-            <setting/>
-          </el-icon>
+          <font-awesome-icon class="list-icons" :icon="['far', 'user']" />
           <template #title>我负责的需求</template>
         </el-menu-item>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/partIn">
-          <el-icon>
-            <setting/>
-          </el-icon>
+          <font-awesome-icon class="list-icons" :icon="['far', 'user']" />
           <template #title>我参与的项目</template>
         </el-menu-item>
       </el-menu>
@@ -64,7 +56,6 @@
 </template>
 
 <script setup lang="ts">
-import {Document, Location, Setting} from "@element-plus/icons-vue";
 import router from "../../router";
 import {ref} from "vue";
 import {logout} from "../../api/homeApi.ts";
@@ -161,5 +152,9 @@ const userLogout = () => {
   font-size: 11px;
   line-height: 48px;
   color: #999;
+}
+.list-icons{
+  margin-right: 12px;
+  
 }
 </style>
