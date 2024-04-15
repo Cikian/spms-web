@@ -1,51 +1,52 @@
 <template>
   <div class="common-layout">
     <el-container>
-      <el-aside width=" ">
 
-        <el-menu
-            default-active="/workTable"
-            class="el-menu-vertical-demo"
-            :collapse="isCollapse"
-            @open="handleOpen"
-            @close="handleClose"
-            background-color="#1c2b45"
-            text-color="#d2d2d2"
-            style="border: none"
-            :router="true"
-        >
-          <div style="width: 100%; height: 72px">1</div>
-          <el-menu-item index="/workTable">
-            <font-awesome-icon class="home-icon" icon="fa-solid fa-layer-group"/>
-            <template #title>工作台</template>
-          </el-menu-item>
-          <el-menu-item index="/proman/home">
-            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-diagram-project"/>
-            <template #title>项目管理</template>
-          </el-menu-item>
-          <el-menu-item index="3">
-            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines"/>
-            <template #title>测试管理</template>
-          </el-menu-item>
-          <el-menu-item index="/user">
-            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user"/>
-            <template #title>用户管理</template>
-          </el-menu-item>
-          <el-menu-item index="5">
-            <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group"/>
-            <template #title>角色管理</template>
-          </el-menu-item>
-          <el-menu-item index="6">
-            <font-awesome-icon class="home-icon" icon="fa-solid fa-gear"/>
-            <template #title>设置</template>
-          </el-menu-item>
-          <el-button class="change-btn" text @click="changeMenu">{{ btext }}</el-button>
-        </el-menu>
-      </el-aside>
+          <el-aside width=" ">
+            <el-menu
+                default-active="/workTable"
+                class="el-menu-vertical-demo"
+                :collapse="isCollapse"
+                @open="handleOpen"
+                @close="handleClose"
+                background-color="#1c2b45"
+                text-color="#d2d2d2"
+                style="border: none"
+                :router="true"
+            >
+              <div style="width: 100%; height: 72px">1</div>
+              <el-menu-item index="/workTable">
+                <font-awesome-icon class="home-icon" icon="fa-solid fa-layer-group"/>
+                <template #title>工作台</template>
+              </el-menu-item>
+              <el-menu-item index="/proman/home">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-diagram-project"/>
+                <template #title>项目管理</template>
+              </el-menu-item>
+              <el-menu-item index="3">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines"/>
+                <template #title>测试管理</template>
+              </el-menu-item>
+              <el-menu-item index="/user">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user"/>
+                <template #title>用户管理</template>
+              </el-menu-item>
+              <el-menu-item index="5">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group"/>
+                <template #title>角色管理</template>
+              </el-menu-item>
+              <el-menu-item index="6">
+                <font-awesome-icon class="home-icon" icon="fa-solid fa-gear"/>
+                <template #title>设置</template>
+              </el-menu-item>
+              <el-button class="change-btn" text @click="changeMenu">{{ btext }}</el-button>
+            </el-menu>
+          </el-aside>
       <el-main style="margin: 0; padding: 0;">
         <router-view/>
       </el-main>
     </el-container>
+
   </div>
 
 
