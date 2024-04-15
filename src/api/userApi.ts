@@ -31,3 +31,11 @@ export function updatePassword(data) {
         data: data
     })
 }
+
+export function addUser(data) {
+    return request({
+        url: '/user/add',
+        method: 'post',
+        data: data
+    })
+}

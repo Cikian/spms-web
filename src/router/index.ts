@@ -92,11 +92,11 @@ const router = createRouter({
                                     name: 'userList',
                                     component: () => import('../views/user_management/user-list.vue')
                                 },
-                                {
-                                    path: '/user/management/userAdd',
-                                    name: 'userAdd',
-                                    component: () => import('../views/user_management/user-add.vue')
-                                }
+                                // {
+                                //     path: '/user/management/userAdd',
+                                //     name: 'userAdd',
+                                //     component: () => import('../views/user_management/user-add.vue')
+                                // }
                             ]
                         }
                     ]
@@ -109,14 +109,24 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     let token = localStorage.getItem("token")
+    let isFirstLogin = localStorage.getItem("isFirstLogin")
+
     if (!token && to.path !== '/login') {
         ElNotification({
-            title: '警告',
+            title: '提示',
             message: '登录失效，请重新登录',
             type: 'warning',
         })
         next('/login')
     } else {
+        if (isFirstLogin === 'true' && to.path !== '/resetPassword') {
+            ElNotification({
+                title: '提示',
+                message: '首次登录，请修改密码',
+                type: 'warning',
+            })
+            next('/resetPassword')
+        }
         next()
     }
 
