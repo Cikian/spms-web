@@ -15,50 +15,71 @@
           <div class="login-body-content-form-container">
             <div class="form-container-header">
               <div class="form-container-header-title">
-                <span>登录</span>
+                <span>重置密码</span>
               </div>
               <div class="from-container-header-description">
-                <span>欢迎登录</span>
+                <span>为了您的账号安全，第一次登录需要重置密码</span>
               </div>
             </div>
             <div class="form-container-body">
               <div class="form-username form-group">
-                <label class="form-label">
-                  <span>用户名</span>
-                </label>
+                <label class="form-label">邮箱</label>
                 <div class="form-control">
                   <el-input
                       class="form-control-input"
-                      v-model="usernameInput"
-                      placeholder="请输入用户名"
+                      v-model="emailInput"
+                      placeholder="请输入邮箱"
                       clearable
                   />
                 </div>
               </div>
               <div class="form-password form-group">
-                <label class="form-label">密码</label>
+                <label class="form-label">验证码</label>
+                <div class="form-control">
+                  <el-input
+                      class="form-control-input from-control-input-code"
+                      v-model="emailCode"
+                      placeholder="请输入验证码"
+                      clearable
+                  />
+                  <el-button :disabled="getCodeBtn" type="primary" @click="getEmailCode" class="getCodeBtn"
+                             size="large">{{ getCodeBtnText }}
+                  </el-button>
+                </div>
+              </div>
+              <div class="form-password form-group">
+                <label class="form-label">原密码</label>
                 <div class="form-control">
                   <el-input
                       class="form-control-input"
-                      v-model="passwordInput"
-                      placeholder="请输入密码"
+                      v-model="oldPasswordInput"
+                      placeholder="请输入原密码"
+                      type="password"
+                      show-password
+                  />
+                </div>
+              </div>
+              <div class="form-password form-group">
+                <label class="form-label">新密码</label>
+                <div class="form-control">
+                  <el-input
+                      class="form-control-input"
+                      v-model="newPasswordInput"
+                      placeholder="请输入新密码"
                       type="password"
                       show-password
                   />
                 </div>
               </div>
               <div class="form-submit">
-                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="userLogin()">登录
+                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="resetPasswod()">提交
                 </el-button>
-              </div>
-              <div class="form-footer">
-                <a href="forget-password.vue" class="forget-password">忘记密码？</a>
               </div>
             </div>
           </div>
         </div>
         <div class="login-body-footer">
-          <span class="login-body-footer-tip">如您没有账号，请联系管理员申请账号</span>
+          <span class="login-body-footer-tip">为了您的账号安全，请勿将账号告知他人</span>
         </div>
       </div>
     </div>
@@ -69,85 +90,146 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue'
-import {login} from "../api/homeApi.ts";
+import {ref, watch} from 'vue'
+import {sendEmailCode, updatePassword, verifyEmail} from "../api/userApi.ts";
 import router from "../router";
 
-const usernameInput = ref('')
-const passwordInput = ref('')
+const emailInput = ref('')
+const emailCode = ref('')
+const oldPasswordInput = ref('')
+const newPasswordInput = ref('')
 const isDisabled = ref(false)
+const getCodeBtn = ref(true)
+const getCodeBtnText = ref('获取验证码')
 
-const userLogin = () => {
-  isDisabled.value = true
 
-  if (usernameInput.value === '') {
+watch(emailInput, (val) => {
+  getCodeBtn.value = !val;
+})
+
+const getEmailCode = () => {
+  getCodeBtn.value = true
+  getCodeBtnText.value = '发送中...'
+
+  let emailRegex = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (!emailRegex.test(emailInput.value)) {
     ElNotification({
-      title: '警告',
-      message: '请输入用户名',
+      title: '提示',
+      message: '请输入正确的邮箱',
       type: 'warning',
     })
-    isDisabled.value = false
+    getCodeBtn.value = false
+    getCodeBtnText.value = '获取验证码'
     return
   }
 
-  if (passwordInput.value === '') {
-    ElNotification({
-      title: '警告',
-      message: '请输入密码',
-      type: 'warning',
-    })
-    isDisabled.value = false
-    return
+  let emailFormData = {
+    email: emailInput.value,
   }
 
-  const usernameRegex = /^spms\d{6}$/;
-  const passwordRegex = /^[a-zA-Z0-9]{6,32}$/;
-  if (usernameInput.value !== "admin" && usernameInput.value !== "cikian") {
-    if (!usernameRegex.test(usernameInput.value) || !passwordRegex.test(passwordInput.value)) {
+  sendEmailCode(emailFormData).then(res => {
+    if (res.data.code === 200) {
       ElNotification({
-        title: '提示',
-        message: '用户名或密码错误',
+        title: '成功',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: '警告',
+        message: res.data.message,
         type: 'warning',
       })
-      isDisabled.value = false
-      return
     }
+    getCodeBtnText.value = '获取验证码'
+    getCodeBtn.value = false
+  })
+
+}
+
+const resetPasswod = () => {
+  isDisabled.value = true
+
+  if (emailInput.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入邮箱',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
   }
 
-  let formData = {
-    userName: usernameInput.value,
-    password: passwordInput.value
+  if (emailCode.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入验证码',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
   }
 
-  login(formData)
-      .then(res => {
+  if (oldPasswordInput.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入原密码',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
+  }
+
+  if (newPasswordInput.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入新密码',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
+  }
+
+  let emailFormData = {
+    email: emailInput.value,
+    code: emailCode.value,
+  }
+
+  let passwordFormData = {
+    oldPassword: oldPasswordInput.value,
+    newPassword: newPasswordInput.value
+  }
+
+  verifyEmail(emailFormData).then(res => {
+    if (res.data.code === 200) {
+      updatePassword(passwordFormData).then(res => {
         if (res.data.code === 200) {
           ElNotification({
             title: '成功',
             message: res.data.message,
             type: 'success',
           })
-
-          let token = res.data.data.token;
-          localStorage.setItem("token", token)
-
-          if (res.data.data.isFirstLogin) {
-            router.push('/resetPassword')
-            return
-          }
-
-          router.push('/home')
-
-        } else if (res.data.code === 400) {
+          localStorage.removeItem('token')
+          router.push('/login')
+        } else {
           ElNotification({
-            title: '警告',
+            title: '提示',
             message: res.data.message,
             type: 'warning',
           })
         }
-
         isDisabled.value = false
       })
+    } else {
+      ElNotification({
+        title: '提示',
+        message: res.data.message,
+        type: 'warning',
+      })
+      isDisabled.value = false
+    }
+  })
+
 }
 </script>
 
@@ -268,6 +350,10 @@ label {
   font-size: 16px;
 }
 
+.from-control-input-code {
+  width: 70%;
+}
+
 .form-submit {
   width: 100%;
 }
@@ -285,16 +371,6 @@ label {
   box-shadow: 0 0 10px 0 rgba(102, 152, 255, 0.5);
 }
 
-.form-footer {
-  margin-top: 16px;
-  text-align: right;
-}
-
-.forget-password {
-  color: #6698ff;
-  font-size: 14px;
-}
-
 .login-body-footer {
   margin-top: 80px;
   text-align: center;
@@ -305,5 +381,15 @@ label {
 .login-body-footer-tip {
   color: #999;
   font-size: 14px;
+}
+
+.getCodeBtn {
+  width: 29%;
+  height: 48px;
+  background-color: #6698ff;
+  color: #fff;
+  font-size: 16px;
+  transition: all 0.3s;
+  float: right;
 }
 </style>

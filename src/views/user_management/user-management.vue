@@ -29,8 +29,11 @@
 <script setup lang="ts">
 import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {onMounted} from "vue";
 
-router.push("/user/management/userList")
+onMounted(() => {
+  router.push("/user/management/userList")
+})
 
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
