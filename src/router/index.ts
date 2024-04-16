@@ -92,11 +92,11 @@ const router = createRouter({
                                     name: 'userList',
                                     component: () => import('../views/user_management/user-list.vue')
                                 },
-                                // {
-                                //     path: '/user/management/userAdd',
-                                //     name: 'userAdd',
-                                //     component: () => import('../views/user_management/user-add.vue')
-                                // }
+                                {
+                                    path: '/user/management/userQuery',
+                                    name: 'userQuery',
+                                    component: () => import('../views/user_management/user-query.vue')
+                                }
                             ]
                         }
                     ]

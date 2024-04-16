@@ -8,6 +8,7 @@
 
 <style>
 .el-dialog {
-  border-radius: 20px;
+  border-radius: 20px!important;
+  padding: 30px 20px!important;
 }
 </style>

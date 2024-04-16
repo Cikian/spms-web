@@ -1,21 +1,28 @@
 <template>
   <div class="user-list-container">
-    <div class="open-add-user-btn">
-      <el-button type="primary" @click="openDialog">新增用户</el-button>
+    <div class="top">
+      <div class="open-add-user-btn">
+        <el-button type="primary" @click="openDialog">新增用户</el-button>
+      </div>
+      <div class="batch-delete">
+        <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">批量删除</el-button>
+      </div>
     </div>
-
     <div class="user-list-table">
       <el-table
+          ref="multipleTableRef"
           :data="userList"
           :row-key="row => row.no"
           style="width: 100%"
           stripe
           v-loading="loading"
+          @selection-change="handleSelectionChange"
       >
+        <el-table-column type="selection" width="55" :reserve-selection="true"/>
         <el-table-column
             prop="no"
             label="序号"
-            width="100"
+            width="120"
         >
         </el-table-column>
         <el-table-column label="头像" width="180">
@@ -33,12 +40,14 @@
             prop="nickName"
             label="昵称"
             width="220"
+            :show-overflow-tooltip="true"
         >
         </el-table-column>
         <el-table-column
             prop="email"
             label="邮箱"
             width="250"
+            :show-overflow-tooltip="true"
         >
         </el-table-column>
         <el-table-column
@@ -58,6 +67,12 @@
             label="状态"
             width="130"
         >
+          <template #default="{row}">
+            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success">
+              {{ row.status }}
+            </el-button>
+            <el-button size="small" plain @click="handleStatus(row)" v-else type="danger">{{ row.status }}</el-button>
+          </template>
         </el-table-column>
         <el-table-column
             prop="createTime"
@@ -90,7 +105,14 @@
       </el-table>
     </div>
     <div class="pagination">
-      <el-pagination background layout="prev, pager, next" :total="total"/>
+      <el-pagination
+          :current-page="tablePage.pageNum"
+          @current-change="changePageNum"
+          :total="tablePage.total"
+          layout="total, prev, pager, next, jumper"
+          background
+          :pager-count="11"
+      />
     </div>
   </div>
 
@@ -120,23 +142,44 @@
     </div>
   </el-dialog>
 
+<!--  用户信息dialog-->
+  <el-dialog
+      title="用户详细信息"
+      v-model="userDetailDialogVisible"
+      width="30%"
+  >
+    <div>
+      <h3>{{ userDetails.userName }}</h3>
+      <p>昵称: {{ userDetails.nickName }}</p>
+      <p>邮箱: {{ userDetails.email }}</p>
+      <p>电话: {{ userDetails.phoneNumber }}</p>
+      <p>性别: {{ userDetails.gender }}</p>
+      <p>状态: {{ userDetails.status }}</p>
+      <p>创建时间: {{ userDetails.createTime }}</p>
+    </div>
+  </el-dialog>
+
 </template>
 
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
-import {addUser, queryUserList} from "../../api/userApi.ts";
-import {ElNotification} from "element-plus";
+import {addUser, deleteUsers, queryById, queryUserList, updateStatus} from "../../api/userApi.ts";
 
 const loading = ref(true)
-const total = ref(0)
-const page = ref(1)
-const size = ref(10)
 const userList = ref([])
 const dialogVisible = ref(false)
 const submitText = ref('提交')
 const isDisabled = ref(false)
-
 const email = ref('')
+const tablePage = {
+  pageNum: 1,
+  pageSize: 10,
+  total: 0
+}
+const multipleTableRef = ref()
+const selectedRows = ref([]);
+const userDetails = ref()
+const userDetailDialogVisible = ref(false)
 
 const openDialog = () => {
   dialogVisible.value = true
@@ -194,16 +237,16 @@ const loadUserList = () => {
   loading.value = true
   let userDTO = {}
   let formData = {
-    page: page.value,
-    size: size.value
+    page: tablePage.pageNum,
+    size: tablePage.pageSize
   }
   queryUserList(formData, userDTO).then(res => {
     if (res.data.code === 200) {
       let pageInfo = res.data.data;
-      total.value = pageInfo.total
+      tablePage.total = parseInt(pageInfo.total)
 
       for (let i = 0; i < pageInfo.records.length; i++) {
-        pageInfo.records[i].no = (page.value - 1) * size.value + i + 1
+        pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
 
         if (pageInfo.records[i].gender === 'N') {
           pageInfo.records[i].gender = '未知'
@@ -231,23 +274,177 @@ const loadUserList = () => {
 }
 
 const handleEdit = (row) => {
-  console.log(row)
+  let userId = row.userId
+  queryById(userId).then(res => {
+    if (res.data.code === 200) {
+      userDetailDialogVisible.value = true
+      userDetails.value = res.data.data
+    } else {
+      ElNotification({
+        title: '提示',
+        message: res.data.message,
+        type: 'warning'
+      })
+    }
+  })
 }
 
 const handleDelete = (row) => {
-  console.log(row)
+  ElMessageBox.confirm(
+      '此操作将删除此用户，确定执行吗？',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+      .then(() => {
+        let userIds = []
+        userIds.push(row.userId)
+        deleteUsers(userIds)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                loadUserList()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消操作',
+          type: 'info'
+        })
+      })
+}
+
+const handleStatus = (row) => {
+  let willStatus = row.status === '启用' ? '禁用' : '启用'
+
+  ElMessageBox.confirm(
+      '此操作将' + willStatus + '此用户，确定执行吗？',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+      .then(() => {
+        let formData = {
+          userId: row.userId,
+          status: row.status === '启用' ? 0 : 1
+        }
+
+        updateStatus(formData)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                loadUserList()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消操作',
+          type: 'info'
+        })
+      })
+
+}
+
+const changePageNum = (currentPage) => {
+  tablePage.pageNum = currentPage
+  loadUserList()
+}
+
+const handleSelectionChange = (selection) => {
+  selectedRows.value = selection;
+}
+
+const handleBatchDelete = () => {
+  let userIds = []
+  for (let i = 0; i < selectedRows.value.length; i++) {
+    userIds.push(selectedRows.value[i].userId)
+  }
+
+  ElMessageBox.confirm(
+      '此操作将批量删除选中的用户，确定执行吗？',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+      .then(() => {
+        deleteUsers(userIds)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                console.log(multipleTableRef)
+                multipleTableRef.value.clearSelection()
+                selectedRows.value = []
+                loadUserList()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消操作',
+          type: 'info'
+        })
+      })
 }
 
 onMounted(() => {
   loadUserList()
 })
 
-
 </script>
 
 <style scoped>
 .user-list-container {
   padding: 10px 20px 0 20px;
+}
+
+.top {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.batch-delete {
+  margin-left: 30px;
 }
 
 .user-list-table {
