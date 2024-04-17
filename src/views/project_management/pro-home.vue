@@ -15,24 +15,15 @@
         >
 
           <div class="group-title">项目</div>
-          <el-menu-item style="margin:0 0 12px 0;" index="/workTable/reqNeedCom">
+          <el-menu-item style="margin:0 0 12px 0;" index="/proman/allpro">
             <font-awesome-icon class="list-icons" :icon="['fas', 'list-check']"/>
             <template #title>全部项目</template>
           </el-menu-item>
-          <el-menu-item style="margin:0 0 12px 0;" index="/workTable/proNeedCom">
+          <el-menu-item style="margin:0 0 12px 0;" index="/proman/tbcom">
             <font-awesome-icon class="list-icons" :icon="['fas', 'terminal']"/>
             <template #title>待完成项目</template>
           </el-menu-item>
-          <el-divider/>
-          <div class="group-title">我的</div>
-          <el-menu-item style="margin:0 0 12px 0;" index="/workTable/myReq">
-            <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
-            <template #title>我负责的需求</template>
-          </el-menu-item>
-          <el-menu-item style="margin:0 0 12px 0;" index="/workTable/partIn">
-            <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
-            <template #title>我参与的项目</template>
-          </el-menu-item>
+
         </el-menu>
       </el-aside>
       <el-main style="padding: 0">
@@ -45,8 +36,13 @@
 </template>
 
 <script setup lang="ts">
-
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {onMounted} from "vue";
+import router from "../../router";
+
+onMounted(() => {
+  router.push('/proman/allpro')
+})
 </script>
 
 <style scoped>
