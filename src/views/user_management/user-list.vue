@@ -173,7 +173,7 @@
       </el-form-item>
       <el-form-item label="角色（分配角色）">
         <el-checkbox-group v-model="userHasRoles">
-          <el-checkbox v-for="role in allRoles" :key="role.roleId" :label="role.roleId">
+          <el-checkbox v-for="role in allRoles" :key="role.roleId" :label="role.roleId" :disabled="!role.status">
             {{ role.remark }}
           </el-checkbox>
         </el-checkbox-group>
