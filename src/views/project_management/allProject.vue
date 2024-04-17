@@ -45,6 +45,26 @@
       <el-table-column label="更新时间" prop="updateTime" />
     </el-table>
   </div>
+
+
+
+  <!-- 新增项目弹出框 -->
+  <el-dialog
+      v-model="dialogVisible"
+      title="Tips"
+      width="980"
+      class="addPro-dialog"
+  >
+    <span>This is a message</span>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="dialogVisible = false">
+          Confirm
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,7 @@
 <template>
-<router-view/>
+  <el-scrollbar max-height="calc(100vh - 52px)">
+    <router-view></router-view>
+  </el-scrollbar>
 </template>
 
 <script setup lang="ts">
