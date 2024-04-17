@@ -7,11 +7,11 @@
 </script>
 
 <style>
-body, html{
+body, html {
   margin: 0;
   padding: 0;
   background-color: #fff;
-  }
+}
 .el-dialog {
   border-radius: 20px!important;
   padding: 30px 20px!important;
