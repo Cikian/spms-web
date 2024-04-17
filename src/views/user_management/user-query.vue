@@ -1,24 +1,46 @@
 <template>
-  <div class="user-list-container">
-    <div class="top">
-      <div class="open-add-user-btn">
-        <el-button type="primary" @click="openDialog">新增用户</el-button>
-      </div>
-      <div class="batch-delete">
-        <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">批量删除</el-button>
-      </div>
+  <div class="user-query-container">
+    <div class="user-query-form-container">
+      <el-form class="form-inline" size="default" :inline="true" :model="form">
+        <el-form-item label="昵称">
+          <el-input v-model="form.nickName" placeholder="请输入昵称" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="用户名">
+          <el-input v-model="form.userName" placeholder="请输入用户名" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-select v-model="form.gender" placeholder="请选择性别" clearable>
+            <el-option label="男" value="M"/>
+            <el-option label="女" value="F"/>
+            <el-option label="未知" value="N"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="form.email" placeholder="请输入邮箱" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="form.status" placeholder="请选择状态" clearable>
+            <el-option label="启用" value="true"/>
+            <el-option label="禁用" value="false"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="form.phoneNumber" placeholder="请输入手机号码" clearable></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="queryUserListByCondition">查询</el-button>
+        </el-form-item>
+      </el-form>
     </div>
     <div class="user-list-table">
       <el-table
-          ref="multipleTableRef"
           :data="userList"
           :row-key="row => row.no"
           style="width: 100%"
           stripe
           v-loading="loading"
-          @selection-change="handleSelectionChange"
+          empty-text="暂无数据"
       >
-        <el-table-column type="selection" width="55" :reserve-selection="true"/>
         <el-table-column
             prop="no"
             label="序号"
@@ -116,33 +138,6 @@
     </div>
   </div>
 
-  <!--  新增用户dialog-->
-  <el-dialog
-      title="新增用户"
-      class="add-user-dialog"
-      v-model="dialogVisible"
-      width="30%"
-      :show-close="false"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-  >
-    <div class="add-user-tip">
-      <span class="add-user-tip-text">系统会将用户账号和密码发送到填写的邮箱，您可以编辑用户为其分配角色</span>
-    </div>
-    <label class="form-label">邮箱</label>
-    <el-input
-        class="form-control-input"
-        v-model="email"
-        clearable
-        placeholder="请输入邮箱"
-    />
-    <div style="text-align: center; margin-top: 20px;">
-      <el-button size="large" type="primary" @click="handleSubmit" :disabled="isDisabled">{{ submitText }}</el-button>
-      <el-button size="large" @click="handleCloseAddUserDialog">取消</el-button>
-    </div>
-  </el-dialog>
-
-  <!--  用户信息dialog-->
   <el-dialog
       title="用户详细信息"
       v-model="userDetailDialogVisible"
@@ -180,140 +175,103 @@
       </el-form-item>
     </el-form>
     <div style="text-align: center; margin-top: 20px;">
-      <el-button size="large" type="primary" @click="handleSubmitUserInfo" :disabled="isDisabled">{{
-          submitText
-        }}
-      </el-button>
+      <el-button size="large" type="primary" @click="handleSubmitUserInfo" :disabled="isDisabled">{{ submitText }}</el-button>
       <el-button size="large" @click="handleCloseEditUserDialog">取消</el-button>
     </div>
   </el-dialog>
-
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
-import {addUser, deleteUsers, queryById, queryUserList, updateStatus} from "../../api/userApi.ts";
+import {ref} from 'vue'
+import {deleteUsers, queryById, queryUserList, updateStatus} from '../../api/userApi.ts'
 import {assignRole, queryRoleList, queryUserHasRole} from "../../api/roleApi.ts";
 
-const loading = ref(true)
-const userList = ref([])
-const dialogVisible = ref(false)
-const submitText = ref('提交')
-const isDisabled = ref(false)
-const email = ref('')
+const loading = ref(false)
+const form = ref({
+  nickName: null,
+  userName: null,
+  gender: null,
+  email: null,
+  status: null,
+  phoneNumber: null
+})
 const tablePage = {
   pageNum: 1,
   pageSize: 10,
   total: 0
 }
-const multipleTableRef = ref()
-const selectedRows = ref([]);
+const userList = ref([])
+const submitText = ref('提交')
+const isDisabled = ref(false)
 const userDetails = ref()
 const userDetailDialogVisible = ref(false)
 const allRoles = ref([])
 const userOldRoles = ref([])
 const userHasRoles = ref([])
 
-const openDialog = () => {
-  dialogVisible.value = true
-}
-
-const handleSubmit = () => {
-  isDisabled.value = true
-  submitText.value = '提交中...'
-
-  if (email.value === '') {
-    ElNotification({
-      title: '警告',
-      message: '邮箱不能为空',
-      type: 'warning'
-    })
-    isDisabled.value = false
-    submitText.value = '提交'
-    return
+const queryUserListByCondition = () => {
+  loading.value = true
+  const data = {
+    page: tablePage.pageNum,
+    size: tablePage.pageSize
   }
 
-  let userFormData = {
-    email: email.value
+  const userDTO = {
+    nickName: form.value.nickName == '' ? null : form.value.nickName,
+    userName: form.value.userName == '' ? null : form.value.userName,
+    gender: form.value.gender == '' ? null : form.value.gender,
+    email: form.value.email == '' ? null : form.value.email,
+    status: form.value.status == '' ? null : form.value.status,
+    phoneNumber: form.value.phoneNumber == '' ? null : form.value.phoneNumber
   }
-  addUser(userFormData)
+
+  queryUserList(data, userDTO)
       .then(res => {
         if (res.data.code === 200) {
-          ElNotification({
-            title: '成功',
-            message: res.data.message,
-            type: 'success'
-          })
-          isDisabled.value = false
-          submitText.value = '提交'
-          email.value = ''
-          dialogVisible.value = false
-          loadUserList()
+          if (res.data.code === 200) {
+            let pageInfo = res.data.data;
+            tablePage.total = parseInt(pageInfo.total)
+
+            for (let i = 0; i < pageInfo.records.length; i++) {
+              pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
+
+              if (pageInfo.records[i].gender === 'N') {
+                pageInfo.records[i].gender = '未知'
+              } else if (pageInfo.records[i].gender === 'M') {
+                pageInfo.records[i].gender = '男'
+              } else {
+                pageInfo.records[i].gender = '女'
+              }
+
+              if (pageInfo.records[i].status) {
+                pageInfo.records[i].status = '启用'
+              } else {
+                pageInfo.records[i].status = '禁用'
+              }
+
+              if (pageInfo.records[i].createTime) {
+                pageInfo.records[i].createTime = new Date(pageInfo.records[i].createTime).toLocaleString()
+              }
+            }
+            userList.value = pageInfo.records
+            queryAllRole()
+            loading.value = false
+          }
         } else {
           ElNotification({
             title: '提示',
             message: res.data.message,
             type: 'warning'
           })
-          isDisabled.value = false
-          submitText.value = '提交'
+          userList.value = []
+          loading.value = false
         }
       })
 }
 
-const handleCloseAddUserDialog = () => {
-  email.value = ''
-  dialogVisible.value = false
-}
-
-const handleCloseEditUserDialog = () => {
-  userDetails.value = {}
-  userHasRoles.value = []
-  userDetailDialogVisible.value = false
-}
-
-const loadUserList = () => {
-  loading.value = true
-  let userDTO = {}
-  let formData = {
-    page: tablePage.pageNum,
-    size: tablePage.pageSize
-  }
-  queryUserList(formData, userDTO).then(res => {
-    if (res.data.code === 200) {
-      let pageInfo = res.data.data;
-      tablePage.total = parseInt(pageInfo.total)
-
-      for (let i = 0; i < pageInfo.records.length; i++) {
-        pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
-
-        if (pageInfo.records[i].gender === 'N') {
-          pageInfo.records[i].gender = '未知'
-        } else if (pageInfo.records[i].gender === 'M') {
-          pageInfo.records[i].gender = '男'
-        } else {
-          pageInfo.records[i].gender = '女'
-        }
-
-        if (pageInfo.records[i].status) {
-          pageInfo.records[i].status = '启用'
-        } else {
-          pageInfo.records[i].status = '禁用'
-        }
-
-        if (pageInfo.records[i].createTime) {
-          pageInfo.records[i].createTime = new Date(pageInfo.records[i].createTime).toLocaleString()
-        }
-      }
-
-      userList.value = pageInfo.records
-      loading.value = false
-    }
-  })
-}
-
 const handleEdit = (row) => {
   let userId = row.userId
+
   queryById(userId)
       .then(res => {
         if (res.data.code === 200) {
@@ -336,6 +294,7 @@ const handleEdit = (row) => {
                     userOldRoles.value.push(res.data.data[i].roleId)
                     userHasRoles.value.push(res.data.data[i].roleId)
                   }
+                  userDetailDialogVisible.value = true
                 } else {
                   ElNotification({
                     title: '提示',
@@ -343,7 +302,6 @@ const handleEdit = (row) => {
                     type: 'warning'
                   })
                 }
-                userDetailDialogVisible.value = true
               })
         } else {
           ElNotification({
@@ -352,145 +310,6 @@ const handleEdit = (row) => {
             type: 'warning'
           })
         }
-
-      })
-}
-
-const handleDelete = (row) => {
-  ElMessageBox.confirm(
-      '此操作将删除此用户，确定执行吗？',
-      '警告',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-      .then(() => {
-        let userIds = []
-        userIds.push(row.userId)
-        deleteUsers(userIds)
-            .then(res => {
-              if (res.data.code === 200) {
-                ElNotification({
-                  title: '成功',
-                  message: res.data.message,
-                  type: 'success'
-                })
-                loadUserList()
-              } else {
-                ElNotification({
-                  title: '提示',
-                  message: res.data.message,
-                  type: 'warning'
-                })
-              }
-            })
-      })
-      .catch(() => {
-        ElNotification({
-          title: '提示',
-          message: '已取消操作',
-          type: 'info'
-        })
-      })
-}
-
-const handleStatus = (row) => {
-  let willStatus = row.status === '启用' ? '禁用' : '启用'
-
-  ElMessageBox.confirm(
-      '此操作将' + willStatus + '此用户，确定执行吗？',
-      '警告',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-      .then(() => {
-        let formData = {
-          userId: row.userId,
-          status: row.status === '启用' ? 0 : 1
-        }
-
-        updateStatus(formData)
-            .then(res => {
-              if (res.data.code === 200) {
-                ElNotification({
-                  title: '成功',
-                  message: res.data.message,
-                  type: 'success'
-                })
-                loadUserList()
-              } else {
-                ElNotification({
-                  title: '提示',
-                  message: res.data.message,
-                  type: 'warning'
-                })
-              }
-            })
-      })
-      .catch(() => {
-        ElNotification({
-          title: '提示',
-          message: '已取消操作',
-          type: 'info'
-        })
-      })
-
-}
-
-const changePageNum = (currentPage) => {
-  tablePage.pageNum = currentPage
-  loadUserList()
-}
-
-const handleSelectionChange = (selection) => {
-  selectedRows.value = selection;
-}
-
-const handleBatchDelete = () => {
-  let userIds = []
-  for (let i = 0; i < selectedRows.value.length; i++) {
-    userIds.push(selectedRows.value[i].userId)
-  }
-
-  ElMessageBox.confirm(
-      '此操作将批量删除选中的用户，确定执行吗？',
-      '警告',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-      .then(() => {
-        deleteUsers(userIds)
-            .then(res => {
-              if (res.data.code === 200) {
-                ElNotification({
-                  title: '成功',
-                  message: res.data.message,
-                  type: 'success'
-                })
-                console.log(multipleTableRef)
-                multipleTableRef.value.clearSelection()
-                selectedRows.value = []
-                loadUserList()
-              } else {
-                ElNotification({
-                  title: '提示',
-                  message: res.data.message,
-                  type: 'warning'
-                })
-              }
-            })
-      })
-      .catch(() => {
-        ElNotification({
-          title: '提示',
-          message: '已取消操作',
-          type: 'info'
-        })
       })
 }
 
@@ -558,29 +377,118 @@ const handleSubmitUserInfo = () => {
       })
 }
 
-onMounted(() => {
-  loadUserList()
-  queryAllRole()
-})
+const handleDelete = (row) => {
+  ElMessageBox.confirm(
+      '此操作将删除此用户，确定执行吗？',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+      .then(() => {
+        let userIds = []
+        userIds.push(row.userId)
+        deleteUsers(userIds)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                queryUserListByCondition()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消操作',
+          type: 'info'
+        })
+      })
+}
+
+const handleStatus = (row) => {
+  let willStatus = row.status === '启用' ? '禁用' : '启用'
+
+  ElMessageBox.confirm(
+      '此操作将' + willStatus + '此用户，确定执行吗？',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+      .then(() => {
+        let formData = {
+          userId: row.userId,
+          status: row.status === '启用' ? 0 : 1
+        }
+
+        updateStatus(formData)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                queryUserListByCondition()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消操作',
+          type: 'info'
+        })
+      })
+
+}
+
+const changePageNum = (currentPage) => {
+  tablePage.pageNum = currentPage
+  queryUserListByCondition()
+}
+
+const handleCloseEditUserDialog = () => {
+  userDetails.value = {}
+  userHasRoles.value = []
+  userDetailDialogVisible.value = false
+}
 
 </script>
 
 <style scoped>
-.user-list-container {
+.user-query-container {
   padding: 10px 20px 0 20px;
 }
 
-.top {
-  display: flex;
-  justify-content: flex-start;
+.user-query-form-container {
+  margin-left: 20px;
 }
 
-.batch-delete {
-  margin-left: 30px;
+.form-inline .el-input {
+  --el-input-width: 200px;
 }
 
-.user-list-table {
-  width: 100%;
+.form-inline .el-select {
+  --el-select-width: 150px;
 }
 
 .pagination {
@@ -588,33 +496,4 @@ onMounted(() => {
   justify-content: center;
   margin-top: 10px;
 }
-
-.open-add-user-btn {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 10px;
-}
-
-.add-user-tip {
-  margin-bottom: 20px;
-}
-
-.add-user-tip-text {
-  font-size: 14px;
-  color: #909399;
-}
-
-.form-label {
-  font-size: 16px;
-  color: #666;
-  margin: 20px 0 10px 0;
-  display: block;
-}
-
-.form-control-input {
-  width: 100%;
-  height: 48px;
-  font-size: 16px;
-}
-
 </style>
