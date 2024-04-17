@@ -14,6 +14,8 @@
           <el-menu-item class="h-menu-item" index="/workTable/wtHome">首页</el-menu-item>
           <el-menu-item class="h-menu-item" index="/workTable/wtPanel">仪表盘</el-menu-item>
           <el-menu-item class="h-menu-item" index="/workTable/wtUndefine">未定义</el-menu-item>
+
+          <AvatarMenu />
         </el-menu>
       </el-header>
       <el-main style="margin: 0; padding: 0">
@@ -27,6 +29,7 @@
 <script setup lang="ts">
 import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import AvatarMenu from "../../compoment/AvatarMenu.vue";
 
 router.push('/workTable/wtHome')
 const handleSelect = (key: string, keyPath: string[]) => {
@@ -39,4 +42,6 @@ const handleSelect = (key: string, keyPath: string[]) => {
   padding: 0 16px;
   margin-right: 20px;
 }
+
+
 </style>

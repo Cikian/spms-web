@@ -130,6 +130,10 @@ const userLogin = () => {
 
           let token = res.data.data.token;
           localStorage.setItem("token", token)
+          let userInfo = res.data.data.userInfo;
+          localStorage.setItem("userInfo", userInfo)
+          let hasRole = res.data.data.hasRole;
+          localStorage.setItem("hasRole", hasRole)
 
           if (res.data.data.isFirstLogin) {
             localStorage.setItem("isFirstLogin", 'true')
