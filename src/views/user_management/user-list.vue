@@ -116,13 +116,13 @@
     </div>
   </div>
 
+  <!--  新增用户dialog-->
   <el-dialog
       title="新增用户"
       class="add-user-dialog"
       v-model="dialogVisible"
       width="30%"
       :show-close="false"
-      :before-close="handleClose"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
   >
@@ -138,24 +138,53 @@
     />
     <div style="text-align: center; margin-top: 20px;">
       <el-button size="large" type="primary" @click="handleSubmit" :disabled="isDisabled">{{ submitText }}</el-button>
-      <el-button size="large" @click="handleClose">取消</el-button>
+      <el-button size="large" @click="handleCloseAddUserDialog">取消</el-button>
     </div>
   </el-dialog>
 
-<!--  用户信息dialog-->
+  <!--  用户信息dialog-->
   <el-dialog
       title="用户详细信息"
       v-model="userDetailDialogVisible"
-      width="30%"
+      width="40%"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
   >
-    <div>
-      <h3>{{ userDetails.userName }}</h3>
-      <p>昵称: {{ userDetails.nickName }}</p>
-      <p>邮箱: {{ userDetails.email }}</p>
-      <p>电话: {{ userDetails.phoneNumber }}</p>
-      <p>性别: {{ userDetails.gender }}</p>
-      <p>状态: {{ userDetails.status }}</p>
-      <p>创建时间: {{ userDetails.createTime }}</p>
+    <!--    表单-->
+    <el-form :model="userDetails" label-position="top">
+      <el-form-item label="用户名">
+        <el-input v-model="userDetails.userName" disabled/>
+      </el-form-item>
+      <el-form-item label="昵称">
+        <el-input v-model="userDetails.nickName" disabled/>
+      </el-form-item>
+      <el-form-item label="邮箱">
+        <el-input v-model="userDetails.email" disabled/>
+      </el-form-item>
+      <el-form-item label="电话">
+        <el-input v-model="userDetails.phoneNumber" disabled/>
+      </el-form-item>
+      <el-form-item label="性别">
+        <el-input v-model="userDetails.gender" disabled/>
+      </el-form-item>
+      <el-form-item label="创建时间">
+        <el-input v-model="userDetails.createTime" disabled/>
+      </el-form-item>
+      <el-form-item label="角色（分配角色）">
+        <el-checkbox-group v-model="userHasRoles">
+          <el-checkbox v-for="role in allRoles" :key="role.roleId" :label="role.roleId">
+            {{ role.remark }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
+    </el-form>
+    <div style="text-align: center; margin-top: 20px;">
+      <el-button size="large" type="primary" @click="handleSubmitUserInfo" :disabled="isDisabled">{{
+          submitText
+        }}
+      </el-button>
+      <el-button size="large" @click="handleCloseEditUserDialog">取消</el-button>
     </div>
   </el-dialog>
 
@@ -164,6 +193,7 @@
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
 import {addUser, deleteUsers, queryById, queryUserList, updateStatus} from "../../api/userApi.ts";
+import {assignRole, queryRoleList, queryUserHasRole} from "../../api/roleApi.ts";
 
 const loading = ref(true)
 const userList = ref([])
@@ -180,6 +210,9 @@ const multipleTableRef = ref()
 const selectedRows = ref([]);
 const userDetails = ref()
 const userDetailDialogVisible = ref(false)
+const allRoles = ref([])
+const userOldRoles = ref([])
+const userHasRoles = ref([])
 
 const openDialog = () => {
   dialogVisible.value = true
@@ -228,9 +261,15 @@ const handleSubmit = () => {
       })
 }
 
-const handleClose = () => {
-  dialogVisible.value = false
+const handleCloseAddUserDialog = () => {
   email.value = ''
+  dialogVisible.value = false
+}
+
+const handleCloseEditUserDialog = () => {
+  userDetails.value = {}
+  userHasRoles.value = []
+  userDetailDialogVisible.value = false
 }
 
 const loadUserList = () => {
@@ -275,18 +314,46 @@ const loadUserList = () => {
 
 const handleEdit = (row) => {
   let userId = row.userId
-  queryById(userId).then(res => {
-    if (res.data.code === 200) {
-      userDetailDialogVisible.value = true
-      userDetails.value = res.data.data
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning'
+  queryById(userId)
+      .then(res => {
+        if (res.data.code === 200) {
+          userDetails.value = res.data.data
+          if (userDetails.value.gender === 'N') {
+            userDetails.value.gender = '未知'
+          } else if (userDetails.value.gender === 'M') {
+            userDetails.value.gender = '男'
+          } else {
+            userDetails.value.gender = '女'
+          }
+          if (userDetails.value.createTime) {
+            userDetails.value.createTime = new Date(userDetails.value.createTime).toLocaleString()
+          }
+
+          queryUserHasRole(userId)
+              .then(res => {
+                if (res.data.code === 200) {
+                  for (let i = 0; i < res.data.data.length; i++) {
+                    userOldRoles.value.push(res.data.data[i].roleId)
+                    userHasRoles.value.push(res.data.data[i].roleId)
+                  }
+                } else {
+                  ElNotification({
+                    title: '提示',
+                    message: res.data.message,
+                    type: 'warning'
+                  })
+                }
+                userDetailDialogVisible.value = true
+              })
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+
       })
-    }
-  })
 }
 
 const handleDelete = (row) => {
@@ -427,8 +494,73 @@ const handleBatchDelete = () => {
       })
 }
 
+const queryAllRole = () => {
+  let formData = {
+    page: 1,
+    size: 100
+  }
+  queryRoleList(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          allRoles.value = res.data.data.records
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+}
+
+const handleSubmitUserInfo = () => {
+  isDisabled.value = true
+  submitText.value = '提交中...'
+
+  let userHasRoleIds = []
+  for (let i = 0; i < userHasRoles.value.length; i++) {
+    userHasRoleIds.push(userHasRoles.value[i])
+  }
+
+  if (userHasRoleIds.toString() === userOldRoles.value.toString()) {
+    isDisabled.value = false
+    submitText.value = '提交'
+    userDetailDialogVisible.value = false
+    return
+  }
+
+  let formData = {
+    userId: userDetails.value.userId,
+    roleIds: userHasRoleIds
+  }
+
+  assignRole(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          isDisabled.value = false
+          submitText.value = '提交'
+          userDetailDialogVisible.value = false
+          loadUserList()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+          isDisabled.value = false
+          submitText.value = '提交'
+        }
+      })
+}
+
 onMounted(() => {
   loadUserList()
+  queryAllRole()
 })
 
 </script>
@@ -483,11 +615,6 @@ onMounted(() => {
   width: 100%;
   height: 48px;
   font-size: 16px;
-}
-
-.add-user-dialog {
-  border-radius: 20px;
-  padding: 30px 30px;
 }
 
 </style>
