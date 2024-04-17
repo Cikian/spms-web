@@ -75,7 +75,19 @@ const router = createRouter({
                 {
                     path: '/proman/home',
                     name: 'promanHome',
-                    component: () => import('../views/project_management/pro-home.vue')
+                    component: () => import('../views/project_management/pro-home.vue'),
+                    children: [
+                        {
+                            path: '/proman/allpro',
+                            name: 'allPro',
+                            component: () => import('../views/project_management/allProject.vue')
+                        },
+                        {
+                            path: '/proman/tbcom',
+                            name: 'tbcom',
+                            component: () => import('../views/project_management/toBeComplete.vue')
+                        }
+                    ]
                 },
                 {
                     path: '/user',
