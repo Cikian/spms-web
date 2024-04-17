@@ -25,7 +25,7 @@
             width="120"
         >
         </el-table-column>
-        <el-table-column label="头像" width="180">
+        <el-table-column label="头像" width="150">
           <template #default="{row}">
             <el-avatar :src="row.avatar" size="large"/>
           </template>
@@ -77,7 +77,7 @@
         <el-table-column
             prop="createTime"
             label="创建时间"
-            width="200"
+            width="170"
         >
         </el-table-column>
         <el-table-column

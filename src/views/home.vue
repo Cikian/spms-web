@@ -27,11 +27,11 @@
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines"/>
                 <template #title>测试管理</template>
               </el-menu-item>
-              <el-menu-item index="/user">
+              <el-menu-item index="/user" v-if="isAdmin">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user"/>
                 <template #title>用户管理</template>
               </el-menu-item>
-              <el-menu-item index="5">
+              <el-menu-item index="5" v-if="isAdmin">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group"/>
                 <template #title>角色管理</template>
               </el-menu-item>
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import {
   Document,
   Menu as IconMenu,
@@ -66,6 +66,8 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 router.push("/workTable")
 const isCollapse = ref(true)
 const btext = ref("展开")
+const isAdmin = ref(false)
+
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
@@ -81,6 +83,17 @@ const changeMenu = () => {
     btext.value = "展开"
   }
 }
+
+const getUserHasRole = () => {
+  let hasRole = localStorage.getItem("hasRole")
+  if (hasRole && hasRole.indexOf("ROLE_system_admin") != -1) {
+    isAdmin.value = true
+  }
+}
+
+onMounted(() => {
+  getUserHasRole()
+})
 
 </script>
 

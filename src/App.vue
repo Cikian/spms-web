@@ -11,4 +11,13 @@
   border-radius: 20px!important;
   padding: 30px 20px!important;
 }
+
+.el-popover{
+  padding: 0!important;
+  border-radius: 10px!important;
+}
+
+.el-divider{
+  border-top-color: #eeeeee!important;
+}
 </style>

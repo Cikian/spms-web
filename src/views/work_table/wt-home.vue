@@ -12,37 +12,36 @@
         <div class="home-user" style="padding: 24px 0 24px 12px">
           <div class="user-info">
             <el-avatar style="width: 44px; height: 44px; float: left; margin-right: 12px"
-                       src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
+                       :src="userInfo.avatar"/>
             <div class="user-desc">
-              <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ name }}, 上午好</div>
+              <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ userInfo.userName }}, 上午好</div>
               <div class="user-role" style="font-size: 12px">今天是{{ currentDate }}, 星期{{ week }}</div>
-              <el-button type="text" style="font-size: 12px; color: #6698ff" @click="userLogout()">退出登录</el-button>
             </div>
           </div>
         </div>
         <el-divider/>
         <el-menu-item style="margin: 12px 0;" index="/workTable/overView">
-          <font-awesome-icon class="list-icons" :icon="['far', 'eye']" />
+          <font-awesome-icon class="list-icons" :icon="['far', 'eye']"/>
           <template #title>概览</template>
         </el-menu-item>
         <el-divider/>
         <div class="group-title">待办</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/reqNeedCom">
-          <font-awesome-icon class="list-icons" :icon="['fas', 'list-check']" />
+          <font-awesome-icon class="list-icons" :icon="['fas', 'list-check']"/>
           <template #title>待完成需求</template>
         </el-menu-item>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/proNeedCom">
-          <font-awesome-icon class="list-icons" :icon="['fas', 'terminal']" />
+          <font-awesome-icon class="list-icons" :icon="['fas', 'terminal']"/>
           <template #title>待完成项目</template>
         </el-menu-item>
         <el-divider/>
         <div class="group-title">我的</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/myReq">
-          <font-awesome-icon class="list-icons" :icon="['far', 'user']" />
+          <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
           <template #title>我负责的需求</template>
         </el-menu-item>
         <el-menu-item style="margin:0 0 12px 0;" index="/workTable/partIn">
-          <font-awesome-icon class="list-icons" :icon="['far', 'user']" />
+          <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
           <template #title>我参与的项目</template>
         </el-menu-item>
       </el-menu>
@@ -57,13 +56,17 @@
 
 <script setup lang="ts">
 import router from "../../router";
-import {ref} from "vue";
-import {logout} from "../../api/homeApi.ts";
+import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 router.push('/workTable/overView')
 
-const name = ref("Cikian")
+let userInfo = ref(
+    {
+      userName: '',
+      avatar: ''
+    }
+)
 let currentDate: string = ref("")
 
 const date = new Date();
@@ -95,27 +98,15 @@ switch (week) {
 }
 currentDate = month + '月' + day + '日';
 
-const userLogout = () => {
-  logout()
-      .then(res => {
-        if (res.data.code === 200) {
-          ElNotification({
-            title: '成功',
-            message: res.data.message,
-            type: 'success',
-          })
-
-          localStorage.removeItem("token")
-          router.push('/login')
-        } else {
-          ElNotification({
-            title: '警告',
-            message: res.data.message,
-            type: 'warning',
-          })
-        }
-      })
+const getUserInfo = () => {
+  let userDetail = localStorage.getItem("userInfo")
+  userInfo.value.avatar = JSON.parse(userDetail).avatar
+  userInfo.value.userName = JSON.parse(userDetail).userName
 }
+
+onMounted(() => {
+  getUserInfo()
+})
 </script>
 
 <style scoped>
@@ -153,8 +144,9 @@ const userLogout = () => {
   line-height: 48px;
   color: #999;
 }
-.list-icons{
+
+.list-icons {
   margin-right: 12px;
-  
+
 }
 </style>
