@@ -2,7 +2,7 @@
   <div class="overView-title">
     全部项目
     <el-button type="primary" style="width: 120px; height:36px">
-      <font-awesome-icon :icon="['fas', 'plus']" />&nbsp;&nbsp;新建项目
+      <font-awesome-icon :icon="['fas', 'plus']"/>&nbsp;&nbsp;新建项目
     </el-button>
 
   </div>
@@ -35,32 +35,124 @@
       <el-table-column label="项目" prop="proName" sortable>
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            <font-awesome-icon style="color: #56abfb" :icon="['fas', 'folder-open']" />
+            <font-awesome-icon style="color: #56abfb" :icon="['fas', 'folder-open']"/>
             <span style="margin-left: 10px">{{ scope.row.proName }}</span>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="标识" prop="flag" />
-      <el-table-column label="所属" prop="from" />
-      <el-table-column label="更新时间" prop="updateTime" />
+      <el-table-column label="标识" prop="flag"/>
+      <el-table-column label="所属" prop="from"/>
+      <el-table-column label="更新时间" prop="updateTime"/>
     </el-table>
   </div>
-
 
 
   <!-- 新增项目弹出框 -->
   <el-dialog
       v-model="dialogVisible"
-      title="Tips"
+      title="新增项目"
       width="980"
       class="addPro-dialog"
   >
-    <span>This is a message</span>
+    <div style="display: flex; height: 50vh">
+      <el-scrollbar style="width: 50%; height: 100%;">
+        <img style="width: 100%" src="../../assets/addPro01.png"/>
+      </el-scrollbar>
+      <el-scrollbar style="width: 50%;height: 100%; margin: 8px 32px 16px 32px; padding-right: 32px">
+        <el-form
+            ref="ruleFormRef"
+            :rules="rules"
+            label-position="top"
+            label-width="auto"
+            :model="proData"
+            style="max-width: 600px;"
+            require-asterisk-position="right"
+            show-message
+            v-if="theFirst"
+        >
+          <el-form-item required label="项目名称" prop="proName">
+            <el-input v-model="proData.proName" placeholder="请输入项目名称" size="large">
+              <template #prefix>
+                <font-awesome-icon style="color: #56abfb" :icon="['fas', 'folder-open']"/>
+              </template>
+            </el-input>
+          </el-form-item>
+<!--          <el-form-item required label="组织" prop="beLong">-->
+<!--            <el-input disabled v-model="proData.beLong" size="large">-->
+<!--              <template #prefix>-->
+<!--                <font-awesome-icon style="color: #56abfb" :icon="['fas', 'sitemap']"/>-->
+<!--              </template>-->
+<!--            </el-input>-->
+<!--          </el-form-item>-->
+          <el-form-item required label="项目标识" prop="proFlag">
+            <el-input v-model="proData.proFlag" placeholder="大写字母和数字，15个字符以内" size="large">
+              <template #prefix>
+                <font-awesome-icon style="color: #56abfb" :icon="['fas', 'feather']"/>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item required label="项目类型">
+            <el-radio-group v-model="proData.proType">
+              <el-radio value="0" size="large">Scrum项目</el-radio>
+              <el-radio value="1" size="large" disabled>Kanban项目</el-radio>
+              <el-radio value="2" size="large" disabled>瀑布项目</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="客户名称">
+            <el-input v-model="proData.proCustomer" size="large"/>
+          </el-form-item>
+          <el-form-item label="描述">
+            <el-input
+                v-model="proData.proDesc"
+                :autosize="{ minRows: 2, maxRows: 4 }"
+                type="textarea"
+                placeholder="项目描述"
+            />
+          </el-form-item>
+        </el-form>
+
+
+        <div v-else style="width: 100%;">
+          <div style="height: 52px">
+
+            <el-table
+                :data="memberData"
+                style="width: 100%"
+                :row-style="{height: '52px'}"
+                @row-click="clickl"
+                stripe
+                :header-cell-style="{fontWeight: 'normal', fontSize: '14px'}"
+            >
+              <el-table-column label="姓名" prop="peoName" sortable>
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-avatar :size="'small'" :src="scope.row.avatar" />
+                    <span style="margin-left: 10px">{{ scope.row.peoName }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="部门" prop="dept"/>
+              <el-table-column label="职位" prop="position"/>
+            </el-table>
+
+          </div>
+        </div>
+
+
+      </el-scrollbar>
+    </div>
+
+
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogVisible = false">
-          Confirm
+        <el-button style="width: 98px; height: 36px" v-show="!theFirst" @click="theFirst = true">上一步</el-button>
+
+        <el-button style="width: 98px; height: 36px" v-if="theFirst" type="primary" @click="submitForm(ruleFormRef)">
+          下一步
+        </el-button>
+
+        <el-button style="width: 98px; height: 36px" v-else type="primary" @click="submitAddPro">
+          提&nbsp;&nbsp;交
         </el-button>
       </div>
     </template>
@@ -68,53 +160,153 @@
 </template>
 
 <script setup lang="ts">
+import {FormInstance, FormRules} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {computed, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
+import {addPro} from "../../api/allProApi.ts";
+
+const dialogVisible = ref(true)
+const theFirst = ref(true)
+let currentUser = reactive({})
+onMounted(() => {
+  currentUser = JSON.parse(localStorage.getItem('userInfo'))
+  memberData[0] = currentUser
+})
+
+interface proMembers {
+  peoId: number,
+  days: number,
+}
+
+interface proDevice {
+  devId: number,
+  days: number,
+}
+
+const proData = reactive({
+  proName: '',
+  proDesc: '',
+  proFlag: '',
+  proType: '0',
+  proLeaderId: '',
+  proCustomer: '',
+  proMembers: [] as proMembers[],
+
+  proDevices: [] as proDevice[],
+})
+
+const ruleFormRef = ref<FormInstance>()
+
+
+const rules = reactive<FormRules<typeof proData>>({
+  proName: [
+    {required: true, message: '请输入项目名称', trigger: 'blur'}
+  ],
+  proFlag: [
+    {required: true, message: '请输入项目标识', trigger: 'blur'},
+    {
+      required: true,
+      pattern: /^[A-Z][A-Z0-9_]{3,14}$/,
+      message: '为3-15个字符，只允许大写字母、数字、下划线，必须字母开头',
+      trigger: 'blur'
+    }
+  ],
+})
+
+const submitForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.validate((valid) => {
+    if (valid) {
+      theFirst.value = false
+    } else {
+      console.log('error submit!')
+      return false
+    }
+  })
+}
 
 
 const searchInput = ref('')
 const filterTableData = computed(() =>
     tableData.filter((data) =>
-            !searchInput.value ||
-            data.proName.toLowerCase().includes(searchInput.value.toLowerCase())
+        !searchInput.value ||
+        data.proName.toLowerCase().includes(searchInput.value.toLowerCase())
     )
 )
 
-const tableData = [
-  {
-    proId: 1001,
-    proName: '软件研发项目管理系统',
-    flag: 'SPMS',
-    from: 'Cikian',
-    updateTime: '2024-05-03 18:55',
-  },
-  {
-    proId: 1002,
-    proName: '超级课程表',
-    flag: 'SCT',
-    from: '张林浩',
-    updateTime: '2024-05-06 18:55',
-  },
-  {
-    proId: 1003,
-    proName: '澡堂管理系统',
-    flag: 'WMS',
-    from: '赵泽',
-    updateTime: '2024-04-03 18:55',
-  },
-  {
-    proId: 1004,
-    proName: '麦基外卖',
-    flag: 'MVS',
-    from: '张三',
-    updateTime: '2024-05-07 18:55',
-  }
-]
+interface project {
+  proId: number,
+  proName: string,
+  flag: string,
+  from: string,
+  updateTime: string,
+}
 
-const clickl = (row,column) => {
+interface member {
+  peoId: number,
+  peoName: string,
+  dept: string,
+  position: string,
+  avatar: string
+}
+
+interface device {
+  devId: number,
+  devName: string,
+  devFlag: string,
+  devFrom: string,
+  devUpdateTime: string,
+}
+
+const tableData = reactive<project[]>([
+    {
+      proId: 1,
+      proName: '项目1',
+      flag: '项目标识',
+      from: '项目来源',
+      updateTime: '2023-04-20 12:00:00'
+    }
+])
+const memberData = reactive<member[]>([
+  {
+    peoId: 1,
+    peoName: '张三',
+    dept: '产品部',
+    position: '产品经理',
+    avatar: 'https://cube.elemecdn.com/0/88/03b0d07103f482067139658244046jpeg.jpeg'
+  },
+  {
+    peoId: 2,
+    peoName: '李四',
+    dept: '产品部',
+    position: '产品经理',
+    avatar: 'https://cube.elemecdn.com/0/88/03b0d07103f482067139658244046jpeg.jpeg'
+  }
+])
+
+
+const clickl = (row, column) => {
   console.log(row)
 }
 
+const submitAddPro = () => {
+  console.log('提交表单')
+  proData.proMembers = [
+    {peoId:'1774695386807324674',days:10},
+    {peoId:'1779874103749816321',days:5}
+  ]
+  proData.proDevices=[
+    {devId:1,days:10},
+    {devId:2,days:5}
+  ]
+  proData.proLeaderId = '1774695386807324674'
+
+  console.log(proData)
+
+  addPro(proData).then((res) => {
+    console.log(res)
+  })
+}
 </script>
 
 <style scoped>
