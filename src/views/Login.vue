@@ -163,7 +163,7 @@ const userLogin = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 40px 0;
+  background-color: #fafafa!important;
   min-height: 100vh;
 }
 

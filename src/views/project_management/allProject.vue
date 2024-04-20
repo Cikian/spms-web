@@ -1,7 +1,7 @@
 <template>
   <div class="overView-title">
     全部项目
-    <el-button type="primary" style="width: 120px; height:36px">
+    <el-button type="primary" style="width: 120px; height:36px" @click="dialogVisible = true">
       <font-awesome-icon :icon="['fas', 'plus']"/>&nbsp;&nbsp;新建项目
     </el-button>
 
@@ -40,9 +40,9 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="标识" prop="flag"/>
+      <el-table-column label="标识" prop="proFlag"/>
       <el-table-column label="所属" prop="from"/>
-      <el-table-column label="更新时间" prop="updateTime"/>
+      <el-table-column label="更新时间" prop="proUpdateTime"/>
     </el-table>
   </div>
 
@@ -77,13 +77,13 @@
               </template>
             </el-input>
           </el-form-item>
-<!--          <el-form-item required label="组织" prop="beLong">-->
-<!--            <el-input disabled v-model="proData.beLong" size="large">-->
-<!--              <template #prefix>-->
-<!--                <font-awesome-icon style="color: #56abfb" :icon="['fas', 'sitemap']"/>-->
-<!--              </template>-->
-<!--            </el-input>-->
-<!--          </el-form-item>-->
+          <el-form-item required label="组织">
+            <el-input disabled v-model="beLong" size="large">
+              <template #prefix>
+                <font-awesome-icon style="color: #56abfb" :icon="['fas', 'sitemap']"/>
+              </template>
+            </el-input>
+          </el-form-item>
           <el-form-item required label="项目标识" prop="proFlag">
             <el-input v-model="proData.proFlag" placeholder="大写字母和数字，15个字符以内" size="large">
               <template #prefix>
@@ -162,15 +162,19 @@
 <script setup lang="ts">
 import {FormInstance, FormRules} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {computed, onMounted, reactive, ref} from "vue";
-import {addPro} from "../../api/allProApi.ts";
+import {onMounted, reactive, ref, computed} from "vue";
+import {addPro,getProList} from "../../api/allProApi.ts";
 
-const dialogVisible = ref(true)
+let tableData = reactive({
+  data:[]
+})
+const dialogVisible = ref(false)
 const theFirst = ref(true)
 let currentUser = reactive({})
 onMounted(() => {
   currentUser = JSON.parse(localStorage.getItem('userInfo'))
   memberData[0] = currentUser
+  getPros()
 })
 
 interface proMembers {
@@ -182,6 +186,8 @@ interface proDevice {
   devId: number,
   days: number,
 }
+
+const beLong = ref('默认组织')
 
 const proData = reactive({
   proName: '',
@@ -228,19 +234,20 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
 const searchInput = ref('')
 const filterTableData = computed(() =>
-    tableData.filter((data) =>
+    tableData.data.filter((data) =>
         !searchInput.value ||
         data.proName.toLowerCase().includes(searchInput.value.toLowerCase())
     )
 )
 
-interface project {
-  proId: number,
-  proName: string,
-  flag: string,
-  from: string,
-  updateTime: string,
+const getPros = () => {
+  console.log('获取项目列表')
+  getProList().then((res) => {
+    tableData.data = res.data.data
+    console.log(tableData.data)
+  })
 }
+
 
 interface member {
   peoId: number,
@@ -250,23 +257,9 @@ interface member {
   avatar: string
 }
 
-interface device {
-  devId: number,
-  devName: string,
-  devFlag: string,
-  devFrom: string,
-  devUpdateTime: string,
-}
 
-const tableData = reactive<project[]>([
-    {
-      proId: 1,
-      proName: '项目1',
-      flag: '项目标识',
-      from: '项目来源',
-      updateTime: '2023-04-20 12:00:00'
-    }
-])
+
+
 const memberData = reactive<member[]>([
   {
     peoId: 1,
@@ -285,15 +278,15 @@ const memberData = reactive<member[]>([
 ])
 
 
-const clickl = (row, column) => {
+const clickl = (row) => {
   console.log(row)
 }
 
 const submitAddPro = () => {
   console.log('提交表单')
   proData.proMembers = [
-    {peoId:'1774695386807324674',days:10},
-    {peoId:'1779874103749816321',days:5}
+    {peoId:"1774695386807324674",days:10},
+    {peoId:"1779874103749816321",days:5}
   ]
   proData.proDevices=[
     {devId:1,days:10},
@@ -304,7 +297,15 @@ const submitAddPro = () => {
   console.log(proData)
 
   addPro(proData).then((res) => {
-    console.log(res)
+    if(res.data.code){
+      ElNotification({
+        title: '成功',
+        message: '添加项目',
+        type: 'success',
+      })
+      dialogVisible.value = false
+      getPros()
+    }
   })
 }
 </script>
