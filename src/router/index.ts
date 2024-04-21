@@ -113,6 +113,31 @@ const router = createRouter({
                         }
                     ]
                 },
+                {
+                    path: '/role',
+                    name: 'role',
+                    component: () => import('../views/role_management/role-home.vue'),
+                    children: [
+                        {
+                            path: '/role/management',
+                            name: 'roleManagement',
+                            component: () => import('../views/role_management/role-management.vue'),
+                            children: [
+                                {
+                                    path: '/role/management/roleList',
+                                    name: 'roleList',
+                                    component: () => import('../views/role_management/role-list.vue')
+                                },
+                                {
+                                    path: '/role/management/roleQuery',
+                                    name: 'roleQuery',
+                                    component: () => import('../views/role_management/role-query.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
+
             ]
         },
 

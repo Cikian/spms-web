@@ -20,7 +20,7 @@ service.interceptors.request.use(function (config) {
 });
 
 service.interceptors.response.use(function (response) {
-    if (response.data.code === 401 || response.data.code === 402) {
+    if (response.data.code === 401 || response.data.code === 402 || response.data.code === 405) {
         ElNotification({
             title: '警告',
             message: response.data.message,

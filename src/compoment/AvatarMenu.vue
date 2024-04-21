@@ -14,8 +14,8 @@
       </div>
       <el-avatar class="avatar-border" :src="userInfo.avatar" :size="70"/>
       <div class="username">{{userInfo.userName}}</div>
-
       <el-divider class="my-divider"/>
+
       <el-menu>
         <el-menu-item class="user-menu-item" index="/user/management/userList">
           <font-awesome-icon class="user-menu-icon" :icon="['far', 'user']"/>

@@ -31,7 +31,7 @@
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user"/>
                 <template #title>用户管理</template>
               </el-menu-item>
-              <el-menu-item index="5" v-if="isAdmin">
+              <el-menu-item index="/role" v-if="isAdmin">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group"/>
                 <template #title>角色管理</template>
               </el-menu-item>

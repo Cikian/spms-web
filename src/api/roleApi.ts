@@ -20,3 +20,19 @@ export function assignRole(data) {
         method: 'post'
     })
 }
+
+export function updateStatus(data) {
+    return request({
+        url: '/role/updateStatus',
+        method: 'post',
+        data: data
+    })
+}
+
+export function deleteRoles(data) {
+    return request({
+        url: '/role/delete',
+        method: 'post',
+        data: data
+    })
+}
