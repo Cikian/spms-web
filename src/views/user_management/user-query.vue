@@ -364,7 +364,7 @@ const handleSubmitUserInfo = () => {
           isDisabled.value = false
           submitText.value = '提交'
           userDetailDialogVisible.value = false
-          loadUserList()
+          queryUserListByCondition()
         } else {
           ElNotification({
             title: '提示',

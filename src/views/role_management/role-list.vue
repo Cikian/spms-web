@@ -2,7 +2,7 @@
   <div class="user-list-container">
     <div class="top">
       <div class="open-add-user-btn">
-        <el-button type="primary" @click="openDialog">新增角色</el-button>
+        <el-button type="primary" @click="openAddRoleDialog">新增角色</el-button>
       </div>
       <div class="batch-delete">
         <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">批量删除</el-button>
@@ -77,17 +77,18 @@
           :current-page="tablePage.pageNum"
           @current-change="changePageNum"
           :total="tablePage.total"
-          layout="total, prev, pager, next, jumper"
+          layout="total, sizes, prev, pager, next, jumper"
           background
           :pager-count="11"
+          :page-sizes="pageSizes"
+          @size-change="handleSizeChange"
       />
     </div>
   </div>
 
-  <!--  新增用户dialog-->
+  <!--  新增角色dialog-->
   <el-dialog
-      title="新增用户"
-      class="add-user-dialog"
+      title="新增角色"
       v-model="dialogVisible"
       width="30%"
       :show-close="false"
@@ -95,64 +96,83 @@
       :close-on-press-escape="false"
   >
     <div class="add-user-tip">
-      <span class="add-user-tip-text">系统会将用户账号和密码发送到填写的邮箱，您可以编辑用户为其分配角色</span>
+      <div class="add-user-tip-text">请按
+        <el-popover
+            placement="bottom-start"
+            width="450"
+            trigger="hover"
+            content="角色标识和名称均是唯一的，不可重复。角色标识只可以用英文单词，多个单词使用下划线（ _ ）分割，例如（system_admin），角色名称只能使用中文。"
+        >
+          <template #reference>
+            <el-text style="color:#409eff; cursor: pointer">规则</el-text>
+          </template>
+        </el-popover>
+        输入角色标识和名称，新增成功之后可以通过编辑赋予角色权限
+      </div>
     </div>
-    <label class="form-label">邮箱</label>
-    <el-input
-        class="form-control-input"
-        v-model="email"
-        clearable
-        placeholder="请输入邮箱"
-    />
+    <el-form :model="role" label-position="top">
+      <el-form-item label="角色标识">
+        <el-input class="form-control-input" v-model="role.roleName" placeholder="请输入角色标识"/>
+      </el-form-item>
+      <el-form-item label="角色名称">
+        <el-input class="form-control-input" v-model="role.remark" placeholder="请输入角色名称"/>
+      </el-form-item>
+    </el-form>
     <div style="text-align: center; margin-top: 20px;">
       <el-button size="large" type="primary" @click="handleSubmit" :disabled="isDisabled">{{ submitText }}</el-button>
       <el-button size="large" @click="handleCloseAddRoleDialog">取消</el-button>
     </div>
   </el-dialog>
 
-  <!--  用户信息dialog-->
+  <!--  角色信息dialog-->
   <el-dialog
-      title="用户详细信息"
-      v-model="userDetailDialogVisible"
+      title="角色详细信息"
+      v-model="roleDetailDialogVisible"
       width="40%"
       :show-close="false"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
   >
-    <!--    表单-->
-    <el-form :model="userDetails" label-position="top">
-      <el-form-item label="用户名">
-        <el-input v-model="userDetails.userName" disabled/>
+    <el-form :model="roleDetails" label-position="top">
+      <el-form-item label="角色标识">
+        <el-input v-model="roleDetails.roleName"/>
       </el-form-item>
-      <el-form-item label="昵称">
-        <el-input v-model="userDetails.nickName" disabled/>
-      </el-form-item>
-      <el-form-item label="邮箱">
-        <el-input v-model="userDetails.email" disabled/>
-      </el-form-item>
-      <el-form-item label="电话">
-        <el-input v-model="userDetails.phoneNumber" disabled/>
-      </el-form-item>
-      <el-form-item label="性别">
-        <el-input v-model="userDetails.gender" disabled/>
+      <el-form-item label="角色名称">
+        <el-input v-model="roleDetails.remark"/>
       </el-form-item>
       <el-form-item label="创建时间">
-        <el-input v-model="userDetails.createTime" disabled/>
+        <el-input v-model="roleDetails.createTime" disabled/>
       </el-form-item>
-      <el-form-item label="角色（分配角色）">
-        <el-checkbox-group v-model="userHasRoles">
-          <el-checkbox v-for="role in allRoles" :key="role.roleId" :label="role.roleId" :disabled="!role.status">
-            {{ role.remark }}
-          </el-checkbox>
-        </el-checkbox-group>
-      </el-form-item>
+      <el-button type="primary" round size="large" @click="openSelectMenuDialog(roleDetails.roleId)">
+        <font-awesome-icon :icon="['far', 'pen-to-square']" style="margin-right: 5px"/>
+        点击分配角色权限
+      </el-button>
     </el-form>
     <div style="text-align: center; margin-top: 20px;">
-      <el-button size="large" type="primary" @click="handleSubmitUserInfo" :disabled="isDisabled">{{
-          submitText
-        }}
+      <el-button size="large" type="primary" @click="handleSubmitRoleInfo" :disabled="isDisabled">{{ submitText }}
       </el-button>
       <el-button size="large" @click="handleCloseEditRoleDialog">取消</el-button>
+    </div>
+  </el-dialog>
+
+  <!--  角色权限选择dialog-->
+  <el-dialog
+      title="角色权限选择"
+      v-model="roleMenuDialogVisible"
+      width="80%"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+  >
+    <el-checkbox-group v-model="roleHasMenus">
+      <el-checkbox v-for="menu in allMenus" :key="menu.menuId" :label="menu.menuId" :disabled="!menu.status">{{ menu.menuName }}
+      </el-checkbox>
+    </el-checkbox-group>
+    <div style="text-align: center; margin-top: 20px;">
+      <el-button size="large" type="primary" @click="handleSelectedMenuDialog" :disabled="canSubmitSelectMenu">
+        {{ selectMenuSubmitText }}
+      </el-button>
+      <el-button size="large" @click="handleCloseSelectMenuDialog">取消</el-button>
     </div>
   </el-dialog>
 
@@ -160,49 +180,88 @@
 
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
-import {assignRole, deleteRoles, queryRoleList, queryUserHasRole, updateStatus} from "../../api/roleApi.ts";
+import {
+  addRole,
+  deleteRoles,
+  queryById,
+  queryRoleList, updateRoleInfo,
+  updateStatus
+} from "../../api/roleApi.ts";
+import {assignPermissions, queryAllMenus, queryRoleHasMenu} from "../../api/menuApi.ts";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const loading = ref(true)
-const roleList = ref([])
 const dialogVisible = ref(false)
+const roleList = ref([])
 const submitText = ref('提交')
+const selectMenuSubmitText = ref('提交')
 const isDisabled = ref(false)
-const email = ref('')
+const role = ref({
+  roleName: '',
+  remark: ''
+})
 const tablePage = {
   pageNum: 1,
   pageSize: 10,
   total: 0
 }
+const pageSizes = [10, 15, 30, 50, 100]
 const multipleTableRef = ref()
 const selectedRows = ref([]);
-const userDetails = ref()
-const userDetailDialogVisible = ref(false)
-const userOldRoles = ref([])
-const userHasRoles = ref([])
 
-const openDialog = () => {
-  dialogVisible.value = true
+const roleDetailDialogVisible = ref(false)
+const roleMenuDialogVisible = ref(false)
+const canSubmitSelectMenu = ref(false)
+const roleDetails = ref()
+const roleOldMenus = ref([])
+const roleHasMenus = ref([])
+const allMenus = ref([])
+
+//打开编辑角色dialog
+const handleEdit = (row) => {
+  let roleId = row.roleId
+  queryById(roleId)
+      .then(res => {
+        if (res.data.code === 200) {
+          roleDetails.value = res.data.data
+          roleDetails.value.createTime = new Date(roleDetails.value.createTime).toLocaleString()
+          roleDetailDialogVisible.value = true
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+
+      })
 }
 
-const handleSubmit = () => {
+//关闭编辑角色dialog
+const handleCloseEditRoleDialog = () => {
+  roleDetails.value = {}
+  roleHasMenus.value = []
+  roleDetailDialogVisible.value = false
+}
+
+//提交编辑角色信息
+const handleSubmitRoleInfo = () => {
   isDisabled.value = true
   submitText.value = '提交中...'
 
-  if (email.value === '') {
-    ElNotification({
-      title: '警告',
-      message: '邮箱不能为空',
-      type: 'warning'
-    })
+  if (!validateRoleInfo(roleDetails.value.roleName, roleDetails.value.remark)) {
     isDisabled.value = false
     submitText.value = '提交'
     return
   }
 
-  let userFormData = {
-    email: email.value
+  let updateRole = {
+    roleId: roleDetails.value.roleId,
+    roleName: roleDetails.value.roleName,
+    remark: roleDetails.value.remark
   }
-  addUser(userFormData)
+
+  updateRoleInfo(updateRole)
       .then(res => {
         if (res.data.code === 200) {
           ElNotification({
@@ -212,9 +271,8 @@ const handleSubmit = () => {
           })
           isDisabled.value = false
           submitText.value = '提交'
-          email.value = ''
-          dialogVisible.value = false
-          loadUserList()
+          handleCloseEditRoleDialog()
+          loadRoleList()
         } else {
           ElNotification({
             title: '提示',
@@ -227,39 +285,128 @@ const handleSubmit = () => {
       })
 }
 
-const handleCloseAddRoleDialog = () => {
-  email.value = ''
-  dialogVisible.value = false
+//加载所有菜单
+const loadAllMenus = () => {
+  queryAllMenus()
+      .then(res => {
+        if (res.data.code === 200) {
+          for (let i = 0; i < res.data.data.length; i++) {
+            allMenus.value.push(res.data.data[i])
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
 }
 
-const handleCloseEditRoleDialog = () => {
-  userDetails.value = {}
-  userHasRoles.value = []
-  userDetailDialogVisible.value = false
+//打开权限分配dialog
+const openSelectMenuDialog = (roleId) => {
+  queryRoleHasMenu(roleId)
+      .then(res => {
+        if (res.data.code === 200) {
+          for (let i = 0; i < res.data.data.length; i++) {
+            roleOldMenus.value.push(res.data.data[i].menuId)
+            roleHasMenus.value.push(res.data.data[i].menuId)
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+  roleMenuDialogVisible.value = true
 }
 
-const handleSubmitUserInfo = () => {
-  isDisabled.value = true
-  submitText.value = '提交中...'
+//关闭权限分配dialog
+const handleCloseSelectMenuDialog = () => {
+  roleHasMenus.value = []
+  roleOldMenus.value = []
+  roleMenuDialogVisible.value = false
+}
 
-  let userHasRoleIds = []
-  for (let i = 0; i < userHasRoles.value.length; i++) {
-    userHasRoleIds.push(userHasRoles.value[i])
+//确定提交权限分配
+const handleSelectedMenuDialog = () => {
+  canSubmitSelectMenu.value = true
+  selectMenuSubmitText.value = '提交中...'
+
+  let roleHasMenuIds = []
+  for (let i = 0; i < roleHasMenus.value.length; i++) {
+    roleHasMenuIds.push(roleHasMenus.value[i])
   }
 
-  if (userHasRoleIds.toString() === userOldRoles.value.toString()) {
-    isDisabled.value = false
-    submitText.value = '提交'
-    userDetailDialogVisible.value = false
+  console.log(roleHasMenuIds.toString() + "....." + roleOldMenus.value.toString())
+  if (roleHasMenuIds.toString() === roleOldMenus.value.toString()) {
+    canSubmitSelectMenu.value = false
+    selectMenuSubmitText.value = '提交'
+    handleCloseSelectMenuDialog()
     return
   }
 
   let formData = {
-    userId: userDetails.value.userId,
-    roleIds: userHasRoleIds
+    roleId: roleDetails.value.roleId,
+    menuIds: roleHasMenuIds
   }
 
-  assignRole(formData)
+  assignPermissions(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          canSubmitSelectMenu.value = false
+          selectMenuSubmitText.value = '提交'
+          handleCloseSelectMenuDialog()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+          canSubmitSelectMenu.value = false
+          selectMenuSubmitText.value = '提交'
+        }
+
+      })
+}
+
+//打开新增角色dialog
+const openAddRoleDialog = () => {
+  dialogVisible.value = true
+}
+
+//关闭新增角色dialog
+const handleCloseAddRoleDialog = () => {
+  role.value = {
+    roleName: '',
+    remark: ''
+  }
+  dialogVisible.value = false
+}
+
+//提交新增角色
+const handleSubmit = () => {
+  isDisabled.value = true
+  submitText.value = '提交中...'
+
+  if (!validateRoleInfo(role.value.roleName, role.value.remark)) {
+    isDisabled.value = false
+    submitText.value = '提交'
+    return
+  }
+
+  let roleFormData = {
+    roleName: role.value.roleName,
+    remark: role.value.remark
+  }
+  addRole(roleFormData)
       .then(res => {
         if (res.data.code === 200) {
           ElNotification({
@@ -269,8 +416,8 @@ const handleSubmitUserInfo = () => {
           })
           isDisabled.value = false
           submitText.value = '提交'
-          userDetailDialogVisible.value = false
-          loadUserList()
+          handleCloseAddRoleDialog()
+          loadRoleList()
         } else {
           ElNotification({
             title: '提示',
@@ -283,13 +430,7 @@ const handleSubmitUserInfo = () => {
       })
 }
 
-
-
-
-
-
-
-
+//加载所有角色
 const loadRoleList = () => {
   loading.value = true
 
@@ -322,89 +463,7 @@ const loadRoleList = () => {
   })
 }
 
-const handleEdit = (row) => {
-  let userId = row.userId
-  queryById(userId)
-      .then(res => {
-        if (res.data.code === 200) {
-          userDetails.value = res.data.data
-          if (userDetails.value.gender === 'N') {
-            userDetails.value.gender = '未知'
-          } else if (userDetails.value.gender === 'M') {
-            userDetails.value.gender = '男'
-          } else {
-            userDetails.value.gender = '女'
-          }
-          if (userDetails.value.createTime) {
-            userDetails.value.createTime = new Date(userDetails.value.createTime).toLocaleString()
-          }
-
-          queryUserHasRole(userId)
-              .then(res => {
-                if (res.data.code === 200) {
-                  for (let i = 0; i < res.data.data.length; i++) {
-                    userOldRoles.value.push(res.data.data[i].roleId)
-                    userHasRoles.value.push(res.data.data[i].roleId)
-                  }
-                } else {
-                  ElNotification({
-                    title: '提示',
-                    message: res.data.message,
-                    type: 'warning'
-                  })
-                }
-                userDetailDialogVisible.value = true
-              })
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
-        }
-
-      })
-}
-
-const handleDelete = (row) => {
-  ElMessageBox.confirm(
-      '此操作将删除此用户，确定执行吗？',
-      '警告',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-      .then(() => {
-        let roleIds = []
-        roleIds.push(row.roleId)
-        deleteRoles(roleIds)
-            .then(res => {
-              if (res.data.code === 200) {
-                ElNotification({
-                  title: '成功',
-                  message: res.data.message,
-                  type: 'success'
-                })
-                loadRoleList()
-              } else {
-                ElNotification({
-                  title: '提示',
-                  message: res.data.message,
-                  type: 'warning'
-                })
-              }
-            })
-      })
-      .catch(() => {
-        ElNotification({
-          title: '提示',
-          message: '已取消操作',
-          type: 'info'
-        })
-      })
-}
-
+//更新角色状态
 const handleStatus = (row) => {
   let willStatus = row.status === '启用' ? '禁用' : '启用'
 
@@ -450,13 +509,44 @@ const handleStatus = (row) => {
 
 }
 
-const changePageNum = (currentPage) => {
-  tablePage.pageNum = currentPage
-  loadRoleList()
-}
-
-const handleSelectionChange = (selection) => {
-  selectedRows.value = selection;
+//删除和批量删除
+const handleDelete = (row) => {
+  ElMessageBox.confirm(
+      '此操作将删除此用户，确定执行吗？',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+      .then(() => {
+        let roleIds = []
+        roleIds.push(row.roleId)
+        deleteRoles(roleIds)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                loadRoleList()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消操作',
+          type: 'info'
+        })
+      })
 }
 
 const handleBatchDelete = () => {
@@ -482,7 +572,6 @@ const handleBatchDelete = () => {
                   message: res.data.message,
                   type: 'success'
                 })
-                console.log(multipleTableRef)
                 multipleTableRef.value.clearSelection()
                 selectedRows.value = []
                 loadRoleList()
@@ -504,8 +593,57 @@ const handleBatchDelete = () => {
       })
 }
 
+//切换页面
+const changePageNum = (currentPage) => {
+  tablePage.pageNum = currentPage
+  loadRoleList()
+}
+
+const handleSizeChange = (pageSize) => {
+  tablePage.pageSize = pageSize
+  loadRoleList()
+}
+
+const handleSelectionChange = (selection) => {
+  selectedRows.value = selection;
+}
+
+//校验角色信息方法
+const validateRoleInfo = (roleName, remark) => {
+  if (!roleName || !remark) {
+    ElNotification({
+      title: '提示',
+      message: '角色标识和名称不能为空',
+      type: 'warning'
+    })
+    return false
+  }
+
+  let roleNameReg = /^[a-zA-Z_]+$/;
+  let remarkReg = /^[\u4e00-\u9fa5]+$/;
+  if (!roleNameReg.test(roleName)) {
+    ElNotification({
+      title: '提示',
+      message: '角色标识只能使用英文单词，多个单词使用下划线（ _ ）分割',
+      type: 'warning'
+    })
+    return false
+  }
+
+  if (!remarkReg.test(remark)) {
+    ElNotification({
+      title: '提示',
+      message: '角色名称只能使用中文',
+      type: 'warning'
+    })
+    return false
+  }
+  return true
+}
+
 onMounted(() => {
   loadRoleList()
+  loadAllMenus()
 })
 
 </script>

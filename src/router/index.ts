@@ -131,7 +131,7 @@ const router = createRouter({
                                 {
                                     path: '/role/management/roleQuery',
                                     name: 'roleQuery',
-                                    component: () => import('../views/role_management/role-query.vue')
+                                    component: () => import('../views/role_management/role-info.vue')
                                 }
                             ]
                         }

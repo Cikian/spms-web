@@ -36,3 +36,26 @@ export function deleteRoles(data) {
         data: data
     })
 }
+
+export function addRole(data) {
+    return request({
+        url: '/role/add',
+        method: 'post',
+        data: data
+    })
+}
+
+export function queryById(data) {
+    return request({
+        url: '/role/queryById/' + data,
+        method: 'get',
+    })
+}
+
+export function updateRoleInfo(data) {
+    return request({
+        url: '/role/updateRoleInfo',
+        method: 'post',
+        data
+    })
+}
