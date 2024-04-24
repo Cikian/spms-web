@@ -71,8 +71,20 @@
                   />
                 </div>
               </div>
+              <div class="form-password form-group">
+                <label class="form-label">确认新密码</label>
+                <div class="form-control">
+                  <el-input
+                      class="form-control-input"
+                      v-model="confirmPasswordInput"
+                      placeholder="请再次输入新密码"
+                      type="password"
+                      show-password
+                  />
+                </div>
+              </div>
               <div class="form-submit">
-                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="resetPasswod()">提交
+                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="resetPassword()">提交
                 </el-button>
               </div>
             </div>
@@ -98,6 +110,7 @@ const emailInput = ref('')
 const emailCode = ref('')
 const oldPasswordInput = ref('')
 const newPasswordInput = ref('')
+const confirmPasswordInput = ref('')
 const isDisabled = ref(false)
 const getCodeBtn = ref(true)
 const getCodeBtnText = ref('获取验证码')
@@ -147,7 +160,7 @@ const getEmailCode = () => {
 
 }
 
-const resetPasswod = () => {
+const resetPassword = () => {
   isDisabled.value = true
 
   if (emailInput.value === '') {
@@ -190,6 +203,26 @@ const resetPasswod = () => {
     return
   }
 
+  if (confirmPasswordInput.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请再次输入新密码',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
+  }
+
+  if (newPasswordInput.value !== confirmPasswordInput.value) {
+    ElNotification({
+      title: '警告',
+      message: '两次输入的密码不一致',
+      type: 'warning',
+    })
+    isDisabled.value = false
+    return
+  }
+
   let emailFormData = {
     email: emailInput.value,
     code: emailCode.value,
@@ -197,7 +230,8 @@ const resetPasswod = () => {
 
   let passwordFormData = {
     oldPassword: oldPasswordInput.value,
-    newPassword: newPasswordInput.value
+    newPassword: newPasswordInput.value,
+    confirmPassword: confirmPasswordInput.value
   }
 
   verifyEmail(emailFormData).then(res => {
@@ -243,6 +277,7 @@ const resetPasswod = () => {
   align-items: center;
   padding: 40px 0;
   min-height: 100vh;
+  background-color: #fafafa !important;
 }
 
 .login-body {
@@ -373,7 +408,7 @@ label {
 }
 
 .login-body-footer {
-  margin-top: 80px;
+  margin-top: 50px;
   text-align: center;
   color: #999;
   font-size: 14px;

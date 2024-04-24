@@ -9,7 +9,6 @@ const service = axios.create({
 })
 
 service.interceptors.request.use(function (config) {
-    // 如果是上传文件，需要设置请求头为multipart/form-data
     if (config.url === "/file/upload" || config.url === "/common/upload/avatar") {
         config.headers["Content-Type"] = "multipart/form-data"
     }

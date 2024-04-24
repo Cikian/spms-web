@@ -75,7 +75,6 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import {queryCurrentUser, updateUserAvatar, updateUserBaseInfo} from "../../api/userApi.ts";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const userDetails = ref({
   userName: '',
@@ -305,7 +304,4 @@ onMounted(() => {
   height: 40px;
   font-size: 16px;
 }
-
-
-
 </style>
