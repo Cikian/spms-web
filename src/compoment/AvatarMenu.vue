@@ -1,5 +1,10 @@
 <template>
-  <el-popover class="my-popover" trigger="click" placement="bottom" width="322" :show-arrow="false">
+  <el-popover
+      popper-style="padding: 0;border-radius: 10px ;"
+      trigger="click"
+      placement="bottom"
+      width="322"
+      :show-arrow="false">
     <template #reference>
       <div class="header-avatar-container">
         <el-avatar
@@ -13,9 +18,9 @@
         <img src="https://cdn-aliyun.pingcode.com/static/portal/assets/images/user-menu-bg.svg?v=5.85.0" alt="">
       </div>
       <el-avatar class="avatar-border" :src="userInfo.avatar" :size="70"/>
-      <div class="username">{{userInfo.userName}}</div>
-
+      <div class="username">{{ userInfo.userName }}</div>
       <el-divider class="my-divider"/>
+
       <el-menu>
         <el-menu-item class="user-menu-item" index="/user/management/userList">
           <font-awesome-icon class="user-menu-icon" :icon="['far', 'user']"/>
@@ -51,12 +56,10 @@ import {logout} from "../api/homeApi.ts";
 import router from "../router";
 import {onMounted, ref} from "vue";
 
-let userInfo = ref(
-    {
-      userName: '',
-      avatar: ''
-    }
-)
+let userInfo = ref({
+  userName: '',
+  avatar: ''
+})
 
 const getUserInfo = () => {
   let userDetail = localStorage.getItem("userInfo")

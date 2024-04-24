@@ -16,7 +16,7 @@
             >
               <div style="width: 100%; height: 72px">1</div>
               <el-menu-item index="/workTable">
-                <font-awesome-icon class="home-icon" icon="fa-solid fa-layer-group"/>
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-layer-group"/>
                 <template #title>工作台</template>
               </el-menu-item>
               <el-menu-item index="/proman/home">
@@ -31,12 +31,12 @@
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user"/>
                 <template #title>用户管理</template>
               </el-menu-item>
-              <el-menu-item index="5" v-if="isAdmin">
+              <el-menu-item index="/role" v-if="isAdmin">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group"/>
                 <template #title>角色管理</template>
               </el-menu-item>
-              <el-menu-item index="6">
-                <font-awesome-icon class="home-icon" icon="fa-solid fa-gear"/>
+              <el-menu-item index="/setting">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-gear"/>
                 <template #title>设置</template>
               </el-menu-item>
               <el-button class="change-btn" text @click="changeMenu">{{ btext }}</el-button>

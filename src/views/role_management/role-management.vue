@@ -3,7 +3,7 @@
     <el-container>
       <el-header style="margin: 0; padding: 0; height: 52px">
         <el-menu
-            default-active="/user/management/userList"
+            default-active="/role/management/roleList"
             class="el-menu-demo"
             mode="horizontal"
             @select="handleSelect"
@@ -11,12 +11,12 @@
             :router="true"
         >
           <span style="line-height: 52px;">
-            <font-awesome-icon style="color: #38c6ff;margin-right: 5px" icon="fa-solid fa-user"/>
-            用户管理
+            <font-awesome-icon style="color: #2ae12d;margin-right: 5px" icon="fa-solid fa-user-group"/>
+            角色管理
             <el-divider style="margin: 0 16px" direction="vertical"/>
           </span>
-          <el-menu-item class="h-menu-item" index="/user/management/userList">用户列表</el-menu-item>
-          <el-menu-item class="h-menu-item" index="/user/management/userQuery">查询用户</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/role/management/roleList">角色列表</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/role/management/roleQuery">查询角色</el-menu-item>
 
           <AvatarMenu/>
         </el-menu>
@@ -41,7 +41,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
 }
 
 onMounted(() => {
-  router.push("/user/management/userList")
+  router.push("/role/management/roleList")
 })
 
 </script>
@@ -51,4 +51,5 @@ onMounted(() => {
   padding: 0 16px;
   margin-right: 20px;
 }
+
 </style>

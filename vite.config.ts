@@ -14,6 +14,7 @@ export default defineConfig({
                 target: "http://localhost:8090",
                 changeOrigin: true,
                 //去掉接口中的 '/api'以便和后端接口匹配
+
             }
         },
     },

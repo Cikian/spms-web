@@ -3,21 +3,15 @@
     <el-container>
       <el-header style="margin: 0; padding: 0; height: 52px">
         <el-menu
-            default-active="/user/management/userList"
             class="el-menu-demo"
             mode="horizontal"
-            @select="handleSelect"
             style="height: 52px; padding: 0 20px"
             :router="true"
         >
           <span style="line-height: 52px;">
-            <font-awesome-icon style="color: #38c6ff;margin-right: 5px" icon="fa-solid fa-user"/>
-            用户管理
-            <el-divider style="margin: 0 16px" direction="vertical"/>
+            <font-awesome-icon class="home-icon" style="color: #ff7575;margin-right: 5px" icon="fa-solid fa-gear"/>
+            设置
           </span>
-          <el-menu-item class="h-menu-item" index="/user/management/userList">用户列表</el-menu-item>
-          <el-menu-item class="h-menu-item" index="/user/management/userQuery">查询用户</el-menu-item>
-
           <AvatarMenu/>
         </el-menu>
       </el-header>
@@ -31,24 +25,16 @@
 </template>
 
 <script setup lang="ts">
-import router from "../../router";
+import AvatarMenu from "../../compoment/AvatarMenu.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted} from "vue";
-import AvatarMenu from "../../compoment/AvatarMenu.vue";
-
-const handleSelect = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
+import router from "../../router";
 
 onMounted(() => {
-  router.push("/user/management/userList")
+  router.push("/setting/list")
 })
-
 </script>
 
 <style scoped>
-.h-menu-item {
-  padding: 0 16px;
-  margin-right: 20px;
-}
+
 </style>

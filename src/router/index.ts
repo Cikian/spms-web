@@ -116,6 +116,54 @@ const router = createRouter({
                         }
                     ]
                 },
+                {
+                    path: '/role',
+                    name: 'role',
+                    component: () => import('../views/role_management/role-home.vue'),
+                    children: [
+                        {
+                            path: '/role/management',
+                            name: 'roleManagement',
+                            component: () => import('../views/role_management/role-management.vue'),
+                            children: [
+                                {
+                                    path: '/role/management/roleList',
+                                    name: 'roleList',
+                                    component: () => import('../views/role_management/role-list.vue')
+                                },
+                                {
+                                    path: '/role/management/roleQuery',
+                                    name: 'roleQuery',
+                                    component: () => import('../views/role_management/role-info.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    path: '/setting',
+                    name: 'setting',
+                    component: () => import('../views/setting/setting-home.vue'),
+                    children: [
+                        {
+                            path: '/setting/list',
+                            name: 'settingList',
+                            component: () => import('../views/setting/setting-list.vue'),
+                            children: [
+                                {
+                                    path: '/setting/list/personal',
+                                    name: 'personal',
+                                    component: () => import('../views/setting/personal-document.vue')
+                                },
+                                {
+                                    path: '/setting/list/account',
+                                    name: 'account',
+                                    component: () => import('../views/setting/account-setting.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
             ]
         },
 

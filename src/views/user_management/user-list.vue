@@ -109,9 +109,11 @@
           :current-page="tablePage.pageNum"
           @current-change="changePageNum"
           :total="tablePage.total"
-          layout="total, prev, pager, next, jumper"
+          layout="total, sizes, prev, pager, next, jumper"
           background
           :pager-count="11"
+          :page-sizes="pageSizes"
+          @size-change="handleSizeChange"
       />
     </div>
   </div>
@@ -206,6 +208,7 @@ const tablePage = {
   pageSize: 10,
   total: 0
 }
+const pageSizes = [10, 15, 30, 50, 100]
 const multipleTableRef = ref()
 const selectedRows = ref([]);
 const userDetails = ref()
@@ -269,6 +272,7 @@ const handleCloseAddUserDialog = () => {
 const handleCloseEditUserDialog = () => {
   userDetails.value = {}
   userHasRoles.value = []
+  userOldRoles.value = []
   userDetailDialogVisible.value = false
 }
 
@@ -449,6 +453,11 @@ const handleSelectionChange = (selection) => {
   selectedRows.value = selection;
 }
 
+const handleSizeChange = (pageSize) => {
+  tablePage.pageSize = pageSize
+  loadUserList()
+}
+
 const handleBatchDelete = () => {
   let userIds = []
   for (let i = 0; i < selectedRows.value.length; i++) {
@@ -544,7 +553,7 @@ const handleSubmitUserInfo = () => {
           })
           isDisabled.value = false
           submitText.value = '提交'
-          userDetailDialogVisible.value = false
+          handleCloseEditUserDialog()
           loadUserList()
         } else {
           ElNotification({
