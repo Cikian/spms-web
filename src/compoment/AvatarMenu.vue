@@ -56,12 +56,10 @@ import {logout} from "../api/homeApi.ts";
 import router from "../router";
 import {onMounted, ref} from "vue";
 
-let userInfo = ref(
-    {
-      userName: '',
-      avatar: ''
-    }
-)
+let userInfo = ref({
+  userName: '',
+  avatar: ''
+})
 
 const getUserInfo = () => {
   let userDetail = localStorage.getItem("userInfo")

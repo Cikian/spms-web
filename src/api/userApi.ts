@@ -62,3 +62,26 @@ export function queryById(data) {
         method: 'get',
     })
 }
+
+export function queryCurrentUser() {
+    return request({
+        url: '/user/queryCurrentUser',
+        method: 'get',
+    })
+}
+
+export function updateUserBaseInfo(data) {
+    return request({
+        url: '/user/updateUserBaseInfo',
+        method: 'post',
+        data
+    })
+}
+
+export function updateUserAvatar(data) {
+    return request({
+        url: '/common/upload/avatar',
+        method: 'post',
+        data
+    })
+}

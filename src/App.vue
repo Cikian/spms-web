@@ -7,6 +7,7 @@
 </script>
 
 <style>
+
 body, html {
   margin: 0;
   padding: 0;
@@ -19,5 +20,11 @@ body, html {
 
 .el-divider{
   border-top-color: #eeeeee!important;
+}
+
+.customPopper {
+  width: 90px!important;
+  min-width: 90px!important;
+  text-align: center;
 }
 </style>

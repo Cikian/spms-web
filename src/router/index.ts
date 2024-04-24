@@ -137,7 +137,30 @@ const router = createRouter({
                         }
                     ]
                 },
-
+                {
+                    path: '/setting',
+                    name: 'setting',
+                    component: () => import('../views/setting/setting-home.vue'),
+                    children: [
+                        {
+                            path: '/setting/list',
+                            name: 'settingList',
+                            component: () => import('../views/setting/setting-list.vue'),
+                            children: [
+                                {
+                                    path: '/setting/list/personal',
+                                    name: 'personal',
+                                    component: () => import('../views/setting/personal-document.vue')
+                                },
+                                {
+                                    path: '/setting/list/account',
+                                    name: 'account',
+                                    component: () => import('../views/setting/account-setting.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
             ]
         },
 

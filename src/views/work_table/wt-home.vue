@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-aside width=" ">
+    <el-aside>
       <el-menu
           default-active="/workTable/overView"
           class="el-menu-vertical-demo"
@@ -147,6 +147,5 @@ onMounted(() => {
 
 .list-icons {
   margin-right: 12px;
-
 }
 </style>
