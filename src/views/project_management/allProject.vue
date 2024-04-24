@@ -21,7 +21,7 @@
 
   </div>
 
-  <div style="width: 100%; padding: 0 40px">
+  <div style="width: 100%; padding: 0 40px" v-loading="loadingPro">
     <el-table
         :data="filterTableData"
         :default-sort="{ prop: 'date', order: 'descending' }"
@@ -126,7 +126,7 @@
               <el-table-column label="姓名" prop="peoName" sortable>
                 <template #default="scope">
                   <div style="display: flex; align-items: center">
-                    <el-avatar :size="'small'" :src="scope.row.avatar" />
+                    <el-avatar :size="'small'" :src="scope.row.avatar"/>
                     <span style="margin-left: 10px">{{ scope.row.peoName }}</span>
                   </div>
                 </template>
@@ -163,24 +163,21 @@
 import {FormInstance, FormRules} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, reactive, ref, computed} from "vue";
-import {addPro,getProList} from "../../api/allProApi.ts";
+import {addPro, getProList} from "../../api/allProApi.ts";
 
 let tableData = reactive({
-  data:[]
+  data: []
 })
 const dialogVisible = ref(false)
 const theFirst = ref(true)
-let currentUser = reactive({})
+let currentUser = reactive<any>({})
 onMounted(() => {
-  currentUser = JSON.parse(localStorage.getItem('userInfo'))
+  currentUser = localStorage.getItem('userInfo')
   memberData[0] = currentUser
   getPros()
 })
 
-interface proMembers {
-  peoId: number,
-  days: number,
-}
+const loadingPro = ref(true)
 
 interface proDevice {
   devId: number,
@@ -196,7 +193,7 @@ const proData = reactive({
   proType: '0',
   proLeaderId: '',
   proCustomer: '',
-  proMembers: [] as proMembers[],
+  proMembers: [] as any,
 
   proDevices: [] as proDevice[],
 })
@@ -245,6 +242,7 @@ const getPros = () => {
   getProList().then((res) => {
     tableData.data = res.data.data
     console.log(tableData.data)
+    loadingPro.value = false
   })
 }
 
@@ -256,8 +254,6 @@ interface member {
   position: string,
   avatar: string
 }
-
-
 
 
 const memberData = reactive<member[]>([
@@ -285,19 +281,19 @@ const clickl = (row) => {
 const submitAddPro = () => {
   console.log('提交表单')
   proData.proMembers = [
-    {peoId:"1774695386807324674",days:10},
-    {peoId:"1779874103749816321",days:5}
+    {peoId: "1774695386807324674", days: 10},
+    {peoId: "1779874103749816321", days: 5}
   ]
-  proData.proDevices=[
-    {devId:1,days:10},
-    {devId:2,days:5}
+  proData.proDevices = [
+    {devId: 1, days: 10},
+    {devId: 2, days: 5}
   ]
   proData.proLeaderId = '1774695386807324674'
 
   console.log(proData)
 
   addPro(proData).then((res) => {
-    if(res.data.code){
+    if (res.data.code) {
       ElNotification({
         title: '成功',
         message: '添加项目',

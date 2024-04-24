@@ -26,6 +26,7 @@ const router = createRouter({
                 {
                     path: '/workTable',
                     name: 'workTable',
+                    redirect: '/workTable/wtHome',
                     component: () => import('../views/work_table/workTable.vue'),
                     children: [
                         {
@@ -92,11 +93,13 @@ const router = createRouter({
                 {
                     path: '/user',
                     name: 'user',
+                    redirect: '/user/management/userList',
                     component: () => import('../views/user_management/user-home.vue'),
                     children: [
                         {
                             path: '/user/management',
                             name: 'userManagement',
+                            redirect: '/user/management/userList',
                             component: () => import('../views/user_management/user-management.vue'),
                             children: [
                                 {
