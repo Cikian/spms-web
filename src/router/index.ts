@@ -119,11 +119,13 @@ const router = createRouter({
                 {
                     path: '/role',
                     name: 'role',
+                    redirect: '/role/management/roleList',
                     component: () => import('../views/role_management/role-home.vue'),
                     children: [
                         {
                             path: '/role/management',
                             name: 'roleManagement',
+                            redirect: '/role/management/roleList',
                             component: () => import('../views/role_management/role-management.vue'),
                             children: [
                                 {
@@ -143,11 +145,13 @@ const router = createRouter({
                 {
                     path: '/setting',
                     name: 'setting',
+                    redirect: '/setting/list/personal',
                     component: () => import('../views/setting/setting-home.vue'),
                     children: [
                         {
                             path: '/setting/list',
                             name: 'settingList',
+                            redirect: '/setting/list/personal',
                             component: () => import('../views/setting/setting-list.vue'),
                             children: [
                                 {
@@ -185,6 +189,32 @@ const router = createRouter({
                                     path: '/device/management/deviceQuery',
                                     name: 'deviceQuery',
                                     component: () => import('../views/device_management/device-query.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    path: '/resourceCost',
+                    name: 'resourceCost',
+                    redirect: '/resourceCost/management/resourceCostEmployee',
+                    component: () => import('../views/resourceCost_management/resourceCost-home.vue'),
+                    children: [
+                        {
+                            path: '/resourceCost/management',
+                            name: 'resourceCostManagement',
+                            redirect: '/resourceCost/management/resourceCostEmployee',
+                            component: () => import('../views/resourceCost_management/resourceCost-management.vue'),
+                            children: [
+                                {
+                                    path: '/resourceCost/management/resourceCostEmployee',
+                                    name: 'resourceCostEmployee',
+                                    component: () => import('../views/resourceCost_management/resourceCost-employee.vue')
+                                },
+                                {
+                                    path: '/resourceCost/management/resourceCostDevice',
+                                    name: 'resourceCostDevice',
+                                    component: () => import('../views/resourceCost_management/resourceCost-device.vue')
                                 }
                             ]
                         }

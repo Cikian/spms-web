@@ -62,7 +62,8 @@
             width="200"
         >
           <template #default="{row}">
-            <el-select class="device-status-select" v-model="row.status" placeholder="请选择" @change="handleStatus(row)">
+            <el-select class="device-status-select" v-model="row.status" placeholder="请选择"
+                       @change="handleStatus(row)">
               <el-option
                   v-for="item in deviceStatus"
                   :key="item.value"
@@ -282,47 +283,48 @@ const loadDeviceList = () => {
     page: tablePage.pageNum,
     size: tablePage.pageSize
   }
-  queryDeviceList(formData, deviceQueryCondition).then(res => {
-    if (res.data.code === 200) {
-      let pageInfo = res.data.data;
-      tablePage.total = parseInt(pageInfo.total)
+  queryDeviceList(formData, deviceQueryCondition)
+      .then(res => {
+        if (res.data.code === 200) {
+          let pageInfo = res.data.data;
+          tablePage.total = parseInt(pageInfo.total)
 
-      for (let i = 0; i < pageInfo.records.length; i++) {
-        pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
+          for (let i = 0; i < pageInfo.records.length; i++) {
+            pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
 
-        if (pageInfo.records[i].type === 0) {
-          pageInfo.records[i].type = '服务器'
-        } else if (pageInfo.records[i].type === 1) {
-          pageInfo.records[i].type = '网络设备'
-        } else if (pageInfo.records[i].type === 2) {
-          pageInfo.records[i].type = '存储设备'
-        } else if (pageInfo.records[i].type === 3) {
-          pageInfo.records[i].type = '计算设备'
-        } else if (pageInfo.records[i].type === 4) {
-          pageInfo.records[i].type = '外围设备'
-        } else if (pageInfo.records[i].type === 5) {
-          pageInfo.records[i].type = '移动设备'
+            if (pageInfo.records[i].type === 0) {
+              pageInfo.records[i].type = '服务器'
+            } else if (pageInfo.records[i].type === 1) {
+              pageInfo.records[i].type = '网络设备'
+            } else if (pageInfo.records[i].type === 2) {
+              pageInfo.records[i].type = '存储设备'
+            } else if (pageInfo.records[i].type === 3) {
+              pageInfo.records[i].type = '计算设备'
+            } else if (pageInfo.records[i].type === 4) {
+              pageInfo.records[i].type = '外围设备'
+            } else if (pageInfo.records[i].type === 5) {
+              pageInfo.records[i].type = '移动设备'
+            }
+
+            if (pageInfo.records[i].purchaseDate) {
+              pageInfo.records[i].purchaseDate = new Date(pageInfo.records[i].purchaseDate).toLocaleString()
+            }
+
+            if (pageInfo.records[i].warrantyExpiryDate) {
+              pageInfo.records[i].warrantyExpiryDate = new Date(pageInfo.records[i].warrantyExpiryDate).toLocaleString()
+            }
+
+            if (pageInfo.records[i].purchaseCost) {
+              pageInfo.records[i].purchaseCost = pageInfo.records[i].purchaseCost.toFixed(2)
+            }
+
+            pageInfo.records[i].oldStatus = pageInfo.records[i].status
+          }
+
+          deviceList.value = pageInfo.records
+          loading.value = false
         }
-
-        if (pageInfo.records[i].purchaseDate) {
-          pageInfo.records[i].purchaseDate = new Date(pageInfo.records[i].purchaseDate).toLocaleString()
-        }
-
-        if (pageInfo.records[i].warrantyExpiryDate) {
-          pageInfo.records[i].warrantyExpiryDate = new Date(pageInfo.records[i].warrantyExpiryDate).toLocaleString()
-        }
-
-        if (pageInfo.records[i].purchaseCost) {
-          pageInfo.records[i].purchaseCost = pageInfo.records[i].purchaseCost.toFixed(2)
-        }
-
-        pageInfo.records[i].oldStatus = pageInfo.records[i].status
-      }
-
-      deviceList.value = pageInfo.records
-      loading.value = false
-    }
-  })
+      })
 }
 
 const handleStatus = (row) => {
@@ -513,8 +515,6 @@ const handleSubmitAddDevice = () => {
         addDeviceIsDisabled.value = false
         addDeviceSubmitText.value = '提交'
       })
-
-
 }
 
 const handleEdit = (row) => {
@@ -729,7 +729,7 @@ onMounted(() => {
   font-size: 16px;
 }
 
-.device-status-select{
+.device-status-select {
   width: 130px;
 }
 </style>
