@@ -247,8 +247,6 @@ const handleSubmit = () => {
             message: res.data.message,
             type: 'success'
           })
-          isDisabled.value = false
-          submitText.value = '提交'
           email.value = ''
           dialogVisible.value = false
           loadUserList()
@@ -258,9 +256,9 @@ const handleSubmit = () => {
             message: res.data.message,
             type: 'warning'
           })
-          isDisabled.value = false
-          submitText.value = '提交'
         }
+        isDisabled.value = false
+        submitText.value = '提交'
       })
 }
 

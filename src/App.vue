@@ -27,4 +27,10 @@ body, html {
   min-width: 90px!important;
   text-align: center;
 }
+
+.form-control-input .el-select__wrapper {
+  width: 100%;
+  height: 48px!important;
+  font-size: 16px;
+}
 </style>

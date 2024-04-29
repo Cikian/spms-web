@@ -9,15 +9,28 @@
       </div>
       <div class="baseInfo-container">
         <el-form class="baseInfo-form" :model="userDetails" label-position="top">
-          <el-form-item label="邮箱">
-            <el-input class="form-control-input" v-model="userDetails.userName"/>
+          <el-form-item :label="'用户名：'+userDetails.userName">
+            <el-input class="form-control-input" v-model="userDetails.userName" disabled/>
           </el-form-item>
-          <el-form-item label="手机号">
-            <el-input class="form-control-input" v-model="userDetails.nickName"/>
+          <el-form-item :label="'邮箱：'+userDetails.email">
+            <div class="email-container">
+              <el-input class="form-control-input" style="width: 86%;" v-model="email" placeholder="请输入新的邮箱" clearable/>
+              <el-button type="primary" size="large" @click="resetEmail" :disabled="emailDisabled">
+                {{ eamilText }}
+              </el-button>
+            </div>
+          </el-form-item>
+          <el-form-item :label="'手机号码：'+userDetails.phoneNumber">
+            <el-input class="form-control-input" v-model="phone" placeholder="请输入新的手机号码" clearable/>
+            <div class="code-container">
+              <el-input class="form-control-input" style="width: 78%;" v-model="code" placeholder="请输入验证码" clearable/>
+              <el-button type="primary" size="large" style="">获取验证码</el-button>
+            </div>
+            <el-button type="primary" size="large" style="margin-top: 10px" @click="resetPhoneNumber" :disabled="phoneNumberDisabled">
+              {{ phoneNumberText }}
+            </el-button>
           </el-form-item>
         </el-form>
-        <el-button type="primary" size="large" @click="" :disabled="isDisabled">{{ submitText }}
-        </el-button>
       </div>
     </div>
     <el-divider class="my-divider"/>
@@ -68,7 +81,9 @@ const userDetails = ref({
   userName: '',
   nickName: '',
   gender: '',
-  avatar: ''
+  avatar: '',
+  email: '',
+  phoneNumber: ''
 })
 const updatePasswordForm = ref({
   oldPassword: '',
@@ -77,8 +92,16 @@ const updatePasswordForm = ref({
 })
 const submitText = ref('确定')
 const isDisabled = ref(false)
+const email = ref('')
+const eamilText = ref('修改')
+const emailDisabled = ref(false)
 
-const loadUserDerail = () => {
+const phone = ref('')
+const code = ref('')
+const phoneNumberText = ref('修改')
+const phoneNumberDisabled = ref(false)
+
+const loadUserDetail = () => {
   queryCurrentUser()
       .then(res => {
         if (res.data.code === 200) {
@@ -169,15 +192,93 @@ const resetPassword = () => {
       })
 
 }
+
+const resetPhoneNumber = () => {
+  phoneNumberText.value = '提交中...'
+  phoneNumberDisabled.value = true
+
+  if (phone.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入新的手机号码',
+      type: 'warning',
+    })
+    phoneNumberText.value = '修改'
+    phoneNumberDisabled.value = false
+    return
+  }
+
+  if (code.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入验证码',
+      type: 'warning',
+    })
+    phoneNumberText.value = '修改'
+    phoneNumberDisabled.value = false
+    return
+  }
+
+  let reg = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
+  if (!reg.test(phone.value)) {
+    ElNotification({
+      title: '警告',
+      message: '请输入正确的手机号码',
+      type: 'warning',
+    })
+    phoneNumberText.value = '修改'
+    phoneNumberDisabled.value = false
+    return
+  }
+
+  console.log(phone.value)
+
+  phoneNumberText.value = '修改'
+  phoneNumberDisabled.value = false
+}
+
+const resetEmail = () => {
+  eamilText.value = '提交中...'
+  emailDisabled.value = true
+
+  if (email.value === '') {
+    ElNotification({
+      title: '警告',
+      message: '请输入新的邮箱',
+      type: 'warning',
+    })
+    eamilText.value = '修改'
+    emailDisabled.value = false
+    return
+  }
+
+  let reg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
+  if (!reg.test(email.value)) {
+    ElNotification({
+      title: '警告',
+      message: '请输入正确的邮箱',
+      type: 'warning',
+    })
+    eamilText.value = '修改'
+    emailDisabled.value = false
+    return
+  }
+
+  console.log(email.value)
+
+  eamilText.value = '修改'
+  emailDisabled.value = false
+}
+
 onMounted(() => {
-  loadUserDerail()
+  loadUserDetail()
 })
 </script>
 
 <style scoped>
 .my-divider {
   width: 95%;
-  margin: 10px auto;
+  margin: 0 auto;
 }
 
 .title {
@@ -204,19 +305,32 @@ onMounted(() => {
 }
 
 .baseInfo-container {
-  width: 550px;
+  width: 100%;
   padding-left: 105px;
   margin-top: 20px;
 }
 
 .baseInfo-form {
-  width: 100%;
+  width: 550px;
 }
 
 .form-control-input {
-  width: 100%;
   height: 40px;
   font-size: 14px;
   color: #999999;
+}
+
+.code-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px
+}
+
+.email-container{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px
 }
 </style>

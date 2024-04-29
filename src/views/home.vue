@@ -35,6 +35,10 @@
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user-group"/>
                 <template #title>角色管理</template>
               </el-menu-item>
+              <el-menu-item index="/device" v-if="isAdmin">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-display" />
+                <template #title>设备管理</template>
+              </el-menu-item>
               <el-menu-item index="/setting">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-gear"/>
                 <template #title>设置</template>

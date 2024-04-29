@@ -103,6 +103,30 @@ const loadUserDerail = () => {
 const submitUserBaseInfo = () => {
   submitText.value = '提交中...'
   isDisabled.value = true
+
+  if (!userDetails.value.nickName) {
+    ElNotification({
+      title: '提示',
+      message: '昵称不能为空',
+      type: 'warning'
+    })
+    submitText.value = '确定'
+    isDisabled.value = false
+    return
+  }
+
+  let reg = /^[\u4E00-\u9FA5\w]{3,18}$/;
+  if (!reg.test(userDetails.value.nickName)) {
+    ElNotification({
+      title: '警告',
+      message: '请输入正确格式的昵称',
+      type: 'warning',
+    })
+    submitText.value = '确定'
+    isDisabled.value = false
+    return
+  }
+
   updateUserBaseInfo(userDetails.value)
       .then(res => {
         if (res.data.code === 200) {
@@ -251,8 +275,8 @@ onMounted(() => {
 .avatar-border:hover:before {
   content: '';
   position: absolute;
-  width: 25px;
-  height: 25px;
+  width: 27px;
+  height: 27px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -281,7 +305,7 @@ onMounted(() => {
 .avatar-border:after {
   content: '';
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .baseInfo {

@@ -164,6 +164,32 @@ const router = createRouter({
                         }
                     ]
                 },
+                {
+                    path: '/device',
+                    name: 'device',
+                    redirect: '/device/management/deviceList',
+                    component: () => import('../views/device_management/device-home.vue'),
+                    children: [
+                        {
+                            path: '/device/management',
+                            name: 'deviceManagement',
+                            redirect: '/device/management/deviceList',
+                            component: () => import('../views/device_management/device-management.vue'),
+                            children: [
+                                {
+                                    path: '/device/management/deviceList',
+                                    name: 'deviceList',
+                                    component: () => import('../views/device_management/device-list.vue')
+                                },
+                                {
+                                    path: '/device/management/deviceQuery',
+                                    name: 'deviceQuery',
+                                    component: () => import('../views/device_management/device-query.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
             ]
         },
 
