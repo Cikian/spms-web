@@ -98,7 +98,7 @@
         </el-table-column>
         <el-table-column
             prop="createTime"
-            label="创建时间"
+            label="入职时间"
             width="200"
         >
         </el-table-column>
@@ -112,7 +112,7 @@
                 size="default"
                 @click="handleEdit(row)"
             >
-              编辑
+              分配角色
             </el-button>
             <el-button
                 type="danger"
@@ -139,7 +139,7 @@
   </div>
 
   <el-dialog
-      title="用户详细信息"
+      title="分配角色"
       v-model="userDetailDialogVisible"
       width="40%"
       :show-close="false"
@@ -148,25 +148,7 @@
   >
     <!--    表单-->
     <el-form :model="userDetails" label-position="top">
-      <el-form-item label="用户名">
-        <el-input v-model="userDetails.userName" disabled/>
-      </el-form-item>
-      <el-form-item label="昵称">
-        <el-input v-model="userDetails.nickName" disabled/>
-      </el-form-item>
-      <el-form-item label="邮箱">
-        <el-input v-model="userDetails.email" disabled/>
-      </el-form-item>
-      <el-form-item label="电话">
-        <el-input v-model="userDetails.phoneNumber" disabled/>
-      </el-form-item>
-      <el-form-item label="性别">
-        <el-input v-model="userDetails.gender" disabled/>
-      </el-form-item>
-      <el-form-item label="创建时间">
-        <el-input v-model="userDetails.createTime" disabled/>
-      </el-form-item>
-      <el-form-item label="角色（分配角色）">
+      <el-form-item label="角色列表">
         <el-checkbox-group v-model="userHasRoles">
           <el-checkbox v-for="role in allRoles" :key="role.roleId" :label="role.roleId" :disabled="!role.status">
             {{ role.remark }}
@@ -276,17 +258,6 @@ const handleEdit = (row) => {
       .then(res => {
         if (res.data.code === 200) {
           userDetails.value = res.data.data
-          if (userDetails.value.gender === 'N') {
-            userDetails.value.gender = '未知'
-          } else if (userDetails.value.gender === 'M') {
-            userDetails.value.gender = '男'
-          } else {
-            userDetails.value.gender = '女'
-          }
-          if (userDetails.value.createTime) {
-            userDetails.value.createTime = new Date(userDetails.value.createTime).toLocaleString()
-          }
-
           queryUserHasRole(userId)
               .then(res => {
                 if (res.data.code === 200) {

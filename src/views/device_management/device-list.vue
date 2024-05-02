@@ -22,13 +22,13 @@
         <el-table-column
             prop="no"
             label="序号"
-            width="120"
+            width="100"
         >
         </el-table-column>
         <el-table-column
             prop="devName"
             label="设备名称"
-            width="270"
+            width="200"
             :show-overflow-tooltip="true"
         >
         </el-table-column>
@@ -41,24 +41,24 @@
         <el-table-column
             prop="purchaseDate"
             label="购买日期"
-            width="250"
+            width="230"
         >
         </el-table-column>
         <el-table-column
             prop="warrantyExpiryDate"
             label="保修到期日期"
-            width="250"
+            width="230"
         >
         </el-table-column>
         <el-table-column
             prop="purchaseCost"
             label="购买价格（元）"
-            width="230"
+            width="200"
         >
         </el-table-column>
         <el-table-column
             prop="status"
-            label="设备当前状态"
+            label="设备工作状态"
             width="200"
         >
           <template #default="{row}">
@@ -73,6 +73,12 @@
               </el-option>
             </el-select>
           </template>
+        </el-table-column>
+        <el-table-column
+            prop="deviceUsage"
+            label="设备使用情况"
+            width="200"
+        >
         </el-table-column>
         <el-table-column
             label="操作"
@@ -306,6 +312,12 @@ const loadDeviceList = () => {
               pageInfo.records[i].type = '移动设备'
             }
 
+            if (pageInfo.records[i].deviceUsage === 0) {
+              pageInfo.records[i].deviceUsage = '空闲'
+            } else {
+              pageInfo.records[i].deviceUsage = '使用中'
+            }
+
             if (pageInfo.records[i].purchaseDate) {
               pageInfo.records[i].purchaseDate = new Date(pageInfo.records[i].purchaseDate).toLocaleString()
             }
@@ -493,7 +505,6 @@ const handleSubmitAddDevice = () => {
   }
 
   deviceFormData.purchaseCost = parseFloat(deviceFormData.purchaseCost).toFixed(2)
-  console.log(deviceFormData.purchaseDate)
 
   addDevice(deviceFormData)
       .then(res => {

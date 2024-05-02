@@ -38,7 +38,7 @@
         >
           <template #reference>
             <el-form-item label="购买价格（元）">
-              <el-input v-model="queryConditionForm.purchaseCost" placeholder="请输入购买价格" clearable/>
+              <el-input style="width: 150px;" v-model="queryConditionForm.purchaseCost" placeholder="请输入购买价格" clearable/>
             </el-form-item>
           </template>
         </el-popover>
@@ -50,6 +50,21 @@
           >
             <el-option
                 v-for="item in deviceStatus"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="设备状态">
+          <el-select
+              v-model="queryConditionForm.usage"
+              clearable
+              placeholder="请选择使用情况"
+          >
+            <el-option
+                v-for="item in deviceUsage"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -80,7 +95,7 @@
         <el-table-column
             prop="devName"
             label="设备名称"
-            width="270"
+            width="230"
             :show-overflow-tooltip="true"
         >
         </el-table-column>
@@ -105,7 +120,7 @@
         <el-table-column
             prop="purchaseCost"
             label="购买价格（元）"
-            width="230"
+            width="200"
         >
         </el-table-column>
         <el-table-column
@@ -124,6 +139,12 @@
               </el-option>
             </el-select>
           </template>
+        </el-table-column>
+        <el-table-column
+            prop="deviceUsage"
+            label="设备使用情况"
+            width="200"
+        >
         </el-table-column>
         <el-table-column
             label="操作"
@@ -221,7 +242,8 @@ const queryConditionForm = ref({
   type: '',
   purchaseDate: '',
   purchaseCost: '',
-  status: ''
+  status: '',
+  usage: ''
 })
 
 const editDeviceSubmitText = ref('提交')
@@ -249,6 +271,10 @@ const deviceTypes = [
   {label: '计算设备', value: 3},
   {label: '外围设备', value: 4},
   {label: '移动设备', value: 5}
+]
+const deviceUsage = [
+  {label: '空闲', value: 0},
+  {label: '使用中', value: 1}
 ]
 
 const queryDeviceListByCondition = () => {
@@ -289,6 +315,12 @@ const queryDeviceListByCondition = () => {
           pageInfo.records[i].type = '外围设备'
         } else if (pageInfo.records[i].type === 5) {
           pageInfo.records[i].type = '移动设备'
+        }
+
+        if (pageInfo.records[i].deviceUsage === 0) {
+          pageInfo.records[i].deviceUsage = '空闲'
+        } else {
+          pageInfo.records[i].deviceUsage = '使用中'
         }
 
         if (pageInfo.records[i].purchaseDate) {
