@@ -183,12 +183,6 @@ const loadDictionaryTypeList = () => {
           }
 
           dictionaryTypeList.value = pageInfo.records
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
         }
         loading.value = false
       })

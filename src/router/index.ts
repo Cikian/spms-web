@@ -298,6 +298,7 @@ router.beforeEach((to, from, next) => {
             message: '登录失效，请重新登录',
             type: 'warning',
         })
+
         next('/login')
     } else {
         if (isFirstLogin === 'true' && to.path !== '/resetPassword') {

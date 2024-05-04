@@ -1,7 +1,6 @@
 import axios from "axios";
-import {useRoute} from "vue-router";
+import router from "../router";
 
-const router = useRoute()
 
 const service = axios.create({
     headers: {

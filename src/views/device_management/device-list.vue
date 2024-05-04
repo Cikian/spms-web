@@ -684,12 +684,6 @@ const getDeviceTypes = () => {
               value: data[i].value
             })
           }
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
         }
       })
 }
@@ -706,12 +700,6 @@ const getDeviceStatus = () => {
               value: data[i].value
             })
           }
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
         }
       })
 }

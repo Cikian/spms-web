@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import {login} from "../api/homeApi.ts";
 import router from "../router";
 
@@ -154,6 +154,10 @@ const userLogin = () => {
         isDisabled.value = false
       })
 }
+
+onMounted(() => {
+  localStorage.clear()
+})
 </script>
 
 <style scoped>
