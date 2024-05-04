@@ -220,8 +220,47 @@ const router = createRouter({
                         }
                     ]
                 },
+                {
+                    path: '/proDetail',
+                    name: 'proDetail',
+                    component: () => import('../views/pro_details/projectDetail-home.vue'),
+                    children: [
+                        {
+                            path: '/proDetail/overView',
+                            name: '项目概览',
+                            component: () => import('../views/pro_details/proOverView.vue')
+                        },
+                        {
+                            path: '/proDetail/proDemand',
+                            name: '项目需求',
+                            component: () => import('../views/pro_details/proDemand.vue')
+                        },
+                        {
+                            path: '/proDetail/proDefect',
+                            name: '项目缺陷',
+                            component: () => import('../views/pro_details/proDefect.vue')
+                        },
+                        {
+                            path: '/proDetail/proWorkItem',
+                            name: '工作项',
+                            component: () => import('../views/pro_details/proWorkItem.vue')
+                        },
+                        {
+                            path: '/proDetail/proTest',
+                            name: '项目测试',
+                            component: () => import('../views/pro_details/proTest.vue')
+                        },
+                        {
+                            path: '/proDetail/proResources',
+                            name: '项目资源',
+                            component: () => import('../views/pro_details/proResources.vue')
+                        },
+                    ]
+                }
+
             ]
         },
+
 
     ]
 })

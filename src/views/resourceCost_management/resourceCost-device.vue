@@ -14,23 +14,23 @@
         >
           <template #reference>
             <el-form-item label="日费用（元）">
-              <el-input type="number" v-model="queryResourceCostConditionForm.dailyCost" placeholder="请输入目标费用" clearable/>
+              <el-input @keydown.enter="queryResourceCostListByCondition" type="number" v-model="queryResourceCostConditionForm.dailyCost" placeholder="请输入目标费用" clearable/>
             </el-form-item>
           </template>
         </el-popover>
-        <el-popover
-            placement="bottom"
-            width="280"
-            trigger="hover"
-            title="提示"
-            content="实际查询价格范围会在目标价格±100元"
-        >
-          <template #reference>
-            <el-form-item label="月费用（元）">
-              <el-input type="number" v-model="queryResourceCostConditionForm.monthlyCost" placeholder="请输入目标费用" clearable/>
-            </el-form-item>
-          </template>
-        </el-popover>
+<!--        <el-popover-->
+<!--            placement="bottom"-->
+<!--            width="280"-->
+<!--            trigger="hover"-->
+<!--            title="提示"-->
+<!--            content="实际查询价格范围会在目标价格±100元"-->
+<!--        >-->
+<!--          <template #reference>-->
+<!--            <el-form-item label="月费用（元）">-->
+<!--              <el-input type="number" v-model="queryResourceCostConditionForm.monthlyCost" placeholder="请输入目标费用" clearable/>-->
+<!--            </el-form-item>-->
+<!--          </template>-->
+<!--        </el-popover>-->
         <el-form-item>
           <el-button type="primary" @click="queryResourceCostListByCondition">查询</el-button>
         </el-form-item>
@@ -44,7 +44,7 @@
           stripe
           v-loading="loading"
       >
-        <el-table-column type="selection" width="55" :reserve-selection="true"/>
+<!--        <el-table-column type="selection" width="55" :reserve-selection="true"/>-->
         <el-table-column
             prop="no"
             label="序号"
@@ -62,11 +62,11 @@
             label="日费用（元）"
         >
         </el-table-column>
-        <el-table-column
-            prop="monthlyCost"
-            label="月费用（元）"
-        >
-        </el-table-column>
+<!--        <el-table-column-->
+<!--            prop="monthlyCost"-->
+<!--            label="月费用（元）"-->
+<!--        >-->
+<!--        </el-table-column>-->
         <el-table-column
             prop="updateTime"
             label="上次更新时间"

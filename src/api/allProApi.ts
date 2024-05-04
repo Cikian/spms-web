@@ -14,3 +14,10 @@ export function getProList() {
         method: 'get',
     })
 }
+
+export function getAddMembers() {
+    return request({
+        url: '/user/queryCanAddToProject',
+        method: 'get',
+    })
+}

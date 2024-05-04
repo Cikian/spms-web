@@ -1,5 +1,7 @@
 import axios from "axios";
-import router from "../router";
+import {useRoute} from "vue-router";
+
+const router = useRoute()
 
 const service = axios.create({
     headers: {
@@ -9,10 +11,16 @@ const service = axios.create({
 })
 
 service.interceptors.request.use(function (config) {
+    let token = localStorage.getItem("token")
+    console.log(config.url !== "/user/login" && !token)
+    if (config.url !== "/user/login" && !token){
+        router.push("/login")
+        return
+    }
+
     if (config.url === "/file/upload" || config.url === "/common/upload/avatar") {
         config.headers["Content-Type"] = "multipart/form-data"
     }
-    let token = localStorage.getItem("token")
 
     if (token !== null && token !== undefined) {
         config.headers.token = token

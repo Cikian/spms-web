@@ -23,14 +23,14 @@
 
   <div style="width: 100%; padding: 0 40px" v-loading="loadingPro">
     <el-table
-        :data="filterTableData"
+        :data="tableData.data"
         :default-sort="{ prop: 'date', order: 'descending' }"
         style="width: 100%"
         :row-style="{height: '56px'}"
-        @row-click="clickl"
         stripe
         highlight-current-row
         :header-cell-style="{fontWeight: 'normal', fontSize: '14px'}"
+        @row-click="rowClick"
     >
       <el-table-column label="项目" prop="proName" sortable>
         <template #default="scope">
@@ -40,7 +40,13 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="标识" prop="proFlag"/>
+      <el-table-column align="center" label="标识" prop="proFlag">
+        <template #default="scope">
+          <div style="width: 100%; text-align: center">
+            <span>{{ scope.row.proFlag }}</span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="所属" prop="from"/>
       <el-table-column label="更新时间" prop="proUpdateTime"/>
     </el-table>
@@ -91,6 +97,20 @@
               </template>
             </el-input>
           </el-form-item>
+
+          <el-form-item required label="项目预计时间">
+            <el-date-picker
+                v-model="proDate"
+                type="daterange"
+                range-separator="——"
+                start-placeholder="开始日期"
+                end-placeholder="预计完成日期"
+                size="large"
+                @change="dateChange"
+                value-format="YYYY-MM-DD HH:mm:ss"
+            />
+          </el-form-item>
+
           <el-form-item required label="项目类型">
             <el-radio-group v-model="proData.proType">
               <el-radio value="0" size="large">Scrum项目</el-radio>
@@ -116,22 +136,27 @@
           <div style="height: 52px">
 
             <el-table
+                ref="addMemberTableRef"
                 :data="memberData"
                 style="width: 100%"
                 :row-style="{height: '52px'}"
-                @row-click="clickl"
                 stripe
                 :header-cell-style="{fontWeight: 'normal', fontSize: '14px'}"
+                @selection-change="handleSelectionChange"
             >
+              <el-table-column type="selection" width="55"/>
               <el-table-column label="姓名" prop="peoName" sortable>
                 <template #default="scope">
                   <div style="display: flex; align-items: center">
-                    <el-avatar :size="'small'" :src="scope.row.avatar"/>
-                    <span style="margin-left: 10px">{{ scope.row.peoName }}</span>
+                    <div>
+                      <el-avatar :size="'small'" :src="scope.row.avatar"/>
+                    </div>
+
+                    <span style="margin-left: 10px">{{ scope.row.userName }}</span>
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="部门" prop="dept"/>
+              <!--              <el-table-column label="部门" prop="dept"/>-->
               <el-table-column label="职位" prop="position"/>
             </el-table>
 
@@ -160,14 +185,17 @@
 </template>
 
 <script setup lang="ts">
-import {FormInstance, FormRules} from "element-plus";
+import {ElTable, FormInstance, FormRules} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {onMounted, reactive, ref, computed} from "vue";
-import {addPro, getProList} from "../../api/allProApi.ts";
+import {onMounted, reactive, ref} from "vue";
+import {addPro, getAddMembers, getProList} from "../../api/allProApi.ts";
+import {useRouter} from "vue-router";
 
 let tableData = reactive({
   data: []
 })
+
+
 const dialogVisible = ref(false)
 const theFirst = ref(true)
 let currentUser = reactive<any>({})
@@ -179,24 +207,25 @@ onMounted(() => {
 
 const loadingPro = ref(true)
 
-interface proDevice {
-  devId: number,
-  days: number,
-}
-
 const beLong = ref('默认组织')
 
 const proData = reactive({
   proName: '',
   proDesc: '',
+  proStatus: 1,
   proFlag: '',
   proType: '0',
-  proLeaderId: '',
   proCustomer: '',
-  proMembers: [] as any,
-
-  proDevices: [] as proDevice[],
+  proMembersIds: [] as string,
+  expectedStartTime: '',
+  expectedEndTime: '',
 })
+
+const proDate = ref('')
+
+const dateChange = () => {
+  console.log(proDate.value)
+}
 
 const ruleFormRef = ref<FormInstance>()
 
@@ -210,7 +239,7 @@ const rules = reactive<FormRules<typeof proData>>({
     {
       required: true,
       pattern: /^[A-Z][A-Z0-9_]{3,14}$/,
-      message: '为3-15个字符，只允许大写字母、数字、下划线，必须字母开头',
+      message: '为4-15个字符，只允许大写字母、数字、下划线，必须字母开头',
       trigger: 'blur'
     }
   ],
@@ -220,6 +249,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
+      getMembers()
       theFirst.value = false
     } else {
       console.log('error submit!')
@@ -230,12 +260,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
 
 
 const searchInput = ref('')
-const filterTableData = computed(() =>
-    tableData.data.filter((data) =>
-        !searchInput.value ||
-        data.proName.toLowerCase().includes(searchInput.value.toLowerCase())
-    )
-)
+
 
 const getPros = () => {
   console.log('获取项目列表')
@@ -243,6 +268,16 @@ const getPros = () => {
     tableData.data = res.data.data
     console.log(tableData.data)
     loadingPro.value = false
+  })
+}
+
+const getMembers = () => {
+  getAddMembers().then((res) => {
+    if (res.data.code === 2001) {
+      memberData.value = res.data.data
+      console.log(memberData.value)
+    }
+
   })
 }
 
@@ -256,53 +291,52 @@ interface member {
 }
 
 
-const memberData = reactive<member[]>([
-  {
-    peoId: 1,
-    peoName: '张三',
-    dept: '产品部',
-    position: '产品经理',
-    avatar: 'https://cube.elemecdn.com/0/88/03b0d07103f482067139658244046jpeg.jpeg'
-  },
-  {
-    peoId: 2,
-    peoName: '李四',
-    dept: '产品部',
-    position: '产品经理',
-    avatar: 'https://cube.elemecdn.com/0/88/03b0d07103f482067139658244046jpeg.jpeg'
-  }
-])
+const memberData = ref<member[]>([])
+const addMemberTableRef = ref<InstanceType<typeof ElTable>>()
+const selectionMembers = ref<User[]>([])
 
-
-const clickl = (row) => {
-  console.log(row)
+const handleSelectionChange = (val: User[]) => {
+  selectionMembers.value = val
+  console.log(selectionMembers.value)
 }
 
 const submitAddPro = () => {
   console.log('提交表单')
-  proData.proMembers = [
-    {peoId: "1774695386807324674", days: 10},
-    {peoId: "1779874103749816321", days: 5}
-  ]
-  proData.proDevices = [
-    {devId: 1, days: 10},
-    {devId: 2, days: 5}
-  ]
-  proData.proLeaderId = '1774695386807324674'
+
+  proData.proMembersIds = []
+  for (let i = 0; i < selectionMembers.value.length; i++) {
+    proData.proMembersIds.push(selectionMembers.value[i].userId)
+  }
+  proData.expectedStartTime = proDate.value[0]
+  proData.expectedEndTime = proDate.value[1]
 
   console.log(proData)
 
   addPro(proData).then((res) => {
-    if (res.data.code) {
+    if (res.data.code === 3001) {
       ElNotification({
         title: '成功',
-        message: '添加项目',
+        message: res.data.code,
         type: 'success',
       })
       dialogVisible.value = false
       getPros()
+    } else {
+      ElNotification({
+        title: '失败',
+        message: res.data.msg,
+        type: 'error',
+      })
     }
   })
+}
+
+
+const router = useRouter()
+const rowClick = (row) => {
+  console.log(row)
+  localStorage.setItem('proDetailId', row.proId)
+  router.push('/proDetail')
 }
 </script>
 

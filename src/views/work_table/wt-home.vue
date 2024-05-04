@@ -59,6 +59,7 @@ import router from "../../router";
 import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 onMounted(() => {
+  router.push("/workTable/overView")
 })
 
 

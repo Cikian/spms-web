@@ -56,7 +56,7 @@
           stripe
           v-loading="loading"
       >
-        <el-table-column type="selection" width="55" :reserve-selection="true"/>
+<!--        <el-table-column type="selection" width="55" :reserve-selection="true"/>-->
         <el-table-column
             prop="no"
             label="序号"
@@ -74,11 +74,11 @@
             label="日费用（元）"
         >
         </el-table-column>
-        <el-table-column
-            prop="monthlyCost"
-            label="月费用（元）"
-        >
-        </el-table-column>
+<!--        <el-table-column-->
+<!--            prop="monthlyCost"-->
+<!--            label="月费用（元）"-->
+<!--        >-->
+<!--        </el-table-column>-->
         <el-table-column
             prop="updateTime"
             label="上次更新时间"
@@ -131,9 +131,9 @@
       <el-form-item label="日费用（元）">
         <el-input class="form-control-input" v-model="resourceCostDetails.dailyCost" type="number"/>
       </el-form-item>
-      <el-form-item label="月费用（元）">
-        <el-input class="form-control-input" v-model="resourceCostDetails.monthlyCost" type="number"/>
-      </el-form-item>
+<!--      <el-form-item label="月费用（元）">-->
+<!--        <el-input class="form-control-input" v-model="resourceCostDetails.monthlyCost" type="number"/>-->
+<!--      </el-form-item>-->
     </el-form>
     <div style="text-align: center; margin-top: 20px;">
       <el-button size="large" type="primary" @click="handleSubmitResourceCostInfo"
