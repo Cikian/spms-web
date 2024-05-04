@@ -220,6 +220,27 @@ const router = createRouter({
                         }
                     ]
                 },
+                {
+                    path: '/dictionary',
+                    name: 'dictionary',
+                    redirect: '/dictionary/management/dictionaryList',
+                    component: () => import('../views/dictionary_management/dictionary-home.vue'),
+                    children: [
+                        {
+                            path: '/dictionary/management',
+                            name: 'dictionaryManagement',
+                            redirect: '/dictionary/management/dictionaryList',
+                            component: () => import('../views/dictionary_management/dictionary-management.vue'),
+                            children: [
+                                {
+                                    path: '/dictionary/management/dictionaryList',
+                                    name: 'dictionaryList',
+                                    component: () => import('../views/dictionary_management/dictionary-list.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
             ]
         },
 

@@ -238,6 +238,7 @@
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
 import {addDevice, queryDeviceById, queryDeviceList, updateDeviceInfo, updateStatus} from "../../api/DeviceApi.ts";
+import {queryDictionaryDataByTypeId} from "../../api/dictionaryApi.ts";
 
 const loading = ref(true)
 const deviceList = ref([])
@@ -268,19 +269,8 @@ const pageSizes = [10, 15, 30, 50, 100]
 const multipleTableRef = ref()
 const selectedRows = ref([]);
 
-const deviceStatus = [
-  {label: '正常', value: 0},
-  {label: '维修中', value: 1},
-  {label: '已报废', value: 2}
-]
-const deviceTypes = [
-  {label: '服务器', value: 0},
-  {label: '网络设备', value: 1},
-  {label: '存储设备', value: 2},
-  {label: '计算设备', value: 3},
-  {label: '外围设备', value: 4},
-  {label: '移动设备', value: 5}
-]
+const deviceStatus = ref([])
+const deviceTypes = ref([])
 
 const loadDeviceList = () => {
   loading.value = true
@@ -431,8 +421,8 @@ const handleSubmitAddDevice = () => {
   }
 
   let isType = false
-  for (let i = 0; i < deviceTypes.length; i++) {
-    if (parseInt(deviceFormData.type) === deviceTypes[i].value) {
+  for (let i = 0; i < deviceTypes.value.length; i++) {
+    if (deviceFormData.type === deviceTypes.value[i].value) {
       isType = true
       break
     }
@@ -586,7 +576,7 @@ const handleSubmitDeviceInfo = () => {
     }
 
     let isType = false
-    for (let i = 0; i < deviceTypes.length; i++) {
+    for (let i = 0; i < deviceTypes.value.length; i++) {
       if (deviceFormData.type === deviceTypes[i].value) {
         isType = true
         break
@@ -682,8 +672,54 @@ const handleSizeChange = (pageSize) => {
   loadDeviceList()
 }
 
+const getDeviceTypes = () => {
+  let deviceTypesId = '1786021634477154306'
+  queryDictionaryDataByTypeId(deviceTypesId)
+      .then(res => {
+        if (res.data.code === 200) {
+          let data = res.data.data
+          for (let i = 0; i < data.length; i++) {
+            deviceTypes.value.push({
+              label: data[i].label,
+              value: data[i].value
+            })
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+}
+
+const getDeviceStatus = () => {
+  let deviceTypesId = '1786582217903677442'
+  queryDictionaryDataByTypeId(deviceTypesId)
+      .then(res => {
+        if (res.data.code === 200) {
+          let data = res.data.data
+          for (let i = 0; i < data.length; i++) {
+            deviceStatus.value.push({
+              label: data[i].label,
+              value: data[i].value
+            })
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+}
+
 onMounted(() => {
   loadDeviceList()
+  getDeviceStatus()
+  getDeviceTypes()
 })
 
 </script>
