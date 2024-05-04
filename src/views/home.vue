@@ -43,6 +43,10 @@
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-coins" />
                 <template #title>资源成本管理</template>
               </el-menu-item>
+              <el-menu-item index="/dictionary" v-if="isAdmin">
+                <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-book" />
+                <template #title>字典管理</template>
+              </el-menu-item>
               <el-menu-item index="/setting">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-gear"/>
                 <template #title>设置</template>
