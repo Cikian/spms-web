@@ -108,6 +108,7 @@ const getUserInfo = () => {
 
 onMounted(() => {
   getUserInfo()
+  router.push("/workTable/overView")
 })
 </script>
 

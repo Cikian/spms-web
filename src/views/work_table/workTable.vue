@@ -30,8 +30,12 @@
 import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
+import {onMounted} from "vue";
 
-router.push('/workTable/wtHome')
+onMounted(() => {
+  router.push('/workTable/wtHome')
+})
+
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }

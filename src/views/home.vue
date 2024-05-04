@@ -4,7 +4,7 @@
 
           <el-aside width=" ">
             <el-menu
-                default-active="/workTable"
+                :default-active="homeMenu?homeMenu:'/workTable'"
                 class="el-menu-vertical-demo"
                 :collapse="isCollapse"
                 @open="handleOpen"
@@ -13,6 +13,7 @@
                 text-color="#d2d2d2"
                 style="border: none"
                 :router="true"
+                @select="changeMenuItem"
             >
               <div style="width: 100%; height: 72px">1</div>
               <el-menu-item index="/workTable">
@@ -102,10 +103,16 @@ const getUserHasRole = () => {
     isAdmin.value = true
   }
 }
-
+const homeMenu = ref('')
 onMounted(() => {
+  homeMenu.value = localStorage.getItem('homeMenu')
   getUserHasRole()
 })
+
+const changeMenuItem = (key: string, keyPath: string) => {
+  localStorage.setItem("homeMenu", key)
+  console.log(key, keyPath)
+}
 
 </script>
 

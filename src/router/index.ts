@@ -26,12 +26,13 @@ const router = createRouter({
                 {
                     path: '/workTable',
                     name: 'workTable',
-                    redirect: '/workTable/wtHome',
+                    redirect: '/workTable/overView',
                     component: () => import('../views/work_table/workTable.vue'),
                     children: [
                         {
                             path: '/workTable/wtHome',
                             name: 'wtHome',
+                            redirect: '/workTable/overView',
                             component: () => import('../views/work_table/wt-home.vue'),
                             children: [
                                 {
@@ -76,6 +77,7 @@ const router = createRouter({
                 {
                     path: '/proman/home',
                     name: 'promanHome',
+                    redirect: '/proman/allpro',
                     component: () => import('../views/project_management/pro-home.vue'),
                     children: [
                         {
@@ -223,6 +225,7 @@ const router = createRouter({
                 {
                     path: '/proDetail',
                     name: 'proDetail',
+                    redirect: '/proDetail/overView',
                     component: () => import('../views/pro_details/projectDetail-home.vue'),
                     children: [
                         {

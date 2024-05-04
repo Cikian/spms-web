@@ -38,7 +38,7 @@ import AvatarMenu from "../../compoment/AvatarMenu.vue";
 import router from "../../router";
 
 onMounted(() => {
-  router.push("/proDetail/overView")
+  // router.push("/proDetail/overView")
 })
 
 

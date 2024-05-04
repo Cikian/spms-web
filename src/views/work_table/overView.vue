@@ -4,7 +4,7 @@
   </div>
 
   <el-row style="padding: 0 40px 32px 40px">
-    <div class="lately-pro" v-for="pro in pros" :key="pro.name">
+    <div class="lately-pro" v-for="pro in pros" :key="pro.name" @click="toProDetail(pro.proId)">
       <div class="lately-pro-in"></div>
       <div class="lately-pro-cont">
         <font-awesome-icon style="font-size: 24px; color: #56abfb" icon="fa-solid fa-folder-plus"/>
@@ -38,25 +38,36 @@
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {ref} from "vue";
+import router from "../../router";
+
+const toProDetail = (proId) => {
+  localStorage.setItem('proDetailId', proId)
+  router.push('/proDetail')
+}
 
 const pros = ref([
   {
+    proId: '1056066526164565266',
     name: '项目啊实打实大苏打的啊实打实的1',
     path: '/work_table/project1'
   },
   {
+    proId: '1056066526164565266',
     name: '项目2',
     path: '/work_table/project2'
   },
   {
+    proId: '1056066526164565266',
     name: '项目3',
     path: '/work_table/project2'
   },
   {
+    proId: '1056066526164565266',
     name: '项目4',
     path: '/work_table/project2'
   },
   {
+    proId: '1056066526164565266',
     name: '项目5',
     path: '/work_table/project2'
   }
