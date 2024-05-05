@@ -10,7 +10,7 @@
             :router="true"
         >
           <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px"
-                                                              icon="fa-solid fa-house"/>工作台<el-divider
+                                                              icon="fa-solid fa-house"/>项目名称<el-divider
               style="margin: 0 16px" direction="vertical"/></span>
           <el-menu-item class="h-menu-item" index="/proDetail/overView">概览</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proDemand">需求</el-menu-item>
@@ -35,7 +35,6 @@
 import {onMounted} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
-import router from "../../router";
 
 onMounted(() => {
   // router.push("/proDetail/overView")
