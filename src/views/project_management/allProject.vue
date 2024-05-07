@@ -316,7 +316,7 @@ const submitAddPro = () => {
     if (res.data.code === 3001) {
       ElNotification({
         title: '成功',
-        message: res.data.code,
+        message: res.data.message,
         type: 'success',
       })
       dialogVisible.value = false
@@ -324,7 +324,7 @@ const submitAddPro = () => {
     } else {
       ElNotification({
         title: '失败',
-        message: res.data.msg,
+        message: res.data.message,
         type: 'error',
       })
     }
