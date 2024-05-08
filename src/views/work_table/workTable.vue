@@ -14,7 +14,7 @@
           <el-menu-item class="h-menu-item" index="/workTable/wtHome">首页</el-menu-item>
           <el-menu-item class="h-menu-item" index="/workTable/wtPanel">仪表盘</el-menu-item>
           <el-menu-item class="h-menu-item" index="/workTable/wtUndefine">未定义</el-menu-item>
-
+          <Notification/>
           <AvatarMenu />
         </el-menu>
       </el-header>
@@ -31,6 +31,7 @@ import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
 import {onMounted} from "vue";
+import Notification from "../../compoment/Notification.vue";
 
 onMounted(() => {
   router.push('/workTable/wtHome')
