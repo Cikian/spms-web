@@ -236,6 +236,7 @@ const router = createRouter({
                         {
                             path: '/proDetail/proDemand',
                             name: '项目需求',
+                            redirect: '/proDetail/proDemand/allDemands',
                             component: () => import('../views/pro_details/proDemand.vue'),
                             children: [
                                 {

@@ -83,7 +83,7 @@
       </el-form-item>
       <el-form-item class="addDictionaryData" label="添加字典数据">
         <el-input v-model="addDictionaryDataForm.label" placeholder="请输入字典数据标签" clearable/>
-        <el-input v-model="addDictionaryDataForm.value" placeholder="请输入字典数据值" clearable/>
+<!--        <el-input v-model="addDictionaryDataForm.value" placeholder="请输入字典数据值" clearable/>-->
         <el-button type="primary" @click="handleAddDictionaryData">添加</el-button>
       </el-form-item>
       <el-form-item label="字典数据">
@@ -98,11 +98,11 @@
               label="字典数据标签"
           >
           </el-table-column>
-          <el-table-column
-              prop="value"
-              label="字典数据值"
-          >
-          </el-table-column>
+<!--          <el-table-column-->
+<!--              prop="value"-->
+<!--              label="字典数据值"-->
+<!--          >-->
+<!--          </el-table-column>-->
           <el-table-column
               label="操作"
           >
@@ -149,7 +149,6 @@ const dictionaryOldDetails = ref()
 const dictionaryDataList = ref([])
 const addDictionaryDataForm = ref({
   label: '',
-  value: ''
 })
 
 const tablePage = {
@@ -214,10 +213,10 @@ const handleCloseEditDictionaryDialog = () => {
 }
 
 const handleAddDictionaryData = () => {
-  if (addDictionaryDataForm.value.label === '' || addDictionaryDataForm.value.value === '') {
+  if (addDictionaryDataForm.value.label === '') {
     ElNotification({
       title: '提示',
-      message: '字典数据标签和值不能为空',
+      message: '字典数据标签不能为空',
       type: 'warning'
     })
     return
@@ -225,7 +224,6 @@ const handleAddDictionaryData = () => {
 
   let formData = {
     label: addDictionaryDataForm.value.label,
-    value: addDictionaryDataForm.value.value,
     dictionaryTypeId: dictionaryDetails.value.dictionaryTypeId
   }
   addDictionaryData(formData)
@@ -246,7 +244,6 @@ const handleAddDictionaryData = () => {
         }
       })
   addDictionaryDataForm.value.label = ''
-  addDictionaryDataForm.value.value = ''
 }
 
 const handleDeleteDictionaryData = (row) => {
