@@ -83,7 +83,6 @@
       </el-form-item>
       <el-form-item class="addDictionaryData" label="添加字典数据">
         <el-input v-model="addDictionaryDataForm.label" placeholder="请输入字典数据标签" clearable/>
-<!--        <el-input v-model="addDictionaryDataForm.value" placeholder="请输入字典数据值" clearable/>-->
         <el-button type="primary" @click="handleAddDictionaryData">添加</el-button>
       </el-form-item>
       <el-form-item label="字典数据">
@@ -98,11 +97,6 @@
               label="字典数据标签"
           >
           </el-table-column>
-<!--          <el-table-column-->
-<!--              prop="value"-->
-<!--              label="字典数据值"-->
-<!--          >-->
-<!--          </el-table-column>-->
           <el-table-column
               label="操作"
           >
@@ -112,6 +106,7 @@
                   text
                   size="default"
                   @click="handleDeleteDictionaryData(row)"
+                  :disabled="row.isSystem"
               >
                 删除
               </el-button>

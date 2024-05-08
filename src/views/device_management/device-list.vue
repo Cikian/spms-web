@@ -62,13 +62,13 @@
             width="200"
         >
           <template #default="{row}">
-            <el-select class="device-status-select" v-model="row.status" placeholder="请选择"
+            <el-select class="device-status-select" v-model="row.status"
                        @change="handleStatus(row)">
               <el-option
                   v-for="item in deviceStatus"
-                  :key="item.value"
+                  :key="item.dictionaryDataId"
                   :label="item.label"
-                  :value="item.value"
+                  :value="item.dictionaryDataId"
               >
               </el-option>
             </el-select>
@@ -202,15 +202,15 @@
       </el-form-item>
       <el-form-item label="设备类型">
         <el-select
-            v-model="deviceDetails.type"
+            v-model="deviceDetails.typeId"
             clearable
             placeholder="请选择设备类型"
         >
           <el-option
               v-for="item in deviceTypes"
-              :key="item.value"
+              :key="item.dictionaryDataId"
               :label="item.label"
-              :value="item.value"
+              :value="item.dictionaryDataId"
           >
           </el-option>
         </el-select>
@@ -271,6 +271,7 @@ const selectedRows = ref([]);
 
 const deviceStatus = ref([])
 const deviceTypes = ref([])
+const deviceUsage = ref([])
 
 const loadDeviceList = () => {
   loading.value = true
@@ -288,10 +289,11 @@ const loadDeviceList = () => {
           for (let i = 0; i < pageInfo.records.length; i++) {
             pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
 
-            if (pageInfo.records[i].deviceUsage === 0) {
-              pageInfo.records[i].deviceUsage = '空闲'
-            } else {
-              pageInfo.records[i].deviceUsage = '使用中'
+            for (let j = 0; j < deviceUsage.value.length; j++) {
+              if (pageInfo.records[i].deviceUsage === deviceUsage.value[j].dictionaryDataId) {
+                pageInfo.records[i].deviceUsage = deviceUsage.value[j].label
+                break
+              }
             }
 
             if (pageInfo.records[i].purchaseDate) {
@@ -316,13 +318,12 @@ const loadDeviceList = () => {
 }
 
 const handleStatus = (row) => {
-  let willStatus = row.status
-  if (row.status === 0) {
-    willStatus = '正常'
-  } else if (row.status === 1) {
-    willStatus = '维修中'
-  } else if (row.status === 2) {
-    willStatus = '已报废'
+  let willStatus = ''
+  for (let i = 0; i < deviceStatus.value.length; i++) {
+    if (row.status === deviceStatus.value[i].dictionaryDataId) {
+      willStatus = deviceStatus.value[i].label
+      break
+    }
   }
 
   ElMessageBox.confirm(
@@ -534,73 +535,21 @@ const handleSubmitDeviceInfo = () => {
   let deviceFormData = {
     devId: deviceDetails.value.devId,
     devName: deviceDetails.value.devName,
-    type: deviceDetails.value.type,
+    typeId: deviceDetails.value.typeId,
     purchaseDate: deviceOldDetails.value.purchaseDate,
     warrantyExpiryDate: deviceOldDetails.value.warrantyExpiryDate,
     purchaseCost: deviceDetails.value.purchaseCost
   }
 
-  if (JSON.stringify(deviceOldDetails.value) === JSON.stringify(deviceFormData)) {
+  if (!deviceFormData.devName) {
     ElNotification({
       title: '提示',
-      message: '设备信息未发生变化',
+      message: '设备名称不能为空',
       type: 'warning'
     })
     editDeviceIsDisabled.value = false
     editDeviceSubmitText.value = '提交'
     return
-  } else {
-    if (!deviceFormData.devName) {
-      ElNotification({
-        title: '提示',
-        message: '设备名称不能为空',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
-
-    let isType = false
-    for (let i = 0; i < deviceTypes.value.length; i++) {
-      if (deviceFormData.type === deviceTypes[i].value) {
-        isType = true
-        break
-      }
-    }
-
-    if (!isType) {
-      ElNotification({
-        title: '提示',
-        message: '设备类型不合法',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
-
-    if (!deviceFormData.purchaseDate) {
-      ElNotification({
-        title: '提示',
-        message: '购买日期不能为空',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
-
-    if (!deviceFormData.warrantyExpiryDate) {
-      ElNotification({
-        title: '提示',
-        message: '保修到期日期不能为空',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
   }
 
   deviceFormData.purchaseDate = deviceFormData.purchaseDate.replace('T', ' ')
@@ -664,24 +613,26 @@ const getDeviceTypes = () => {
       .then(res => {
         if (res.data.code === 200) {
           deviceTypes.value = res.data.data
-
         }
       })
 }
 
 const getDeviceStatus = () => {
-  let deviceTypesId = '1786582217903677442'
-  queryDictionaryDataByTypeId(deviceTypesId)
+  let deviceStatusId = '1786582217903677442'
+  queryDictionaryDataByTypeId(deviceStatusId)
       .then(res => {
         if (res.data.code === 200) {
           deviceStatus.value = res.data.data
-          // let data = res.data.data
-          // for (let i = 0; i < data.length; i++) {
-          //   deviceStatus.value.push({
-          //     label: data[i].label,
-          //     value: data[i].value
-          //   })
-          // }
+        }
+      })
+}
+
+const getDeviceUsage = () => {
+  let deviceTypesId = '1786608523483566082'
+  queryDictionaryDataByTypeId(deviceTypesId)
+      .then(res => {
+        if (res.data.code === 200) {
+          deviceUsage.value = res.data.data
         }
       })
 }
@@ -690,6 +641,7 @@ onMounted(() => {
   loadDeviceList()
   getDeviceStatus()
   getDeviceTypes()
+  getDeviceUsage()
 })
 
 </script>
