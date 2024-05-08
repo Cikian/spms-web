@@ -236,7 +236,39 @@ const router = createRouter({
                         {
                             path: '/proDetail/proDemand',
                             name: '项目需求',
-                            component: () => import('../views/pro_details/proDemand.vue')
+                            component: () => import('../views/pro_details/proDemand.vue'),
+                            children: [
+                                {
+                                    path: '/proDetail/proDemand/allDemands',
+                                    name: '全部需求',
+                                    component: () => import('../views/pro_details/proDemandViews/allDemands.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDemand/allSpeciality',
+                                    name: '全部特性',
+                                    component: () => import('../views/pro_details/proDemandViews/allSpeciality.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDemand/allUserStory',
+                                    name: '全部用户故事',
+                                    component: () => import('../views/pro_details/proDemandViews/allUserStory.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDemand/onGoingDemand',
+                                    name: '进行中的需求',
+                                    component: () => import('../views/pro_details/proDemandViews/onGoingDemand.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDemand/myDemand',
+                                    name: '我负责的需求',
+                                    component: () => import('../views/pro_details/proDemandViews/myDemand.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDemand/mySubmitDemand',
+                                    name: '我提交的需求',
+                                    component: () => import('../views/pro_details/proDemandViews/mySubmitDemand.vue')
+                                },
+                            ]
                         },
                         {
                             path: '/proDetail/proDefect',

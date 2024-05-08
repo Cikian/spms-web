@@ -6,7 +6,7 @@
             default-active="/proDetail/overView"
             class="el-menu-demo"
             mode="horizontal"
-            style="height: 52px; padding: 0 20px"
+            style="height: 52px; padding: 0 20px; box-shadow: rgba(0, 0, 0, 0.1) 0 0 4px"
             :router="true"
         >
           <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px"
