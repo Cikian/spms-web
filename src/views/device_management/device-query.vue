@@ -7,15 +7,15 @@
         </el-form-item>
         <el-form-item label="设备类型">
           <el-select
-              v-model="queryConditionForm.type"
+              v-model="queryConditionForm.typeId"
               clearable
               placeholder="请选择设备类型"
           >
             <el-option
                 v-for="item in deviceTypes"
-                :key="item.value"
+                :key="item.dictionaryDataId"
                 :label="item.label"
-                :value="item.value"
+                :value="item.dictionaryDataId"
             >
             </el-option>
           </el-select>
@@ -38,7 +38,8 @@
         >
           <template #reference>
             <el-form-item label="购买价格（元）">
-              <el-input style="width: 150px;" v-model="queryConditionForm.purchaseCost" placeholder="请输入购买价格" clearable/>
+              <el-input style="width: 150px;" v-model="queryConditionForm.purchaseCost" placeholder="请输入购买价格"
+                        clearable/>
             </el-form-item>
           </template>
         </el-popover>
@@ -50,14 +51,14 @@
           >
             <el-option
                 v-for="item in deviceStatus"
-                :key="item.value"
+                :key="item.dictionaryDataId"
                 :label="item.label"
-                :value="item.value"
+                :value="item.dictionaryDataId"
             >
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="设备状态">
+        <el-form-item label="设备使用情况">
           <el-select
               v-model="queryConditionForm.usage"
               clearable
@@ -65,9 +66,9 @@
           >
             <el-option
                 v-for="item in deviceUsage"
-                :key="item.value"
+                :key="item.dictionaryDataId"
                 :label="item.label"
-                :value="item.value"
+                :value="item.dictionaryDataId"
             >
             </el-option>
           </el-select>
@@ -100,7 +101,7 @@
         >
         </el-table-column>
         <el-table-column
-            prop="type"
+            prop="typeName"
             label="设备类型"
             width="200"
         >
@@ -125,16 +126,17 @@
         </el-table-column>
         <el-table-column
             prop="status"
-            label="设备当前状态"
+            label="设备工作状态"
             width="200"
         >
           <template #default="{row}">
-            <el-select class="device-status-select" v-model="row.status" placeholder="请选择" @change="handleStatus(row)">
+            <el-select class="device-status-select" v-model="row.status"
+                       @change="handleStatus(row)">
               <el-option
                   v-for="item in deviceStatus"
-                  :key="item.value"
+                  :key="item.dictionaryDataId"
                   :label="item.label"
-                  :value="item.value"
+                  :value="item.dictionaryDataId"
               >
               </el-option>
             </el-select>
@@ -198,15 +200,15 @@
       </el-form-item>
       <el-form-item label="设备类型">
         <el-select
-            v-model="deviceDetails.type"
+            v-model="deviceDetails.typeId"
             clearable
             placeholder="请选择设备类型"
         >
           <el-option
               v-for="item in deviceTypes"
-              :key="item.value"
+              :key="item.dictionaryDataId"
               :label="item.label"
-              :value="item.value"
+              :value="item.dictionaryDataId"
           >
           </el-option>
         </el-select>
@@ -240,7 +242,7 @@ const deviceList = ref([])
 
 const queryConditionForm = ref({
   devName: '',
-  type: '',
+  typeId: '',
   purchaseDate: '',
   purchaseCost: '',
   status: '',
@@ -269,10 +271,11 @@ const queryDeviceListByCondition = () => {
 
   let deviceQueryCondition = {
     devName: queryConditionForm.value.devName,
-    type: queryConditionForm.value.type,
+    typeId: queryConditionForm.value.typeId,
     purchaseDate: queryConditionForm.value.purchaseDate,
     purchaseCost: queryConditionForm.value.purchaseCost,
-    status: queryConditionForm.value.status
+    status: queryConditionForm.value.status,
+    deviceUsage: queryConditionForm.value.usage
   }
 
   let formData = {
@@ -280,70 +283,58 @@ const queryDeviceListByCondition = () => {
     size: tablePage.pageSize
   }
 
-  queryDeviceList(formData, deviceQueryCondition).then(res => {
-    if (res.data.code === 200) {
-      let pageInfo = res.data.data;
-      tablePage.total = parseInt(pageInfo.total)
+  queryDeviceList(formData, deviceQueryCondition)
+      .then(res => {
+        if (res.data.code === 200) {
+          let pageInfo = res.data.data;
+          tablePage.total = parseInt(pageInfo.total)
 
-      for (let i = 0; i < pageInfo.records.length; i++) {
-        pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
+          for (let i = 0; i < pageInfo.records.length; i++) {
+            pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
 
-        if (pageInfo.records[i].type === 0) {
-          pageInfo.records[i].type = '服务器'
-        } else if (pageInfo.records[i].type === 1) {
-          pageInfo.records[i].type = '网络设备'
-        } else if (pageInfo.records[i].type === 2) {
-          pageInfo.records[i].type = '存储设备'
-        } else if (pageInfo.records[i].type === 3) {
-          pageInfo.records[i].type = '计算设备'
-        } else if (pageInfo.records[i].type === 4) {
-          pageInfo.records[i].type = '外围设备'
-        } else if (pageInfo.records[i].type === 5) {
-          pageInfo.records[i].type = '移动设备'
-        }
+            for (let j = 0; j < deviceUsage.value.length; j++) {
+              if (pageInfo.records[i].deviceUsage === deviceUsage.value[j].dictionaryDataId) {
+                pageInfo.records[i].deviceUsage = deviceUsage.value[j].label
+                break
+              }
+            }
 
-        if (pageInfo.records[i].deviceUsage === 0) {
-          pageInfo.records[i].deviceUsage = '空闲'
+            if (pageInfo.records[i].purchaseDate) {
+              pageInfo.records[i].purchaseDate = new Date(pageInfo.records[i].purchaseDate).toLocaleString()
+            }
+
+            if (pageInfo.records[i].warrantyExpiryDate) {
+              pageInfo.records[i].warrantyExpiryDate = new Date(pageInfo.records[i].warrantyExpiryDate).toLocaleString()
+            }
+
+            if (pageInfo.records[i].purchaseCost) {
+              pageInfo.records[i].purchaseCost = pageInfo.records[i].purchaseCost.toFixed(2)
+            }
+
+            pageInfo.records[i].oldStatus = pageInfo.records[i].status
+          }
+
+          deviceList.value = pageInfo.records
+          loading.value = false
         } else {
-          pageInfo.records[i].deviceUsage = '使用中'
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+          deviceList.value = []
+          loading.value = false
         }
-
-        if (pageInfo.records[i].purchaseDate) {
-          pageInfo.records[i].purchaseDate = new Date(pageInfo.records[i].purchaseDate).toLocaleString()
-        }
-
-        if (pageInfo.records[i].warrantyExpiryDate) {
-          pageInfo.records[i].warrantyExpiryDate = new Date(pageInfo.records[i].warrantyExpiryDate).toLocaleString()
-        }
-
-        if (pageInfo.records[i].purchaseCost) {
-          pageInfo.records[i].purchaseCost = pageInfo.records[i].purchaseCost.toFixed(2)
-        }
-
-        pageInfo.records[i].oldStatus = pageInfo.records[i].status
-      }
-
-      deviceList.value = pageInfo.records
-      loading.value = false
-    }else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning'
       })
-      loading.value = false
-    }
-  })
 }
 
 const handleStatus = (row) => {
-  let willStatus = row.status
-  if (row.status === 0) {
-    willStatus = '正常'
-  } else if (row.status === 1) {
-    willStatus = '维修中'
-  } else if (row.status === 2) {
-    willStatus = '已报废'
+  let willStatus = ''
+  for (let i = 0; i < deviceStatus.value.length; i++) {
+    if (row.status === deviceStatus.value[i].dictionaryDataId) {
+      willStatus = deviceStatus.value[i].label
+      break
+    }
   }
 
   ElMessageBox.confirm(
@@ -419,73 +410,21 @@ const handleSubmitDeviceInfo = () => {
   let deviceFormData = {
     devId: deviceDetails.value.devId,
     devName: deviceDetails.value.devName,
-    type: deviceDetails.value.type,
+    typeId: deviceDetails.value.typeId,
     purchaseDate: deviceOldDetails.value.purchaseDate,
     warrantyExpiryDate: deviceOldDetails.value.warrantyExpiryDate,
     purchaseCost: deviceDetails.value.purchaseCost
   }
 
-  if (JSON.stringify(deviceOldDetails.value) === JSON.stringify(deviceFormData)) {
+  if (!deviceFormData.devName) {
     ElNotification({
       title: '提示',
-      message: '设备信息未发生变化',
+      message: '设备名称不能为空',
       type: 'warning'
     })
     editDeviceIsDisabled.value = false
     editDeviceSubmitText.value = '提交'
     return
-  } else {
-    if (!deviceFormData.devName) {
-      ElNotification({
-        title: '提示',
-        message: '设备名称不能为空',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
-
-    let isType = false
-    for (let i = 0; i < deviceTypes.value.length; i++) {
-      if (deviceFormData.type === deviceTypes.value[i].value) {
-        isType = true
-        break
-      }
-    }
-
-    if (!isType) {
-      ElNotification({
-        title: '提示',
-        message: '设备类型不合法',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
-
-    if (!deviceFormData.purchaseDate) {
-      ElNotification({
-        title: '提示',
-        message: '购买日期不能为空',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
-
-    if (!deviceFormData.warrantyExpiryDate) {
-      ElNotification({
-        title: '提示',
-        message: '保修到期日期不能为空',
-        type: 'warning'
-      })
-      editDeviceIsDisabled.value = false
-      editDeviceSubmitText.value = '提交'
-      return
-    }
   }
 
   deviceFormData.purchaseDate = deviceFormData.purchaseDate.replace('T', ' ')
@@ -540,19 +479,7 @@ const getDeviceTypes = () => {
   queryDictionaryDataByTypeId(deviceTypesId)
       .then(res => {
         if (res.data.code === 200) {
-          let data = res.data.data
-          for (let i = 0; i < data.length; i++) {
-            deviceTypes.value.push({
-              label: data[i].label,
-              value: data[i].value
-            })
-          }
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
+          deviceTypes.value = res.data.data
         }
       })
 }
@@ -562,19 +489,7 @@ const getDeviceStatus = () => {
   queryDictionaryDataByTypeId(deviceTypesId)
       .then(res => {
         if (res.data.code === 200) {
-          let data = res.data.data
-          for (let i = 0; i < data.length; i++) {
-            deviceStatus.value.push({
-              label: data[i].label,
-              value: data[i].value
-            })
-          }
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
+          deviceStatus.value = res.data.data
         }
       })
 }
@@ -584,19 +499,7 @@ const getDeviceUsage = () => {
   queryDictionaryDataByTypeId(deviceTypesId)
       .then(res => {
         if (res.data.code === 200) {
-          let data = res.data.data
-          for (let i = 0; i < data.length; i++) {
-            deviceUsage.value.push({
-              label: data[i].label,
-              value: data[i].value
-            })
-          }
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning'
-          })
+          deviceUsage.value = res.data.data
         }
       })
 }
@@ -632,7 +535,7 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.device-status-select{
+.device-status-select {
   width: 130px;
 }
 </style>
