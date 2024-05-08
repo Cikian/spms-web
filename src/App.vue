@@ -33,4 +33,8 @@ body, html {
   height: 48px!important;
   font-size: 16px;
 }
+
+.notification-drawer .el-drawer__body{
+  padding: 0;
+}
 </style>
