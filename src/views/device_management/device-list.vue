@@ -33,7 +33,7 @@
         >
         </el-table-column>
         <el-table-column
-            prop="type"
+            prop="typeName"
             label="设备类型"
             width="200"
         >
@@ -147,9 +147,9 @@
     >
       <el-option
           v-for="item in deviceTypes"
-          :key="item.value"
+          :key="item.dictionaryDataId"
           :label="item.label"
-          :value="item.value"
+          :value="item.dictionaryDataId"
       >
       </el-option>
     </el-select>
@@ -288,20 +288,6 @@ const loadDeviceList = () => {
           for (let i = 0; i < pageInfo.records.length; i++) {
             pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
 
-            if (pageInfo.records[i].type === 0) {
-              pageInfo.records[i].type = '服务器'
-            } else if (pageInfo.records[i].type === 1) {
-              pageInfo.records[i].type = '网络设备'
-            } else if (pageInfo.records[i].type === 2) {
-              pageInfo.records[i].type = '存储设备'
-            } else if (pageInfo.records[i].type === 3) {
-              pageInfo.records[i].type = '计算设备'
-            } else if (pageInfo.records[i].type === 4) {
-              pageInfo.records[i].type = '外围设备'
-            } else if (pageInfo.records[i].type === 5) {
-              pageInfo.records[i].type = '移动设备'
-            }
-
             if (pageInfo.records[i].deviceUsage === 0) {
               pageInfo.records[i].deviceUsage = '空闲'
             } else {
@@ -420,24 +406,24 @@ const handleSubmitAddDevice = () => {
     return
   }
 
-  let isType = false
-  for (let i = 0; i < deviceTypes.value.length; i++) {
-    if (deviceFormData.type === deviceTypes.value[i].value) {
-      isType = true
-      break
-    }
-  }
-
-  if (!isType) {
-    ElNotification({
-      title: '提示',
-      message: '设备类型不合法',
-      type: 'warning'
-    })
-    addDeviceIsDisabled.value = false
-    addDeviceSubmitText.value = '提交'
-    return
-  }
+  // let isType = false
+  // for (let i = 0; i < deviceTypes.value.length; i++) {
+  //   if (deviceFormData.type === deviceTypes.value[i].value) {
+  //     isType = true
+  //     break
+  //   }
+  // }
+  //
+  // if (!isType) {
+  //   ElNotification({
+  //     title: '提示',
+  //     message: '设备类型不合法',
+  //     type: 'warning'
+  //   })
+  //   addDeviceIsDisabled.value = false
+  //   addDeviceSubmitText.value = '提交'
+  //   return
+  // }
 
   if (!deviceFormData.purchaseDate) {
     ElNotification({
@@ -677,13 +663,8 @@ const getDeviceTypes = () => {
   queryDictionaryDataByTypeId(deviceTypesId)
       .then(res => {
         if (res.data.code === 200) {
-          let data = res.data.data
-          for (let i = 0; i < data.length; i++) {
-            deviceTypes.value.push({
-              label: data[i].label,
-              value: data[i].value
-            })
-          }
+          deviceTypes.value = res.data.data
+
         }
       })
 }
@@ -693,13 +674,14 @@ const getDeviceStatus = () => {
   queryDictionaryDataByTypeId(deviceTypesId)
       .then(res => {
         if (res.data.code === 200) {
-          let data = res.data.data
-          for (let i = 0; i < data.length; i++) {
-            deviceStatus.value.push({
-              label: data[i].label,
-              value: data[i].value
-            })
-          }
+          deviceStatus.value = res.data.data
+          // let data = res.data.data
+          // for (let i = 0; i < data.length; i++) {
+          //   deviceStatus.value.push({
+          //     label: data[i].label,
+          //     value: data[i].value
+          //   })
+          // }
         }
       })
 }
