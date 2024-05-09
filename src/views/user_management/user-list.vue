@@ -38,7 +38,7 @@
         </el-table-column>
         <el-table-column
             prop="nickName"
-            label="昵称"
+            label="姓名"
             width="220"
             :show-overflow-tooltip="true"
         >
@@ -131,6 +131,13 @@
     <div class="add-user-tip">
       <span class="add-user-tip-text">系统会将用户账号和密码发送到填写的邮箱，您可以编辑用户为其分配角色</span>
     </div>
+    <label class="form-label">姓名</label>
+    <el-input
+        class="form-control-input"
+        v-model="nickName"
+        clearable
+        placeholder="请输入用户姓名"
+    />
     <label class="form-label">邮箱</label>
     <el-input
         class="form-control-input"
@@ -185,6 +192,7 @@ const dialogVisible = ref(false)
 const submitText = ref('提交')
 const isDisabled = ref(false)
 const email = ref('')
+const nickName = ref('')
 const tablePage = {
   pageNum: 1,
   pageSize: 10,
@@ -219,7 +227,8 @@ const handleSubmit = () => {
   }
 
   let userFormData = {
-    email: email.value
+    email: email.value,
+    nickName: nickName.value
   }
   addUser(userFormData)
       .then(res => {
@@ -230,6 +239,7 @@ const handleSubmit = () => {
             type: 'success'
           })
           email.value = ''
+          nickName.value = ''
           dialogVisible.value = false
           loadUserList()
         } else {
@@ -246,6 +256,7 @@ const handleSubmit = () => {
 
 const handleCloseAddUserDialog = () => {
   email.value = ''
+  nickName.value = ''
   dialogVisible.value = false
 }
 

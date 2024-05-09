@@ -18,6 +18,7 @@
           <el-menu-item class="h-menu-item" index="/user/management/userList">用户列表</el-menu-item>
           <el-menu-item class="h-menu-item" index="/user/management/userQuery">查询用户</el-menu-item>
 
+          <Notification/>
           <AvatarMenu/>
         </el-menu>
       </el-header>
@@ -35,6 +36,7 @@ import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted} from "vue";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
+import Notification from "../../compoment/Notification.vue";
 
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)

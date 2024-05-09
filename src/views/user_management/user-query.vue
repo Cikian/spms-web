@@ -2,8 +2,8 @@
   <div class="user-query-container">
     <div class="user-query-form-container">
       <el-form class="form-inline" size="default" :inline="true" :model="form">
-        <el-form-item label="昵称">
-          <el-input v-model="form.nickName" placeholder="请输入昵称" clearable></el-input>
+        <el-form-item label="姓名">
+          <el-input v-model="form.nickName" placeholder="请输入姓名" clearable></el-input>
         </el-form-item>
         <el-form-item label="用户名">
           <el-input v-model="form.userName" placeholder="请输入用户名" clearable></el-input>
@@ -60,7 +60,7 @@
         </el-table-column>
         <el-table-column
             prop="nickName"
-            label="昵称"
+            label="姓名"
             width="220"
             :show-overflow-tooltip="true"
         >

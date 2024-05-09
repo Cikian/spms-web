@@ -141,7 +141,7 @@
     <label class="form-label">设备类型</label>
     <el-select
         class="form-control-input"
-        v-model="addDeviceInfo.type"
+        v-model="addDeviceInfo.typeId"
         clearable
         placeholder="请选择设备类型"
     >
@@ -237,7 +237,14 @@
 
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
-import {addDevice, queryDeviceById, queryDeviceList, updateDeviceInfo, updateStatus} from "../../api/DeviceApi.ts";
+import {
+  addDevice,
+  deleteDevice,
+  queryDeviceById,
+  queryDeviceList,
+  updateDeviceInfo,
+  updateStatus
+} from "../../api/DeviceApi.ts";
 import {queryDictionaryDataByTypeId} from "../../api/dictionaryApi.ts";
 
 const loading = ref(true)
@@ -246,7 +253,7 @@ const deviceList = ref([])
 const addDeviceDialogVisible = ref(false)
 const addDeviceInfo = ref({
   devName: '',
-  type: '',
+  typeId: '',
   purchaseDate: '',
   warrantyExpiryDate: '',
   purchaseCost: ''
@@ -390,7 +397,7 @@ const handleSubmitAddDevice = () => {
 
   let deviceFormData = {
     devName: addDeviceInfo.value.devName,
-    type: addDeviceInfo.value.type,
+    typeId: addDeviceInfo.value.typeId,
     purchaseDate: addDeviceInfo.value.purchaseDate,
     warrantyExpiryDate: addDeviceInfo.value.warrantyExpiryDate,
     purchaseCost: addDeviceInfo.value.purchaseCost
@@ -406,25 +413,6 @@ const handleSubmitAddDevice = () => {
     addDeviceSubmitText.value = '提交'
     return
   }
-
-  // let isType = false
-  // for (let i = 0; i < deviceTypes.value.length; i++) {
-  //   if (deviceFormData.type === deviceTypes.value[i].value) {
-  //     isType = true
-  //     break
-  //   }
-  // }
-  //
-  // if (!isType) {
-  //   ElNotification({
-  //     title: '提示',
-  //     message: '设备类型不合法',
-  //     type: 'warning'
-  //   })
-  //   addDeviceIsDisabled.value = false
-  //   addDeviceSubmitText.value = '提交'
-  //   return
-  // }
 
   if (!deviceFormData.purchaseDate) {
     ElNotification({
@@ -585,9 +573,41 @@ const handleCloseEditUserDialog = () => {
   deviceDetails.value = {}
 }
 
-//TODO：删除设备
 const handleDelete = (row) => {
-  console.log(row)
+  let ids = []
+  ids.push(row.devId)
+
+  ElMessageBox.confirm('此操作将永久删除该设备，是否继续？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+      .then(() => {
+        deleteDevice(ids)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                loadDeviceList()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消删除操作',
+          type: 'info'
+        })
+      })
 }
 
 const handleBatchDelete = () => {

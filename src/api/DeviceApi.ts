@@ -38,3 +38,11 @@ export function updateDeviceInfo(data) {
         data: data
     })
 }
+
+export function deleteDevice(data) {
+    return request({
+        url: '/device/delete',
+        method: 'post',
+        data: data
+    })
+}

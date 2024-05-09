@@ -17,7 +17,7 @@
           </span>
           <el-menu-item class="h-menu-item" index="/role/management/roleList">角色列表</el-menu-item>
           <el-menu-item class="h-menu-item" index="/role/management/roleQuery">查询角色</el-menu-item>
-
+          <Notification/>
           <AvatarMenu/>
         </el-menu>
       </el-header>
@@ -35,6 +35,7 @@ import router from "../../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted} from "vue";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
+import Notification from "../../compoment/Notification.vue";
 
 const handleSelect = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
