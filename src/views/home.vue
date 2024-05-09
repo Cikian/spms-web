@@ -24,7 +24,7 @@
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-diagram-project"/>
                 <template #title>项目管理</template>
               </el-menu-item>
-              <el-menu-item index="3">
+              <el-menu-item index="/test">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines"/>
                 <template #title>测试管理</template>
               </el-menu-item>
