@@ -20,8 +20,10 @@
         <el-empty v-if="showNewEmptyNotification" description="暂无最新通知"/>
         <div class="unread" v-if="notificationList.length !== 0">
           <el-card v-for="(item,index) in notificationList" :key="index"
-                   style="margin-bottom: 10px; cursor: pointer" @click="readNotify(item.notificationId,index)">
-            <div>{{ item.content }}</div>
+                   style="margin-bottom: 10px; cursor: pointer" shadow="hover"
+                   @click="readNotify(item.notificationId,index)">
+            <div>{{ item.content }}&nbsp;<span style="color: #409eff;text-decoration: underline">{{ item.title }}</span>
+            </div>
           </el-card>
         </div>
 
@@ -33,8 +35,9 @@
           <div class="read" v-if="!unreadNotification">
             <el-empty v-if="notificationOldList.length === 0" description="暂无历史通知"/>
             <el-card v-else v-for="(item,index) in notificationOldList" :key="index"
-                     style="margin-bottom: 10px;cursor: pointer" @click="readNotify(item.notificationId,index)">
-              <div>{{ item.content }}</div>
+                     style="margin-bottom: 10px;cursor: pointer" shadow="hover"
+                     @click="readNotify(item.notificationId,index)">
+              <div>{{ item.content }}&nbsp;<span style="color: #409eff;text-decoration: underline">{{ item.title }}</span></div>
             </el-card>
           </div>
         </transition>

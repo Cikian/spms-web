@@ -12,6 +12,7 @@
             <font-awesome-icon class="home-icon" style="color: #ff7575;margin-right: 5px" icon="fa-solid fa-gear"/>
             设置
           </span>
+          <Notification/>
           <AvatarMenu/>
         </el-menu>
       </el-header>
@@ -29,6 +30,7 @@ import AvatarMenu from "../../compoment/AvatarMenu.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted} from "vue";
 import router from "../../router";
+import Notification from "../../compoment/Notification.vue";
 
 onMounted(() => {
   router.push("/setting/list")
