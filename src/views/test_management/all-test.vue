@@ -2,11 +2,10 @@
   <div class="container">
     <div class="header">
       <div class="title">
-        我负责的
+        全部测试计划
       </div>
       <div class="addTest">
-        <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
-            style="font-size: 20px; margin-right: 5px;">+</span>新建测试
+        <el-button type="primary" size="large"><span style="font-size: 20px; margin-right: 5px;">+</span>新建测试
         </el-button>
       </div>
     </div>
@@ -34,7 +33,7 @@
           <el-table-column prop="planName" label="测试计划名称">
             <template #default="scope">
               <div style="display: flex; align-items: center">
-                <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']"/>
+                <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']" />
                 <span style="margin-left: 10px">{{ scope.row.planName }}</span>
               </div>
             </template>
@@ -82,88 +81,12 @@
       />
     </div>
   </div>
-
-  <!--  新增测试计划dialog-->
-  <el-dialog
-      title="新建测试计划"
-      v-model="addTestPlanDialogVisible"
-      width="42%"
-      center
-      :show-close="false"
-  >
-    <el-form :model="form" label-width="100px" label-position="top">
-      <el-form-item label="测试计划名称">
-        <el-input v-model="form.planName"
-                  placeholder="请输入测试计划名称"
-                  maxlength="255"
-                  show-word-limit
-                  type="text"
-                  clearable
-                  size="large"/>
-      </el-form-item>
-      <el-form-item label="关联项目">
-        <el-select size="large" v-model="form.projectId" placeholder="请选择关联项目" @change="getDemandListByProId"
-                   no-data-text="暂无项目">
-          <el-option
-              v-for="item in allProject"
-              :key="item.proId"
-              :label="item.proName"
-              :value="item.proId"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="关联需求">
-        <el-select size="large" v-model="form.demandId" placeholder="请选择关联需求" no-data-text="暂无需求">
-          <el-option
-              v-for="item in projectDemand"
-              :key="item.demandId"
-              :label="item.title"
-              :value="item.demandId"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="负责人">
-        <el-select size="large" v-model="form.head" placeholder="请选择负责人" no-data-text="暂无成员">
-          <el-option
-              v-for="item in projectTestMember"
-              :key="item.userId"
-              :label="item.nickName"
-              :value="item.userId"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="计划周期">
-        <el-date-picker
-            v-model="form.startTime"
-            type="date"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择开始日期">
-        </el-date-picker>
-        <span style="margin: 0 15px">-</span>
-        <el-date-picker
-            v-model="form.endTime"
-            type="date"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择结束日期">
-        </el-date-picker>
-      </el-form-item>
-    </el-form>
-    <div slot="footer" class="dialog-footer">
-      <el-button @click="handleCloseAddTestPlanDialog" size="large" style="width: 90px;">取 消</el-button>
-      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;">确 定</el-button>
-    </div>
-  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {addTestPlan, queryTestPlanList} from "../../api/TestPlanApi.ts";
-import {getProListByStatus} from "../../api/allProApi.ts";
-import {queryDemandByProId} from "../../api/demandApi.ts";
-import {queryProjectTestMember} from "../../api/userApi.ts";
+import {queryTestPlanList} from "../../api/TestPlanApi.ts";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -181,20 +104,6 @@ const pageSizes = [10, 15, 30, 50, 100]
 const loading = ref(false)
 const searchContent = ref('')
 const tableData = ref([])
-
-const allProject = ref([])
-const projectDemand = ref([])
-const projectTestMember = ref([])
-
-const addTestPlanDialogVisible = ref(false)
-const form = ref({
-  planName: '',
-  projectId: '',
-  demandId: '',
-  head: '',
-  startTime: '',
-  endTime: '',
-})
 
 const loadTestPlanList = () => {
   loading.value = true
@@ -234,43 +143,6 @@ const search = () => {
   loadTestPlanList()
 }
 
-const openAddTestPlanDialog = () => {
-  addTestPlanDialogVisible.value = true
-}
-
-const handleCloseAddTestPlanDialog = () => {
-  form.value = {
-    planName: '',
-    projectId: '',
-    demandId: '',
-    head: '',
-    startTime: '',
-    endTime: '',
-  }
-  addTestPlanDialogVisible.value = false
-}
-
-const submitForm = () => {
-  // 处理时间格式
-
-  let formData = {
-    planName: form.value.planName,
-    projectId: form.value.projectId,
-    demandId: form.value.demandId,
-    head: form.value.head,
-    startTime: form.value.startTime,
-    endTime: form.value.endTime,
-  }
-
-  addTestPlan(formData)
-      .then(res => {
-        if (res.data.code === 200) {
-          addTestPlanDialogVisible.value = false
-          loadTestPlanList()
-        }
-      })
-}
-
 const changePageNum = (currentPage) => {
   tablePage.pageNum = currentPage
   loadTestPlanList()
@@ -281,37 +153,8 @@ const handleSizeChange = (pageSize) => {
   loadTestPlanList()
 }
 
-const getProjectListByStatus = () => {
-  getProListByStatus(0)
-      .then(res => {
-        if (res.data.code === 200) {
-          allProject.value = res.data.data
-        }
-      })
-}
-
-const getDemandListByProId = () => {
-  queryDemandByProId(form.value.projectId)
-      .then(res => {
-        if (res.data.code === 200) {
-          projectDemand.value = res.data.data
-        }
-      })
-  getProjectTestMember()
-}
-
-const getProjectTestMember = () => {
-  queryProjectTestMember(form.value.projectId)
-      .then(res => {
-        if (res.data.code === 200) {
-          projectTestMember.value = res.data.data
-        }
-      })
-}
-
 onMounted(() => {
   loadTestPlanList()
-  getProjectListByStatus()
 })
 
 </script>
@@ -357,9 +200,4 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
 </style>

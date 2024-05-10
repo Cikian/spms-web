@@ -7,3 +7,11 @@ export function queryTestPlanList(data, condition, type) {
         data: condition
     })
 }
+
+export function addTestPlan(data) {
+    return request({
+        url: '/testPlan/add',
+        method: 'post',
+        data
+    })
+}

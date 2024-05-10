@@ -20,3 +20,10 @@ export function queryDemandMembers(proId) {
         method: 'get',
     })
 }
+
+export function queryDemandByProId(proId) {
+    return request({
+        url: '/demand/list/' + proId,
+        method: 'get',
+    })
+}

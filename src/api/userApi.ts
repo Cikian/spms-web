@@ -85,3 +85,10 @@ export function updateUserAvatar(data) {
         data
     })
 }
+
+export function queryProjectTestMember(data) {
+    return request({
+        url: '/user/queryProjectMembers/' + data + '/4',
+        method: 'get'
+    })
+}

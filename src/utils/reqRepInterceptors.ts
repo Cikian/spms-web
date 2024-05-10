@@ -11,7 +11,6 @@ const service = axios.create({
 
 service.interceptors.request.use(function (config) {
     let token = localStorage.getItem("token")
-    console.log(config.url !== "/user/login" && !token)
     if (config.url !== "/user/login" && !token){
         router.push("/login")
         return

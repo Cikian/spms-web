@@ -331,11 +331,11 @@ const router = createRouter({
                                     name: 'myTest',
                                     component: () => import('../views/test_management/my-test.vue')
                                 },
-                                // {
-                                //     path: '/setting/list/account',
-                                //     name: 'account',
-                                //     component: () => import('../views/setting/account-setting.vue')
-                                // }
+                                {
+                                    path: '/test/list/allTest',
+                                    name: 'allTest',
+                                    component: () => import('../views/test_management/all-test.vue')
+                                }
                             ]
                         }
                     ]

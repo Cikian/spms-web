@@ -2,12 +2,18 @@
   <el-container>
     <el-aside width="260px">
       <el-menu
-          default-active="/test/list/myTest"
+          default-active="/test/list/allTest"
           class="el-menu-vertical-demo"
           background-color="#fbfbfb"
           active-text-color="#6698ff"
           :router="true"
       >
+        <div class="group-title">测试库</div>
+        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/allTest">
+          <font-awesome-icon class="list-icons" :icon="['fas', 'list']" />
+          <template #title>全部测试库</template>
+        </el-menu-item>
+        <el-divider/>
         <div class="group-title">代办</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/test/list/myTest">
           <font-awesome-icon class="list-icons" :icon="['far', 'user']" />

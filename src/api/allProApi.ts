@@ -15,6 +15,13 @@ export function getProList() {
     })
 }
 
+export function getProListByStatus(data) {
+    return request({
+        url: '/pro/getProjectByStatus/' + data,
+        method: 'get',
+    })
+}
+
 export function getAddMembers() {
     return request({
         url: '/user/queryCanAddToProject',
