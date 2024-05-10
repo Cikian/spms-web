@@ -13,7 +13,10 @@
     <div class="content">
       <div class="top">
         <div class="search">
-          <el-input placeholder="请输入测试计划名称" v-model="searchContent" size="large" @keydown.enter="search"
+          <el-input placeholder="请输入测试计划名称"
+                    v-model="searchContent"
+                    size="large"
+                    @keydown.enter="search"
                     clearable>
             <template #prefix>
               <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
@@ -30,6 +33,7 @@
                   size="large"
                   stripe
                   v-loading="loading"
+                  @row-click="rowClick"
         >
           <el-table-column prop="planName" label="测试计划名称">
             <template #default="scope">
@@ -152,18 +156,77 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="handleCloseAddTestPlanDialog" size="large" style="width: 90px;">取 消</el-button>
-      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;">确 定</el-button>
+      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;" :disabled="addTestPlanBtnDisable">
+        {{ addTestPlanBtnText }}
+      </el-button>
     </div>
+  </el-dialog>
+
+  <!--  编辑测试计划dialog-->
+  <el-dialog
+      v-model="openDialog"
+      title="编辑测试计划"
+      width="80vw"
+      :before-close="handleClose"
+  >
+    <el-form
+        :model="echoTestPlan"
+        label-width="auto"
+        label-position="top"
+        require-asterisk-position="right"
+        size="large"
+    >
+      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
+        <div style="width: 73%;">
+          <el-form-item label="标题" required>
+            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题"></el-input>
+          </el-form-item>
+
+          <el-form-item label="描述">
+            <div style="width: 100%">
+              <Toolbar
+                  style="border-bottom: 1px solid #ccc"
+                  :editor="editorRef"
+                  :defaultConfig="toolbarConfig"
+                  :mode="mode"
+              />
+              <Editor
+                  style="height: 300px; overflow-y: hidden;"
+                  v-model="valueHtml"
+                  :defaultConfig="editorConfig"
+                  :mode="mode"
+                  @onCreated="handleCreatedEditor"
+              />
+            </div>
+          </el-form-item>
+
+        </div>
+        <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
+
+        </el-scrollbar>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="openDialog = false">取消</el-button>
+          <el-button type="primary" @click="submitAddDemand">
+            发布
+          </el-button>
+        </div>
+      </template>
+    </el-form>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from 'vue'
+import {nextTick, onMounted, ref, shallowRef} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {addTestPlan, queryTestPlanList} from "../../api/TestPlanApi.ts";
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
+import {IToolbarConfig} from "@wangeditor/editor";
+import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
+import {DomEditor} from '@wangeditor/editor'
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -178,14 +241,12 @@ const tablePage = {
 }
 const pageSizes = [10, 15, 30, 50, 100]
 
+//新增测试计划
 const loading = ref(false)
 const searchContent = ref('')
 const tableData = ref([])
-
-const allProject = ref([])
-const projectDemand = ref([])
-const projectTestMember = ref([])
-
+const addTestPlanBtnText = ref('提交')
+const addTestPlanBtnDisable = ref(false)
 const addTestPlanDialogVisible = ref(false)
 const form = ref({
   planName: '',
@@ -195,6 +256,15 @@ const form = ref({
   startTime: '',
   endTime: '',
 })
+
+//编辑需求
+const openDialog = ref(false)
+const echoTestPlan = ref({})
+
+//其他
+const allProject = ref([])
+const projectDemand = ref([])
+const projectTestMember = ref([])
 
 const loadTestPlanList = () => {
   loading.value = true
@@ -251,7 +321,74 @@ const handleCloseAddTestPlanDialog = () => {
 }
 
 const submitForm = () => {
-  // 处理时间格式
+  addTestPlanBtnText.value = '提交中...'
+  addTestPlanBtnDisable.value = true
+
+  if (form.value.planName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入测试计划名称',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    return;
+  }
+
+  if (form.value.projectId === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择关联项目',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    return;
+  }
+
+  if (form.value.demandId === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择关联需求',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    return;
+  }
+
+  if (form.value.head === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择负责人',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    return;
+  }
+
+  if (form.value.startTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划开始时间',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    return;
+  }
+
+  if (form.value.endTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划结束时间',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    return;
+  }
 
   let formData = {
     planName: form.value.planName,
@@ -265,9 +402,22 @@ const submitForm = () => {
   addTestPlan(formData)
       .then(res => {
         if (res.data.code === 200) {
-          addTestPlanDialogVisible.value = false
+          handleCloseAddTestPlanDialog()
           loadTestPlanList()
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
         }
+        addTestPlanBtnText.value = '提交'
+        addTestPlanBtnDisable.value = false
       })
 }
 
@@ -307,6 +457,41 @@ const getProjectTestMember = () => {
           projectTestMember.value = res.data.data
         }
       })
+}
+
+const rowClick = (row) => {
+  openDialog.value = true
+  echoTestPlan.value = row
+}
+
+const mode = 'default' // 或 'simple'
+const editorRef = shallowRef()
+const valueHtml = ref('')// 内容 HTML
+
+const editorConfig = {
+  placeholder: '请输入内容...',
+}
+
+const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
+  excludeKeys: [
+    "uploadImage",
+    "group-video",// 排除菜单组，写菜单组 key 的值即可
+    "fullScreen",
+  ]
+}
+
+const handleCreatedEditor = (editor) => {
+  editorRef.value = editor // 记录 editor 实例，重要！
+  nextTick(() => {
+    const toolbar = DomEditor.getToolbar(editorRef.value)
+    const curToolbarConfig = toolbar.getConfig()
+    console.log('curToolbarConfig', curToolbarConfig)
+  })
+}
+
+const handleClose = (done: () => void) => {
+  valueHtml.value = ''
+  done()
 }
 
 onMounted(() => {

@@ -37,4 +37,8 @@ body, html {
 .notification-drawer .el-drawer__body{
   padding: 0;
 }
+
+.table .el-table__row {
+  cursor: pointer;
+}
 </style>
