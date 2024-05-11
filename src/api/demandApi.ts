@@ -27,3 +27,18 @@ export function queryDemandByProId(proId) {
         method: 'get',
     })
 }
+
+export function queryProByProId(proId) {
+    return request({
+        url: '/pro/getByProId/' + proId,
+        method: 'get',
+    })
+}
+
+export function insertNewDemand(data) {
+    return request({
+        url: '/demand',
+        method: 'post',
+        data
+    })
+}

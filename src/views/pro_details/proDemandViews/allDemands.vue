@@ -83,6 +83,7 @@
       title="新建需求"
       width="80vw"
       :before-close="handleClose"
+      top="7vh"
   >
     <el-form
         :model="newDemandFormData"
@@ -118,7 +119,7 @@
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
           <el-form-item label="项目" required>
-            <el-input readonly disabled v-model="newDemandFormData.proId">
+            <el-input readonly disabled v-model="currentProInfo.proName">
               <template #prefix>
                 <font-awesome-icon style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
               </template>
@@ -317,6 +318,8 @@
           </el-form-item>
         </el-scrollbar>
       </div>
+    </el-form>
+
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="openDialog = false">取消</el-button>
@@ -325,7 +328,6 @@
           </el-button>
         </div>
       </template>
-    </el-form>
   </el-dialog>
 
 
@@ -338,12 +340,21 @@ import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {queryDemandMembers, queryDemandSource, queryDemandTypes} from "../../../api/demandApi.ts";
+import {
+  insertNewDemand,
+  queryDemandMembers,
+  queryDemandSource,
+  queryDemandTypes,
+  queryProByProId
+} from "../../../api/demandApi.ts";
 
 const proId = ref('')
+const currentProInfo = ref({})
 
 onMounted(() => {
   proId.value = localStorage.getItem('proDetailId')
+
+  getCurrentProInfo()
   getDemandTypes()
   getDemandSource()
   getDemandMembers()
@@ -367,6 +378,17 @@ const openDialog = ref(false)
 const members = ref([])
 const demandTypes = ref([])
 const demandSource = ref([])
+
+const getCurrentProInfo = () => {
+  queryProByProId(proId.value).then((res) => {
+    if (res.data.code === 2001){
+      currentProInfo.value = res.data.data
+      console.log(currentProInfo.value)
+    } else {
+
+    }
+  })
+}
 
 const getDemandMembers = () => {
   queryDemandMembers(proId.value).then((res) => {
@@ -466,7 +488,16 @@ const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
 
 const submitAddDemand = () => {
   console.log("提交需求")
+  newDemandFormData.value.desc = valueHtml.value
+  console.log(newDemandFormData.value)
   openDialog.value = false
+  insertNewDemand(newDemandFormData.value).then((res) => {
+    if (res.data.code === 3001) {
+      console.log("发布成功")
+    } else {
+      console.log("发布失败")
+    }
+  })
 }
 const handleCreatedEditor = (editor) => {
   editorRef.value = editor // 记录 editor 实例，重要！
@@ -484,7 +515,7 @@ const handleClose = (done: () => void) => {
 }
 
 const openAddDemandDialog = () => {
-  newDemandFormData.value.proId = '项目名称'
+  newDemandFormData.value.proId = currentProInfo.value.proId
   openDialog.value = true
 }
 
