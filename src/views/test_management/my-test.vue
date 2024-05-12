@@ -167,66 +167,193 @@
       v-model="openDialog"
       title="编辑测试计划"
       width="80vw"
-      :before-close="handleClose"
+      :show-close="false"
   >
     <el-form
         :model="echoTestPlan"
         label-width="auto"
         label-position="top"
         require-asterisk-position="right"
-        size="large"
-    >
+        size="large">
       <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
         <div style="width: 73%;">
           <el-form-item label="标题" required>
-            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题"></el-input>
+            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable></el-input>
           </el-form-item>
-
-          <el-form-item label="描述">
-            <div style="width: 100%">
-              <Toolbar
-                  style="border-bottom: 1px solid #ccc"
-                  :editor="editorRef"
-                  :defaultConfig="toolbarConfig"
-                  :mode="mode"
-              />
-              <Editor
-                  style="height: 300px; overflow-y: hidden;"
-                  v-model="valueHtml"
-                  :defaultConfig="editorConfig"
-                  :mode="mode"
-                  @onCreated="handleCreatedEditor"
-              />
-            </div>
-          </el-form-item>
-
+          <el-tabs type="border-card" @tab-click="handleTabClick" v-model="activeName">
+            <el-tab-pane label="测试用例" name="caseList">
+              <el-table :data="testCaseTableData"
+                        style="width: 100%;"
+                        size="large"
+                        v-loading="loadTestCase"
+                        max-height="535px"
+                        stripe>
+                <el-table-column prop="caseName" label="用例名称"/>
+                <el-table-column prop="priority" label="优先级" sortable>
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.priority === 0" type="info">低</el-tag>
+                    <el-tag v-else-if="scope.row.priority === 1" type="warning">中</el-tag>
+                    <el-tag v-else-if="scope.row.priority === 2" type="danger">高</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" sortable>
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.status === false" type="info">未完成</el-tag>
+                    <el-tag v-else-if="scope.row.status === true" type="success">已完成</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                  <template #default="scope">
+                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)">编辑</el-button>
+                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)">删除
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
+            <el-tab-pane label="添加测试用例" name="addCase">
+              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top" style="max-height: 704px">
+                <el-form-item label="用例名称" required>
+                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable></el-input>
+                </el-form-item>
+                <el-form-item label="用例描述" required>
+                  <el-input v-model="addTestCaseForm.caseContent" placeholder="请输入用例描述" type="textarea"
+                            :rows="12" resize="none" clearable></el-input>
+                </el-form-item>
+                <el-form-item label="优先级" required>
+                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级" clearable>
+                    <el-option label="低" value="0"></el-option>
+                    <el-option label="中" value="1"></el-option>
+                    <el-option label="高" value="2"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div class="add-test-case-footer">
+                <el-button type="primary" @click="submitAddTestCase" :disabled="addTestCaseBtnDisable">
+                  {{ addTestCaseBtnText }}
+                </el-button>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
-
+          <el-form-item label="负责人" required>
+            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人" clearable>
+              <el-option
+                  v-for="item in projectTestMember"
+                  :key="item.userId"
+                  :label="item.nickName"
+                  :value="item.userId"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="关联项目">
+            <el-input v-model="echoTestPlan.projectName" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="关联需求">
+            <el-input v-model="echoTestPlan.demandName" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="开始日期" required>
+            <el-date-picker
+                v-model="echoTestPlan.startTime"
+                type="date"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择开始日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="结束日期" required>
+            <el-date-picker
+                v-model="echoTestPlan.endTime"
+                type="date"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-progress
+              style="margin-top: 10px"
+              :percentage="echoTestPlan.progress"
+              :color="colors"
+              stroke-width="15"
+              type="circle">
+            <template #default="{ percentage }">
+              <span class="percentage-value">{{ percentage }}%</span>
+              <span class="percentage-label">测试进度</span>
+            </template>
+          </el-progress>
+          <div class="dialog-footer">
+            <el-button @click="handleCloseEditTestPlan">取消</el-button>
+            <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable">
+              {{ editTestPlanBtnText }}
+            </el-button>
+          </div>
         </el-scrollbar>
       </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="openDialog = false">取消</el-button>
-          <el-button type="primary" @click="submitAddDemand">
-            发布
-          </el-button>
-        </div>
-      </template>
     </el-form>
+  </el-dialog>
+
+<!--  编辑测试用例dialog-->
+  <el-dialog
+      v-model="editTestCaseDialogVisible"
+      title="编辑测试用例"
+      width="40%"
+      center
+      :show-close="false"
+  >
+    <el-form :model="echoTestCase" label-width="100px" label-position="top">
+      <el-form-item label="用例名称">
+        <el-input v-model="echoTestCase.caseName"
+                  placeholder="请输入用例名称"
+                  type="text"
+                  clearable
+                  size="large"/>
+      </el-form-item>
+      <el-form-item label="用例描述">
+        <el-input v-model="echoTestCase.caseContent"
+                  placeholder="请输入用例描述"
+                  type="textarea"
+                  :rows="12"
+                  resize="none"
+                  clearable/>
+      </el-form-item>
+      <el-form-item label="优先级">
+        <el-select v-model="echoTestCase.priority" placeholder="请选择优先级" clearable size="large">
+          <el-option label="低" value="0"></el-option>
+          <el-option label="中" value="1"></el-option>
+          <el-option label="高" value="2"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="echoTestCase.status" placeholder="请选择状态" clearable size="large">
+          <el-option label="未完成" value="0"></el-option>
+          <el-option label="已完成" value="1"></el-option>
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
+      <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
+                 :disabled="editTestCaseBtnDisable">
+        {{ editTestCaseBtnText }}
+      </el-button>
+    </div>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import {nextTick, onMounted, ref, shallowRef} from "vue";
+import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {addTestPlan, queryTestPlanList} from "../../api/TestPlanApi.ts";
+import {
+  addTestCase,
+  addTestPlan,
+  queryTestCaseByPlanId,
+  queryTestPlanById,
+  queryTestPlanList, updateTestPlan
+} from "../../api/TestPlanApi.ts";
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
-import {IToolbarConfig} from "@wangeditor/editor";
-import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import {DomEditor} from '@wangeditor/editor'
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -242,7 +369,7 @@ const tablePage = {
 const pageSizes = [10, 15, 30, 50, 100]
 
 //新增测试计划
-const loading = ref(false)
+const loading = ref(true)
 const searchContent = ref('')
 const tableData = ref([])
 const addTestPlanBtnText = ref('提交')
@@ -259,7 +386,27 @@ const form = ref({
 
 //编辑需求
 const openDialog = ref(false)
+const editTestPlanBtnText = ref('提交')
+const editTestPlanBtnDisable = ref(false)
 const echoTestPlan = ref({})
+
+//测试用例
+const loadTestCase = ref(true)
+const activeName = ref('caseList')
+const testCaseTableData = ref([])
+const addTestCaseForm = ref({
+  caseName: '',
+  caseContent: '',
+  priority: ''
+})
+const addTestCaseBtnText = ref('提交')
+const addTestCaseBtnDisable = ref(false)
+
+//编辑测试用例
+const editTestCaseDialogVisible = ref(false)
+const editTestCaseBtnText = ref('提交')
+const editTestCaseBtnDisable = ref(false)
+const echoTestCase = ref({})
 
 //其他
 const allProject = ref([])
@@ -305,6 +452,8 @@ const search = () => {
 }
 
 const openAddTestPlanDialog = () => {
+  projectDemand.value = []
+  projectTestMember.value = []
   addTestPlanDialogVisible.value = true
 }
 
@@ -447,11 +596,11 @@ const getDemandListByProId = () => {
           projectDemand.value = res.data.data
         }
       })
-  getProjectTestMember()
+  getProjectTestMember(form.value.projectId)
 }
 
-const getProjectTestMember = () => {
-  queryProjectTestMember(form.value.projectId)
+const getProjectTestMember = (projectId) => {
+  queryProjectTestMember(projectId)
       .then(res => {
         if (res.data.code === 200) {
           projectTestMember.value = res.data.data
@@ -459,39 +608,128 @@ const getProjectTestMember = () => {
       })
 }
 
+const getTestPlanDetailById = (planId) => {
+  queryTestPlanById(planId)
+      .then(res => {
+        if (res.data.code === 200) {
+          echoTestPlan.value = res.data.data
+          getTestPlanData()
+        }
+      })
+}
+
 const rowClick = (row) => {
   openDialog.value = true
-  echoTestPlan.value = row
+  getProjectTestMember(row.projectId)
+  getTestPlanDetailById(row.testPlanId)
 }
 
-const mode = 'default' // 或 'simple'
-const editorRef = shallowRef()
-const valueHtml = ref('')// 内容 HTML
-
-const editorConfig = {
-  placeholder: '请输入内容...',
+const submitAddTestCase = () => {
+  addTestCaseBtnText.value = '提交中...'
+  addTestCaseBtnDisable.value = true
+  let formData = {
+    caseName: addTestCaseForm.value.caseName,
+    caseContent: addTestCaseForm.value.caseContent,
+    priority: addTestCaseForm.value.priority,
+    testPlanId: echoTestPlan.value.testPlanId
+  }
+  addTestCase(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          addTestCaseBtnText.value = '提交'
+          addTestCaseBtnDisable.value = false
+          addTestCaseForm.value = {
+            caseName: '',
+            caseContent: '',
+            priority: ''
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+          addTestCaseBtnText.value = '提交'
+          addTestCaseBtnDisable.value = false
+        }
+      })
 }
 
-const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
-  excludeKeys: [
-    "uploadImage",
-    "group-video",// 排除菜单组，写菜单组 key 的值即可
-    "fullScreen",
-  ]
+const getTestPlanData = () => {
+  loadTestCase.value = true
+  queryTestCaseByPlanId(echoTestPlan.value.testPlanId)
+      .then(res => {
+        if (res.data.code === 200) {
+          testCaseTableData.value = res.data.data
+          loadTestCase.value = false
+        }
+      })
 }
 
-const handleCreatedEditor = (editor) => {
-  editorRef.value = editor // 记录 editor 实例，重要！
-  nextTick(() => {
-    const toolbar = DomEditor.getToolbar(editorRef.value)
-    const curToolbarConfig = toolbar.getConfig()
-    console.log('curToolbarConfig', curToolbarConfig)
+const handleTabClick = (tab) => {
+  if (tab.props.name === 'caseList') {
+    getTestPlanData()
+  }
+}
+
+const handleCloseEditTestPlan = () => {
+  openDialog.value = false
+  echoTestPlan.value = {}
+  testCaseTableData.value = []
+}
+
+const handleSubmitEditTestPlan = () => {
+  editTestPlanBtnText.value = '提交中...'
+  editTestPlanBtnDisable.value = true
+  let fromData = {
+    testPlanId: echoTestPlan.value.testPlanId,
+    planName: echoTestPlan.value.planName,
+    head: echoTestPlan.value.head,
+    startTime: echoTestPlan.value.startTime.replace('T', ' '),
+    endTime: echoTestPlan.value.endTime.replace('T', ' ')
+  }
+  updateTestPlan(fromData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          handleCloseEditTestPlan()
+          loadTestPlanList()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        editTestPlanBtnText.value = '提交'
+        editTestPlanBtnDisable.value = false
+      })
+}
+
+const editTestCase = (row) => {
+  editTestCaseDialogVisible.value = true
+  echoTestCase.value = row
+}
+
+const deleteTestCase = (row) => {
+  ElMessageBox.confirm('此操作将永久删除该测试用例, 是否继续?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    console.log('删除')
+  }).catch(() => {
+    console.log('取消')
   })
-}
-
-const handleClose = (done: () => void) => {
-  valueHtml.value = ''
-  done()
 }
 
 onMounted(() => {
@@ -545,6 +783,24 @@ onMounted(() => {
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
+  margin-top: 43px;
+}
+
+.add-test-case-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.percentage-value {
+  display: block;
   margin-top: 10px;
+  font-size: 28px;
+}
+
+.percentage-label {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
 }
 </style>
