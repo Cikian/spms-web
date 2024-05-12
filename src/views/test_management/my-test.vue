@@ -189,7 +189,7 @@
                         max-height="535px"
                         stripe>
                 <el-table-column prop="caseName" label="用例名称"/>
-                <el-table-column prop="priority" label="优先级" sortable>
+                <el-table-column prop="priorityLabel" label="优先级" sortable>
                   <template #default="scope">
                     <el-tag v-if="scope.row.priority === 0" type="info">低</el-tag>
                     <el-tag v-else-if="scope.row.priority === 1" type="warning">中</el-tag>
@@ -247,7 +247,7 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="关联项目">
+          <el-form-item label="所属项目">
             <el-input v-model="echoTestPlan.projectName" disabled></el-input>
           </el-form-item>
           <el-form-item label="关联需求">
@@ -293,14 +293,13 @@
     </el-form>
   </el-dialog>
 
-<!--  编辑测试用例dialog-->
+  <!--  编辑测试用例dialog-->
   <el-dialog
       v-model="editTestCaseDialogVisible"
       title="编辑测试用例"
       width="40%"
       center
-      :show-close="false"
-  >
+      :show-close="false">
     <el-form :model="echoTestCase" label-width="100px" label-position="top">
       <el-form-item label="用例名称">
         <el-input v-model="echoTestCase.caseName"
@@ -318,16 +317,16 @@
                   clearable/>
       </el-form-item>
       <el-form-item label="优先级">
-        <el-select v-model="echoTestCase.priority" placeholder="请选择优先级" clearable size="large">
-          <el-option label="低" value="0"></el-option>
-          <el-option label="中" value="1"></el-option>
-          <el-option label="高" value="2"></el-option>
+        <el-select v-model="echoTestCase.priority" placeholder="请选择优先级" size="large">
+          <el-option key="0" label="低" :value="0"/>
+          <el-option key="1" label="中" :value="1"/>
+          <el-option key="2" label="高" :value="2"/>
         </el-select>
       </el-form-item>
       <el-form-item label="状态">
-        <el-select v-model="echoTestCase.status" placeholder="请选择状态" clearable size="large">
-          <el-option label="未完成" value="0"></el-option>
-          <el-option label="已完成" value="1"></el-option>
+        <el-select v-model="echoTestCase.status" placeholder="请选择状态" size="large">
+          <el-option key="false" label="未完成" :value="false"/>
+          <el-option key="true" label="已完成" :value="true"/>
         </el-select>
       </el-form-item>
     </el-form>
@@ -346,10 +345,10 @@ import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addTestCase,
-  addTestPlan,
+  addTestPlan, deleteTestCaseById, queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, updateTestPlan
+  queryTestPlanList, updateTestCase, updateTestPlan
 } from "../../api/TestPlanApi.ts";
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {queryDemandByProId} from "../../api/demandApi.ts";
@@ -386,7 +385,7 @@ const form = ref({
 
 //编辑需求
 const openDialog = ref(false)
-const editTestPlanBtnText = ref('提交')
+const editTestPlanBtnText = ref('确定')
 const editTestPlanBtnDisable = ref(false)
 const echoTestPlan = ref({})
 
@@ -404,7 +403,7 @@ const addTestCaseBtnDisable = ref(false)
 
 //编辑测试用例
 const editTestCaseDialogVisible = ref(false)
-const editTestCaseBtnText = ref('提交')
+const editTestCaseBtnText = ref('确定')
 const editTestCaseBtnDisable = ref(false)
 const echoTestCase = ref({})
 
@@ -613,7 +612,7 @@ const getTestPlanDetailById = (planId) => {
       .then(res => {
         if (res.data.code === 200) {
           echoTestPlan.value = res.data.data
-          getTestPlanData()
+          getTestCaseData()
         }
       })
 }
@@ -660,7 +659,7 @@ const submitAddTestCase = () => {
       })
 }
 
-const getTestPlanData = () => {
+const getTestCaseData = () => {
   loadTestCase.value = true
   queryTestCaseByPlanId(echoTestPlan.value.testPlanId)
       .then(res => {
@@ -669,12 +668,6 @@ const getTestPlanData = () => {
           loadTestCase.value = false
         }
       })
-}
-
-const handleTabClick = (tab) => {
-  if (tab.props.name === 'caseList') {
-    getTestPlanData()
-  }
 }
 
 const handleCloseEditTestPlan = () => {
@@ -715,9 +708,20 @@ const handleSubmitEditTestPlan = () => {
       })
 }
 
+const handleTabClick = (tab) => {
+  if (tab.props.name === 'caseList') {
+    getTestCaseData()
+  }
+}
+
 const editTestCase = (row) => {
   editTestCaseDialogVisible.value = true
-  echoTestCase.value = row
+  queryTestCaseById(row.testCaseId)
+      .then(res => {
+        if (res.data.code === 200) {
+          echoTestCase.value = res.data.data
+        }
+      })
 }
 
 const deleteTestCase = (row) => {
@@ -726,10 +730,63 @@ const deleteTestCase = (row) => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    console.log('删除')
+    deleteTestCaseById(row.testCaseId)
+        .then(res => {
+          if (res.data.code === 200) {
+            ElNotification({
+              title: '成功',
+              message: res.data.message,
+              type: 'success'
+            })
+            getTestCaseData()
+          } else {
+            ElNotification({
+              title: '提示',
+              message: res.data.message,
+              type: 'warning'
+            })
+          }
+        })
   }).catch(() => {
-    console.log('取消')
+    ElNotification({
+      title: '提示',
+      message: '已取消删除',
+      type: 'info'
+    })
   })
+}
+
+const submitEditTestCase = () => {
+  editTestCaseBtnText.value = '提交中...'
+  editTestCaseBtnDisable.value = true
+  let formData = {
+    testCaseId: echoTestCase.value.testCaseId,
+    caseName: echoTestCase.value.caseName,
+    caseContent: echoTestCase.value.caseContent,
+    priority: echoTestCase.value.priority,
+    status: echoTestCase.value.status,
+    testPlanId: echoTestPlan.value.testPlanId
+  }
+  updateTestCase(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          editTestCaseDialogVisible.value = false
+          getTestCaseData()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        editTestCaseBtnText.value = '提交'
+        editTestCaseBtnDisable.value = false
+      })
 }
 
 onMounted(() => {

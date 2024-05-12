@@ -45,3 +45,25 @@ export function updateTestPlan(data) {
         data
     })
 }
+
+export function queryTestCaseById(data) {
+    return request({
+        url: '/testCase/queryById/' + data,
+        method: 'get',
+    })
+}
+
+export function updateTestCase(data) {
+    return request({
+        url: '/testCase/update',
+        method: 'post',
+        data
+    })
+}
+
+export function deleteTestCaseById(data) {
+    return request({
+        url: '/testCase/delete/' + data,
+        method: 'post'
+    })
+}
