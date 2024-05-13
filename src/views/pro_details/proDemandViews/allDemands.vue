@@ -544,7 +544,8 @@
   <el-dialog
       v-model="clickRowDialogVisible"
       width="80vw"
-      top="7vh"
+      style="height: 90vh"
+      top="3vh"
       @close="handleCloseClickRow"
   >
       <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
@@ -719,10 +720,16 @@
                   <el-button @click="showDesc = !showDesc" type="primary">保存</el-button>
                 </div>
               </div>
+              <el-tabs v-model="secondTagName">
+                <el-tab-pane label="评论" name="comment">评论</el-tab-pane>
+                <el-tab-pane label="活动" name="active">活动</el-tab-pane>
+                <el-tab-pane label="流转" name="circulation">流转</el-tab-pane>
+              </el-tabs>
             </el-tab-pane>
             <el-tab-pane label="子工作项" name="childrenWorkItem">Config</el-tab-pane>
             <el-tab-pane label="测试" name="tests">Role</el-tab-pane>
           </el-tabs>
+
 
 
         </div>
@@ -745,14 +752,6 @@
           style="color: #73d897;width: 18px; margin-right: 5px"
           :icon="['fas', 'square-check']"/></span>
       {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
-    </template>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="addDemandDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitAddDemand">
-          发布
-        </el-button>
-      </div>
     </template>
   </el-dialog>
 
@@ -1021,6 +1020,7 @@ const clickRow = (row) => {
 }
 
 const firstTagName = ref('baseInfo')
+const secondTagName = ref('comment')
 
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
