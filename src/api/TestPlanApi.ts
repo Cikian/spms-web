@@ -2,7 +2,7 @@ import request from '../utils/reqRepInterceptors'
 
 export function queryTestPlanList(data, condition, type) {
     return request({
-        url: '/testPlan/list?page=' + data.page + '&size=' + data.size + '&type=' + type,
+        url: '/testPlan/list?page=' + data.page + '&size=' + data.size + '&type=' + type + '&status=' + data.status,
         method: 'post',
         data: condition
     })
@@ -43,5 +43,49 @@ export function updateTestPlan(data) {
         url: '/testPlan/update',
         method: 'post',
         data
+    })
+}
+
+export function queryTestCaseById(data) {
+    return request({
+        url: '/testCase/queryById/' + data,
+        method: 'get',
+    })
+}
+
+export function updateTestCase(data) {
+    return request({
+        url: '/testCase/update',
+        method: 'post',
+        data
+    })
+}
+
+export function deleteTestCaseById(data) {
+    return request({
+        url: '/testCase/delete/' + data,
+        method: 'post'
+    })
+}
+
+export function uploadTestReport(data) {
+    return request({
+        url: '/common/upload/testReport',
+        method: 'post',
+        data
+    })
+}
+
+export function queryTestReportByPlanId(data) {
+    return request({
+        url: '/testReport/list/' + data,
+        method: 'get',
+    })
+}
+
+export function deleteTestReportById(data) {
+    return request({
+        url: '/testReport/delete/' + data,
+        method: 'post'
     })
 }

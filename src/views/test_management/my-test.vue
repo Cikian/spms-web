@@ -22,6 +22,12 @@
               <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
             </template>
           </el-input>
+          <div class="test-plan-status">
+            <el-button type="primary" size="large" round @click="changeStatus(0)">全部</el-button>
+            <el-button type="danger" size="large" round @click="changeStatus(1)">未开始</el-button>
+            <el-button type="warning" size="large" round @click="changeStatus(2)">进行中</el-button>
+            <el-button type="success" size="large" round @click="changeStatus(3)">已完成</el-button>
+          </div>
         </div>
         <div class="total">
           共有<span>{{ tablePage.total }}</span>个测试
@@ -189,7 +195,7 @@
                         max-height="535px"
                         stripe>
                 <el-table-column prop="caseName" label="用例名称"/>
-                <el-table-column prop="priority" label="优先级" sortable>
+                <el-table-column prop="priorityLabel" label="优先级" sortable>
                   <template #default="scope">
                     <el-tag v-if="scope.row.priority === 0" type="info">低</el-tag>
                     <el-tag v-else-if="scope.row.priority === 1" type="warning">中</el-tag>
@@ -234,6 +240,54 @@
                 </el-button>
               </div>
             </el-tab-pane>
+            <el-tab-pane label="测试报告" name="testReport">
+              <el-upload
+                  class="upload-report"
+                  :show-file-list="false"
+                  :on-progress="handleProgress"
+                  :before-upload="beforeUpload"
+                  :http-request="handleUpload"
+                  drag>
+                <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
+                <div class="el-upload__text">
+                  将文件拖动到此或<em>点击上传</em>
+                </div>
+                <template #tip>
+                  <div class="el-upload__tip" style="font-size: 15px">
+                    仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
+                  </div>
+                </template>
+              </el-upload>
+              <div class="upload-progress">
+                <el-progress v-if="uploadProgress > 0" :percentage="uploadProgress" :color="colors" :stroke-width="15"
+                             type="line"/>
+              </div>
+              <div class="test-report-card">
+                <el-card v-if="testReport !== null" class="test-report">
+                  <div class="test-report-top">
+                    <div class="test-report-title">{{ testReport.testReportName }}</div>
+                    <div class="approval">
+                      <el-text class="test-report-approval" v-if="testReport.approvalStatus === 0" type='primary'>待审批
+                      </el-text>
+                      <el-text class="test-report-approval" v-else-if="testReport.approvalStatus === 1" type='success'>
+                        已通过
+                      </el-text>
+                      <el-text class="test-report-approval" v-else-if="testReport.approvalStatus === 2" type="danger">
+                        未通过
+                      </el-text>
+                    </div>
+                  </div>
+                  <div class="test-report-footer">
+                    <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
+                    <el-button type="danger" text size="default" @click="deleteTestReport">删除</el-button>
+                  </div>
+                </el-card>
+                <el-empty description="暂未上传测试报告" v-else/>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="留言" name="message">
+              <el-input type="textarea" placeholder="请输入留言内容" :rows="10" resize="none"></el-input>
+            </el-tab-pane>
           </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
@@ -247,7 +301,7 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="关联项目">
+          <el-form-item label="所属项目">
             <el-input v-model="echoTestPlan.projectName" disabled></el-input>
           </el-form-item>
           <el-form-item label="关联需求">
@@ -293,14 +347,13 @@
     </el-form>
   </el-dialog>
 
-<!--  编辑测试用例dialog-->
+  <!--  编辑测试用例dialog-->
   <el-dialog
       v-model="editTestCaseDialogVisible"
       title="编辑测试用例"
       width="40%"
       center
-      :show-close="false"
-  >
+      :show-close="false">
     <el-form :model="echoTestCase" label-width="100px" label-position="top">
       <el-form-item label="用例名称">
         <el-input v-model="echoTestCase.caseName"
@@ -318,16 +371,16 @@
                   clearable/>
       </el-form-item>
       <el-form-item label="优先级">
-        <el-select v-model="echoTestCase.priority" placeholder="请选择优先级" clearable size="large">
-          <el-option label="低" value="0"></el-option>
-          <el-option label="中" value="1"></el-option>
-          <el-option label="高" value="2"></el-option>
+        <el-select v-model="echoTestCase.priority" placeholder="请选择优先级" size="large">
+          <el-option key="0" label="低" :value="0"/>
+          <el-option key="1" label="中" :value="1"/>
+          <el-option key="2" label="高" :value="2"/>
         </el-select>
       </el-form-item>
       <el-form-item label="状态">
-        <el-select v-model="echoTestCase.status" placeholder="请选择状态" clearable size="large">
-          <el-option label="未完成" value="0"></el-option>
-          <el-option label="已完成" value="1"></el-option>
+        <el-select v-model="echoTestCase.status" placeholder="请选择状态" size="large">
+          <el-option key="false" label="未完成" :value="false"/>
+          <el-option key="true" label="已完成" :value="true"/>
         </el-select>
       </el-form-item>
     </el-form>
@@ -347,13 +400,18 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addTestCase,
   addTestPlan,
+  deleteTestCaseById, deleteTestReportById,
+  queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, updateTestPlan
+  queryTestPlanList, queryTestReportByPlanId,
+  updateTestCase,
+  updateTestPlan,
 } from "../../api/TestPlanApi.ts";
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
+import request from '../../utils/reqRepInterceptors'
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -367,6 +425,8 @@ const tablePage = {
   total: 0
 }
 const pageSizes = [10, 15, 30, 50, 100]
+const currentTestPlanStatus = ref(0)
+const uploadProgress = ref(0)
 
 //新增测试计划
 const loading = ref(true)
@@ -386,7 +446,7 @@ const form = ref({
 
 //编辑需求
 const openDialog = ref(false)
-const editTestPlanBtnText = ref('提交')
+const editTestPlanBtnText = ref('确定')
 const editTestPlanBtnDisable = ref(false)
 const echoTestPlan = ref({})
 
@@ -404,24 +464,32 @@ const addTestCaseBtnDisable = ref(false)
 
 //编辑测试用例
 const editTestCaseDialogVisible = ref(false)
-const editTestCaseBtnText = ref('提交')
+const editTestCaseBtnText = ref('确定')
 const editTestCaseBtnDisable = ref(false)
 const echoTestCase = ref({})
+
+//测试报告
+const testReport = ref(null)
 
 //其他
 const allProject = ref([])
 const projectDemand = ref([])
 const projectTestMember = ref([])
 
+const changeStatus = (status) => {
+  currentTestPlanStatus.value = status
+  loadTestPlanList()
+}
+
 const loadTestPlanList = () => {
   loading.value = true
-
   let queryCondition = {
     planName: searchContent.value
   }
   let formData = {
     page: tablePage.pageNum,
-    size: tablePage.pageSize
+    size: tablePage.pageSize,
+    status: currentTestPlanStatus.value
   }
   queryTestPlanList(formData, queryCondition, 1)
       .then(res => {
@@ -437,8 +505,14 @@ const loadTestPlanList = () => {
               pageInfo.records[i].endTime = pageInfo.records[i].endTime.split('T')[0]
             }
           }
-
           tableData.value = pageInfo.records
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+          tableData.value = []
         }
       })
       .finally(() => {
@@ -613,7 +687,7 @@ const getTestPlanDetailById = (planId) => {
       .then(res => {
         if (res.data.code === 200) {
           echoTestPlan.value = res.data.data
-          getTestPlanData()
+          getTestCaseData()
         }
       })
 }
@@ -660,7 +734,7 @@ const submitAddTestCase = () => {
       })
 }
 
-const getTestPlanData = () => {
+const getTestCaseData = () => {
   loadTestCase.value = true
   queryTestCaseByPlanId(echoTestPlan.value.testPlanId)
       .then(res => {
@@ -671,16 +745,13 @@ const getTestPlanData = () => {
       })
 }
 
-const handleTabClick = (tab) => {
-  if (tab.props.name === 'caseList') {
-    getTestPlanData()
-  }
-}
-
 const handleCloseEditTestPlan = () => {
   openDialog.value = false
   echoTestPlan.value = {}
   testCaseTableData.value = []
+  activeName.value = 'caseList'
+  testReport.value = null
+  uploadProgress.value = 0
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -715,9 +786,22 @@ const handleSubmitEditTestPlan = () => {
       })
 }
 
+const handleTabClick = (tab) => {
+  if (tab.props.name === 'caseList') {
+    getTestCaseData()
+  } else if (tab.props.name === 'testReport') {
+    queryTestReport()
+  }
+}
+
 const editTestCase = (row) => {
   editTestCaseDialogVisible.value = true
-  echoTestCase.value = row
+  queryTestCaseById(row.testCaseId)
+      .then(res => {
+        if (res.data.code === 200) {
+          echoTestCase.value = res.data.data
+        }
+      })
 }
 
 const deleteTestCase = (row) => {
@@ -726,10 +810,166 @@ const deleteTestCase = (row) => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    console.log('删除')
+    deleteTestCaseById(row.testCaseId)
+        .then(res => {
+          if (res.data.code === 200) {
+            ElNotification({
+              title: '成功',
+              message: res.data.message,
+              type: 'success'
+            })
+            getTestCaseData()
+          } else {
+            ElNotification({
+              title: '提示',
+              message: res.data.message,
+              type: 'warning'
+            })
+          }
+        })
   }).catch(() => {
-    console.log('取消')
+    ElNotification({
+      title: '提示',
+      message: '已取消删除',
+      type: 'info'
+    })
   })
+}
+
+const submitEditTestCase = () => {
+  editTestCaseBtnText.value = '提交中...'
+  editTestCaseBtnDisable.value = true
+  let formData = {
+    testCaseId: echoTestCase.value.testCaseId,
+    caseName: echoTestCase.value.caseName,
+    caseContent: echoTestCase.value.caseContent,
+    priority: echoTestCase.value.priority,
+    status: echoTestCase.value.status,
+    testPlanId: echoTestPlan.value.testPlanId
+  }
+  updateTestCase(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          editTestCaseDialogVisible.value = false
+          getTestCaseData()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        editTestCaseBtnText.value = '提交'
+        editTestCaseBtnDisable.value = false
+      })
+}
+
+const beforeUpload = (file) => {
+  const isLt5M = file.size / 1024 / 1024 < 5;
+  if (!isLt5M) {
+    ElNotification({
+      title: '警告',
+      message: '上传文件大小不能超过 5MB!',
+      type: 'warning'
+    })
+  }
+
+  const isDoc = file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/pdf';
+  if (!isDoc) {
+    ElNotification({
+      title: '警告',
+      message: '上传文件只能是doc、docx、pdf格式!',
+      type: 'warning'
+    })
+  }
+  return isLt5M && isDoc;
+}
+
+const handleProgress = (event) => {
+  uploadProgress.value = Math.floor((event.loaded / event.total) * 100);
+}
+
+const handleUpload = (file) => {
+  let formData = new FormData();
+  formData.append('file', file.file);
+  formData.append('testPlanId', echoTestPlan.value.testPlanId);
+
+  const config = {
+    onUploadProgress: (progressEvent) => {
+      uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    },
+  };
+
+  request.post('/common/upload/testReport', formData, config)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          queryTestReport()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+
+}
+
+const queryTestReport = () => {
+  queryTestReportByPlanId(echoTestPlan.value.testPlanId)
+      .then(res => {
+        if (res.data.code === 200) {
+          testReport.value = res.data.data
+        } else {
+          testReport.value = null
+        }
+      })
+}
+
+const deleteTestReport = () =>  {
+  ElMessageBox.confirm('此操作将永久删除该测试报告, 是否继续?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deleteTestReportById(testReport.value.testReportId)
+        .then(res => {
+          if (res.data.code === 200) {
+            ElNotification({
+              title: '成功',
+              message: res.data.message,
+              type: 'success'
+            })
+            queryTestReport()
+          } else {
+            ElNotification({
+              title: '提示',
+              message: res.data.message,
+              type: 'warning'
+            })
+          }
+        })
+  }).catch(() => {
+    ElNotification({
+      title: '提示',
+      message: '已取消删除',
+      type: 'info'
+    })
+  })
+}
+
+const downloadTestReport = () => {
+  window.open(testReport.value.reportFile)
 }
 
 onMounted(() => {
@@ -766,8 +1006,18 @@ onMounted(() => {
 }
 
 .search {
-  width: 300px;
+  width: 650px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.test-plan-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: 20px;
 }
 
 .table {
@@ -802,5 +1052,25 @@ onMounted(() => {
   display: block;
   margin-top: 10px;
   font-size: 12px;
+}
+
+.test-report-card {
+  margin-top: 20px;
+}
+
+.test-report-top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.test-report-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.test-report-footer {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
 }
 </style>

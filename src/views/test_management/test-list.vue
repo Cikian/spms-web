@@ -8,26 +8,20 @@
           active-text-color="#6698ff"
           :router="true"
       >
-        <div class="group-title">测试库</div>
-        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/allTest">
-          <font-awesome-icon class="list-icons" :icon="['fas', 'list']" />
-          <template #title>全部测试库</template>
-        </el-menu-item>
-        <el-divider/>
-        <div class="group-title">代办</div>
-        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/myTest">
-          <font-awesome-icon class="list-icons" :icon="['far', 'user']" />
-          <template #title>我负责的</template>
-        </el-menu-item>
-        <el-divider/>
-        <div class="group-title">其他</div>
+        <div class="group-title">项目质量</div>
         <el-menu-item style="margin:0 0 12px 0;" index="1">
-          <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
-          <template #title>设置1</template>
+          <font-awesome-icon class="list-icons" :icon="['fas', 'list']"/>
+          <template #title>质量目标</template>
         </el-menu-item>
-        <el-menu-item style="margin:0 0 12px 0;" index="2">
+        <el-divider/>
+        <div class="group-title">需求测试</div>
+        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/allTest">
+          <font-awesome-icon class="list-icons" :icon="['fas', 'list']"/>
+          <template #title>全部计划</template>
+        </el-menu-item>
+        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/myTest">
           <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
-          <template #title>设置2</template>
+          <template #title>我负责的</template>
         </el-menu-item>
       </el-menu>
     </el-aside>
