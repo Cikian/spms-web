@@ -48,7 +48,7 @@
                 </div>
               </div>
               <div class="form-submit">
-                <el-button color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="userLogin()">登录
+                <el-button :loading="loadingLogin" color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="userLogin()">登录
                 </el-button>
               </div>
               <div class="form-footer">
@@ -77,7 +77,10 @@ const usernameInput = ref('')
 const passwordInput = ref('')
 const isDisabled = ref(false)
 
+const loadingLogin = ref(false)
+
 const userLogin = () => {
+  loadingLogin.value = true
   isDisabled.value = true
 
   if (usernameInput.value === '') {
@@ -87,6 +90,7 @@ const userLogin = () => {
       type: 'warning',
     })
     isDisabled.value = false
+    loadingLogin.value = false
     return
   }
 
@@ -97,6 +101,7 @@ const userLogin = () => {
       type: 'warning',
     })
     isDisabled.value = false
+    loadingLogin.value = false
     return
   }
 
@@ -110,6 +115,7 @@ const userLogin = () => {
         type: 'warning',
       })
       isDisabled.value = false
+      loadingLogin.value = false
       return
     }
   }
@@ -152,6 +158,7 @@ const userLogin = () => {
         }
 
         isDisabled.value = false
+        loadingLogin.value = false
       })
 }
 

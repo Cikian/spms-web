@@ -1,10 +1,20 @@
 <template>
-  <div style="display: flex; justify-content: space-between; margin-bottom: 20px">
-    全部需求
+  <div
+      style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      padding: 0 30px;
+"
+  >
+    <el-input placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable>
+
+    </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
   </div>
   <el-table
-      :data="tableData"
+      :data="demandsByLevel"
       row-key="demandId"
       :indent="40"
       border
@@ -12,9 +22,10 @@
       size="large"
       @selection-change="handleSelectionChange"
       :header-cell-style="{'text-align': 'center',}"
+      @row-click="clickRow"
   >
     <el-table-column align="center" type="selection"/>
-    <el-table-column align="center" label="序号" type="index"/>
+    <el-table-column align="center" label="序号" type="index" min-width="30px"/>
     <el-table-column align="center" prop="demandNo" label="编号" sortable type=""/>
     <el-table-column align="left" prop="title" label="标题" min-width="200px">
       <template #default="scope">
@@ -26,14 +37,29 @@
             :icon="['fas', 'flag']"/>{{ scope.row.title }}</span>
         <span v-show="scope.row.workItemType===2"><font-awesome-icon
             style="color: #30d1fc;width: 18px; margin-right: 5px"
-            :icon="['fas', 'book-open']"/>{{
-            scope.row.title
-          }}</span>
+            :icon="['fas', 'book-open']"/>{{ scope.row.title }}</span>
         <span v-show="scope.row.workItemType===3"><font-awesome-icon
             style="color: #73d897;width: 18px; margin-right: 5px"
-            :icon="['fas', 'square-check']"/>{{
-            scope.row.title
-          }}</span>
+            :icon="['fas', 'square-check']"/>{{ scope.row.title }}</span>
+        <div class="table-title-cell">
+          <el-tooltip
+              class="box-item"
+              effect="dark"
+              :content="scope.row.workItemType===0?'新建特性':scope.row.workItemType===1?'新建用户故事':scope.row.workItemType===2?'新建任务':'任务'"
+              placement="top",
+              v-if="scope.row.workItemType!==3"
+          >
+            <el-button @click="addWorkItem(scope.row)" style="font-size: 20px; margin-right: 20px" type="text"><font-awesome-icon :icon="['fas', 'plus']" /></el-button>
+          </el-tooltip>
+          <el-tooltip
+              class="box-item"
+              effect="dark"
+              content="Top Center prompts info"
+              placement="top"
+          >
+            <el-button style="font-size: 18px; margin-right: 30px" type="text"><font-awesome-icon :icon="['far', 'pen-to-square']" /></el-button>
+          </el-tooltip>
+        </div>
       </template>
     </el-table-column>
     <el-table-column align="center" prop="demandStatus" label="状态" class-name="table-statue-column">
@@ -42,6 +68,7 @@
             v-model="scope.row.demandStatus"
             placeholder="请选择优先级"
             class="demand-status-select"
+            @change="demandStatusChange(scope.row)"
         >
           <el-option
               class="demand-table-select-options-menu"
@@ -109,8 +136,9 @@
       <template #default="scope">
         <el-select
             v-model="scope.row.headId"
-            placeholder="请选择优先级"
+            placeholder="—"
             class="demand-headId-select"
+            @change="demandHeadIdChange(scope.row)"
         >
           <el-option
               class="member-select-options-menu"
@@ -145,7 +173,7 @@
             v-model="scope.row.priority"
             placeholder="请选择优先级"
             class="demand-status-select"
-            @change="tablePriorityChange(scope.row)"
+            @change="demandPriorityChange(scope.row)"
         >
           <el-option
               class="demand-table-select-options-menu"
@@ -203,7 +231,7 @@
     </el-table-column>
     <el-table-column align="center" prop="fatherDemandId" label="父工作项">
       <template #default="scope">
-        <span v-for="demand in tableData" v-show="demand.demandId === scope.row.fatherDemandId">{{
+        <span v-for="demand in demandsByLevel" v-show="demand.demandId === scope.row.fatherDemandId">{{
             demand.title
           }}</span>
       </template>
@@ -218,12 +246,14 @@
 
   </el-table>
 
+  <!--  新建需求弹窗-->
   <el-dialog
-      v-model="openDialog"
+      v-model="addDemandDialogVisible"
       title="新建需求"
       width="80vw"
       :before-close="handleClose"
       top="7vh"
+      @close="closeAddDemandDialog"
   >
     <el-form
         :model="newDemandFormData"
@@ -324,7 +354,7 @@
                 clearable
             >
               <el-option
-                  v-for="item in tableData"
+                  v-for="item in allDemands"
                   :key="item.demandId"
                   :label="item.title"
                   :value="item.demandId"
@@ -371,6 +401,24 @@
                 </div>
               </template>
             </el-select>
+          </el-form-item>
+          <el-form-item labei="开始时间">
+            <el-date-picker
+                v-model="newDemandFormData.startTime"
+                type="date"
+                placeholder="选择日期"
+                size="large"
+                clearable
+            />
+          </el-form-item>
+          <el-form-item labei="结束时间">
+            <el-date-picker
+                v-model="newDemandFormData.endTime"
+                type="date"
+                placeholder="选择日期"
+                size="large"
+                clearable
+            />
           </el-form-item>
           <el-form-item label="优先级">
             <el-select
@@ -485,7 +533,222 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="openDialog = false">取消</el-button>
+        <el-button @click="addDemandDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitAddDemand">
+          发布
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <!--  点击需求弹窗-->
+  <el-dialog
+      v-model="clickRowDialogVisible"
+      width="80vw"
+      top="7vh"
+      @close="handleCloseClickRow"
+  >
+      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
+        <div style="width: 75%; ">
+            <el-input class="click-dialog-input" v-model="clickedDemand.title" placeholder="请输入需求标题" size="large" style="height: 50px; font-size: 22px"></el-input>
+
+          <div style="width: 100%; padding: 20px 20px;">
+            <el-descriptions
+                direction="vertical"
+                :column="4"
+                :size="size"
+            >
+              <el-descriptions-item width="25%" label="负责人" >
+                <el-select
+                    v-model="clickedDemand.headId"
+                    placeholder="—"
+                    class="demand-headId-select"
+                    @change="demandHeadIdChange(clickedDemand)"
+                    style="width: 80%"
+                >
+                  <el-option
+                      class="member-select-options-menu"
+                      v-for="item in members"
+                      :key="item.userId"
+                      :label="item.nickName"
+                      :value="item.userId"
+                  >
+                    <div style="display: flex; align-items: center; text-align: center">
+                      <div style="display: flex; align-items: center;">
+                        <el-avatar :size="'small'" :src="item.avatar" style="position: relative; top: 0.2vh;"/>
+                      </div>
+
+                      <span style="margin-left: 10px">{{ item.nickName }}</span>
+                    </div>
+                  </el-option>
+
+                  <template #prefix>
+                    <div v-for="member in members"
+                         v-show="member.userId === clickedDemand.headId"
+                         style="display: flex; align-items: center"
+                    >
+                      <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                    </div>
+                  </template>
+                </el-select>
+              </el-descriptions-item>
+              <el-descriptions-item width="25%" label="状态">
+                <el-select
+                    v-model="clickedDemand.demandStatus"
+                    placeholder="请选择优先级"
+                    class="demand-status-select"
+                    @change="demandStatusChange(clickedDemand)"
+                    style="width: 80%"
+                >
+                  <el-option
+                      class="demand-table-select-options-menu"
+                      :key="0"
+                      label="打开"
+                      :value="0"
+                      :disabled="clickedDemand.demandStatus === 0"
+                  >
+                    <div v-if="clickedDemand.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">打开</div>
+                    <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
+                  </el-option>
+                  <el-option
+                      class="demand-table-select-options-menu"
+                      :key="1"
+                      label="进行中"
+                      :value="1"
+                      :disabled="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1"
+                  >
+                    <div v-if="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1" class="table-statue"
+                         style="background-color: #fae3b2;">进行中
+                    </div>
+                    <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
+                  </el-option>
+                  <el-option
+                      class="demand-table-select-options-menu"
+                      :key="2"
+                      label="已完成"
+                      :value="2"
+                      :disabled="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1"
+                  >
+                    <div v-if="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1" class="table-statue"
+                         style="background-color: #c0fad5;">已完成
+                    </div>
+                    <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
+                  </el-option>
+                  <el-option
+                      class="demand-table-select-options-menu"
+                      :key="-1"
+                      label="关闭"
+                      :value="-1"
+                      :disabled="clickedDemand.demandStatus === -1"
+                  >
+                    <div v-if="clickedDemand.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">关闭</div>
+                    <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
+                  </el-option>
+
+                  <template #prefix>
+                    <div class="table-statue" style="background-color: #56abfb;" v-show="clickedDemand.demandStatus===0">打开</div>
+                    <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.demandStatus===1">进行中
+                    </div>
+                    <div class="table-statue" style="background-color: #9de4b6;" v-show="clickedDemand.demandStatus===2">已完成
+                    </div>
+                    <div class="table-statue" style="background-color: #c3c3c3;" v-show="clickedDemand.demandStatus===-1">关闭</div>
+                  </template>
+                </el-select>
+              </el-descriptions-item>
+              <el-descriptions-item width="25%" label="开始时间">
+                <el-date-picker
+                    v-model="clickedDemand.startTime"
+                    type="date"
+                    placeholder="——"
+                    class="click-dialog-input"
+                    :clearable="false"
+                />
+              </el-descriptions-item>
+              <el-descriptions-item width="25%" label="结束时间">
+                <el-date-picker
+                    v-model="clickedDemand.endTime"
+                    type="date"
+                    placeholder="——"
+                    class="click-dialog-input"
+                    :clearable="false"
+                />
+              </el-descriptions-item>
+
+            </el-descriptions>
+          </div>
+
+          <el-tabs v-model="firstTagName">
+            <el-tab-pane label="基本信息" name="baseInfo">
+              <div style="display: flex; justify-content: space-between; padding-right: 50px; align-items: center">
+                <span>描述</span>
+                <el-button @click="showDesc = false" text round style="font-size: 18px;"><font-awesome-icon :icon="['fas', 'pencil']" /></el-button>
+              </div>
+              <Toolbar
+                  v-show="false"
+                  style="border-bottom: 1px solid #ccc"
+                  :editor="clickReadOnlyEditorRef"
+                  :defaultConfig="toolbarConfig"
+                  :mode="mode"
+              />
+              <Editor
+                  v-show="showDesc"
+                  style="height: 200px; overflow-y: hidden;"
+                  v-model="clickValueHtmlReadOnly"
+                  :defaultConfig="{
+                      readOnly: true
+                    }"
+                  :mode="mode"
+                  @onCreated="handleCreatedClickReadOnlyEditor"
+              />
+
+              <div v-show="!showDesc">
+                <Toolbar
+                    style="border-bottom: 1px solid #ccc"
+                    :editor="clickEditorRef"
+                    :defaultConfig="toolbarConfig"
+                    :mode="mode"
+                />
+                <Editor
+                    style="height: 300px; overflow-y: hidden;"
+                    v-model="clickValueHtml"
+                    :defaultConfig="editorConfig"
+                    :mode="mode"
+                    @onCreated="handleCreatedClickEditor"
+                />
+                <div style="text-align: right; padding-right: 50px">
+                  <el-button @click="showDesc = !showDesc" type="text" text>取消</el-button>
+                  <el-button @click="showDesc = !showDesc" type="primary">保存</el-button>
+                </div>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="子工作项" name="childrenWorkItem">Config</el-tab-pane>
+            <el-tab-pane label="测试" name="tests">Role</el-tab-pane>
+          </el-tabs>
+
+
+        </div>
+        <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
+
+        </el-scrollbar>
+      </div>
+
+    <template #header>
+      <span v-show="clickedDemand.workItemType===0"><font-awesome-icon
+          style="color: #ff877b;width: 18px; margin-right: 5px"
+          :icon="['fas', 'bolt-lightning']"/></span>
+      <span v-show="clickedDemand.workItemType===1"><font-awesome-icon
+          style="color: #9191f9;width: 18px; margin-right: 5px"
+          :icon="['fas', 'flag']"/></span>
+      <span v-show="clickedDemand.workItemType===2"><font-awesome-icon
+          style="color: #30d1fc;width: 18px; margin-right: 5px"
+          :icon="['fas', 'book-open']"/></span>
+      <span v-show="clickedDemand.workItemType===3"><font-awesome-icon
+          style="color: #73d897;width: 18px; margin-right: 5px"
+          :icon="['fas', 'square-check']"/></span>
+      {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
+    </template>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="addDemandDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submitAddDemand">
           发布
         </el-button>
@@ -497,21 +760,25 @@
 
 
 <script setup lang="ts">
-import {nextTick, onMounted, ref, shallowRef} from "vue";
+import {nextTick, onMounted, ref, shallowRef,onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
+  getAllDemandByProId,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
   queryDemandTypes,
-  queryProByProId
+  queryProByProId, updateDemandHeadId, updateDemandPriority, updateDemandStatus
 } from "../../../api/demandApi.ts";
 
 const proId = ref('')
 const currentProInfo = ref({})
+
+const demandsByLevel = ref([])
+const allDemands = ref([])
 
 onMounted(() => {
   proId.value = localStorage.getItem('proDetailId')
@@ -520,6 +787,7 @@ onMounted(() => {
   getDemandTypes()
   getDemandSource()
   getDemandMembers()
+  getDemandsList()
 })
 
 const newDemandFormData = ref({
@@ -536,7 +804,8 @@ const newDemandFormData = ref({
   storyPoint: 0,
 })
 
-const openDialog = ref(false)
+const addDemandDialogVisible = ref(false)
+const clickRowDialogVisible = ref(false)
 const members = ref([])
 const demandTypes = ref([])
 const demandSource = ref([])
@@ -573,120 +842,20 @@ const getDemandSource = () => {
   })
 }
 
-const tableData = ref([
-  {
-    demandId: '1001',
-    proId: '123',
-    demandNo: 'demo-1',
-    title: '用户',
-    demandDesc: '需求描述1',
-    demandStatus: -1,
-    headId: '0',
-    priority: 2,
-    fatherDemandId: '1000',
-    type: '1788120977904091137',
-    workItemType: 0,
-    source: '1788141110428971010',
-    storyPoint: 0,
-    children: [
-      {
-        demandId: '1005',
-        proId: '123',
-        demandNo: 'demo-1',
-        title: '用户',
-        demandDesc: '需求描述1',
-        demandStatus: -1,
-        headId: '0',
-        priority: 2,
-        fatherDemandId: '1000',
-        type: '1788120977904091137',
-        workItemType: 0,
-        source: '1788141110428971010',
-        storyPoint: 0,
-        children: [
-          {
-            demandId: '1006',
-            proId: '123',
-            demandNo: 'demo-1',
-            title: '用户',
-            demandDesc: '需求描述1',
-            demandStatus: -1,
-            headId: '0',
-            priority: 2,
-            fatherDemandId: '1000',
-            type: '1788120977904091137',
-            workItemType: 0,
-            source: '1788141110428971010',
-            storyPoint: 0,
-            children: [
-              {
-                demandId: '1007',
-                proId: '123',
-                demandNo: 'demo-1',
-                title: '用户',
-                demandDesc: '需求描述1',
-                demandStatus: -1,
-                headId: '0',
-                priority: 2,
-                fatherDemandId: '1000',
-                type: '1788120977904091137',
-                workItemType: 0,
-                source: '1788141110428971010',
-                storyPoint: 0,
-              }
-            ]
-          }
-        ]
-      },
-      {
-        demandId: '1008',
-        proId: '123',
-        demandNo: 'demo-1',
-        title: '用户',
-        demandDesc: '需求描述1',
-        demandStatus: -1,
-        headId: '0',
-        priority: 2,
-        fatherDemandId: '1000',
-        type: '1788120977904091137',
-        workItemType: 0,
-        source: '1788141110428971010',
-        storyPoint: 0,
-      }
-
-    ]
-  },
-  {
-    demandId: '1002',
-    proId: '124',
-    demandNo: 'demo-2',
-    title: '购物车',
-    demandDesc: '需求描述1',
-    demandStatus: 1,
-    headId: '1',
-    priority: 2,
-    fatherDemandId: '1001',
-    type: '1788121016265195521',
-    workItemType: 1,
-    source: '1788141153521250306',
-    storyPoint: 0,
-  },
-  {
-    demandId: '1003',
-    proId: '125',
-    demandNo: 'demo-3',
-    title: '不知道起啥名，起个长点的名字',
-    demandDesc: '需求描述1',
-    demandStatus: 0,
-    headId: '125',
-    priority: 2,
-    fatherDemandId: '1001',
-    type: '1788121016265195521',
-    workItemType: 2,
-    source: '1788141153521250306',
-    storyPoint: 0,
-  },
-])
+const getDemandsList = () => {
+  getAllDemandByProId(proId.value).then((res) => {
+    if (res.data.code === 2001) {
+      demandsByLevel.value = res.data.data.demandsByLevel
+      allDemands.value = res.data.data.allDemands
+    } else {
+      ElNotification({
+        title: '通知',
+        message: res.data.message,
+        duration: 2000,
+      })
+    }
+  })
+}
 
 const selections = ref([])
 
@@ -694,13 +863,16 @@ const handleSelectionChange = (val) => {
   selections.value = val
 }
 
-
 const mode = 'default' // 或 'simple'
 const editorRef = shallowRef()
-
+const clickEditorRef = shallowRef()
+const clickReadOnlyEditorRef = shallowRef()
 
 // 内容 HTML
 const valueHtml = ref('')
+const clickValueHtml = ref('')
+const clickValueHtmlReadOnly = ref('')
+const showDesc = ref(true)
 
 const editorConfig = {
   placeholder: '请输入内容...',
@@ -715,12 +887,82 @@ const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
 }
 
 const submitAddDemand = () => {
-  console.log("提交需求")
+  if (newDemandFormData.value.fatherDemandId === "") {
+    newDemandFormData.value.fatherDemandId = "0"
+  }
   newDemandFormData.value.demandDesc = valueHtml.value
-  console.log(newDemandFormData.value)
-  openDialog.value = false
   insertNewDemand(newDemandFormData.value).then((res) => {
     if (res.data.code === 3001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      addDemandDialogVisible.value = false
+      getDemandsList()
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+const handleCreatedEditor = (editor) => {
+  editorRef.value = editor // 记录 editor 实例，重要！
+  // nextTick(() => {
+  //   const toolbar = DomEditor.getToolbar(editorRef.value)
+  //   const curToolbarConfig = toolbar.getConfig()
+  //   console.log('curToolbarConfig', curToolbarConfig)
+  // })
+}
+const handleCreatedClickEditor = (editor) => {
+  clickEditorRef.value = editor // 记录 editor 实例，重要！
+}
+const handleCreatedClickReadOnlyEditor = (editor) => {
+  clickReadOnlyEditorRef.value = editor // 记录 editor 实例，重要！
+}
+
+const handleClose = (done: () => void) => {
+  valueHtml.value = ''
+  done()
+}
+
+const openAddDemandDialog = () => {
+  newDemandFormData.value.proId = currentProInfo.value.proId
+  addDemandDialogVisible.value = true
+}
+
+const closeAddDemandDialog = () => {
+  newDemandFormData.value.proId = currentProInfo.value.proId
+  newDemandFormData.value.title = ''
+  newDemandFormData.value.demandDesc = ''
+  newDemandFormData.value.demandStatus = 0
+  newDemandFormData.value.headId = ''
+  newDemandFormData.value.priority = 2
+  newDemandFormData.value.fatherDemandId = ''
+  newDemandFormData.value.type = ''
+  newDemandFormData.value.workItemType = 0
+  newDemandFormData.value.source = ''
+  newDemandFormData.value.storyPoint = 0
+  newDemandFormData.value.startTime = ''
+  newDemandFormData.value.endTime = ''
+
+
+  valueHtml.value = ''
+}
+
+const addWorkItem = (row) => {
+  newDemandFormData.value.proId = currentProInfo.value.proId
+  newDemandFormData.value.fatherDemandId = row.demandId
+  newDemandFormData.value.workItemType = row.workItemType + 1
+  addDemandDialogVisible.value = true
+}
+
+const demandStatusChange = (row) => {
+  updateDemandStatus(row.demandId,row.demandStatus).then((res) => {
+    if (res.data.code === 4001) {
       ElNotification({
         title: 'Success',
         message: res.data.message,
@@ -735,30 +977,63 @@ const submitAddDemand = () => {
     }
   })
 }
-const handleCreatedEditor = (editor) => {
-  editorRef.value = editor // 记录 editor 实例，重要！
-  nextTick(() => {
-    const toolbar = DomEditor.getToolbar(editorRef.value)
-    const curToolbarConfig = toolbar.getConfig()
-    console.log('curToolbarConfig', curToolbarConfig)
+const demandHeadIdChange = (row) => {
+  updateDemandHeadId(row.demandId,row.headId).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+const demandPriorityChange = (row) => {
+  updateDemandPriority(row.demandId,row.priority).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
   })
 }
 
-
-const handleClose = (done: () => void) => {
-  valueHtml.value = ''
-  done()
+const clickedDemand = ref({})
+const clickRow = (row) => {
+  console.log(row)
+  clickValueHtmlReadOnly.value = row.demandDesc
+  clickRowDialogVisible.value = true
+  clickedDemand.value = row
 }
 
-const openAddDemandDialog = () => {
-  newDemandFormData.value.proId = currentProInfo.value.proId
-  openDialog.value = true
-}
+const firstTagName = ref('baseInfo')
 
-const tablePriorityChange = (row) => {
-  console.log(row.priority)
-}
-
+// 组件销毁时，也及时销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  const clickEditor = clickEditorRef.value
+  const clickReadOnlyEditor = clickReadOnlyEditorRef.value
+  if (editor == null) return
+  if (clickEditor == null) return
+  if (clickReadOnlyEditor == null) return
+  editor.destroy()
+  clickEditor.destroy()
+  clickReadOnlyEditor.destroy()
+})
 </script>
 
 <style scoped>
@@ -797,5 +1072,17 @@ const tablePriorityChange = (row) => {
   display: flex;
   align-items: center;
   height: 50px;
+}
+
+.table-title-cell{
+  display: inline-block;
+  text-align: right;
+  position: absolute;
+  right: 0;
+  opacity: 0;
+}
+
+.el-table__row .is-left:hover .table-title-cell{
+  opacity: 1;
 }
 </style>

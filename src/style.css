@@ -31,3 +31,26 @@ a {
     box-shadow: none !important;
     background-color: rgba(0, 0, 0, 0);
 }
+
+.cell{
+    width: 100%;
+}
+
+.click-dialog-input .el-input__wrapper {
+    box-shadow: none !important;
+    border: 1px solid rgba(0,0,0,0)!important;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.click-dialog-input .el-input__wrapper:hover {
+    box-shadow: none !important;
+    border: 1px solid #409EFF!important;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.click-dialog-input .el-input__wrapper:focus {
+    box-shadow: none !important;
+    border: 1px solid #409EFF!important;
+    background-color: rgba(0, 0, 0, 0);
+}
+

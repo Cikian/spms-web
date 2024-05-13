@@ -42,3 +42,29 @@ export function insertNewDemand(data) {
         data
     })
 }
+
+export function getAllDemandByProId(proId) {
+    return request({
+        url: '/demand/list/' + proId,
+        method: 'get'
+    })
+}
+
+export function updateDemandStatus(demandId, status) {
+    return request({
+        url: '/demand/changeStatus/' + demandId + '/' + status,
+        method: 'put',
+    })
+}
+export function updateDemandHeadId(demandId, headId) {
+    return request({
+        url: '/demand/changeHeadId/' + demandId + '/' + headId,
+        method: 'put',
+    })
+}
+export function updateDemandPriority(demandId, priority) {
+    return request({
+        url: '/demand/changePriority/' + demandId + '/' + priority,
+        method: 'put',
+    })
+}
