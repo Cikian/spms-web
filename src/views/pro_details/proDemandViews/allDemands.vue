@@ -681,7 +681,7 @@
             <el-tab-pane label="基本信息" name="baseInfo">
               <div style="display: flex; justify-content: space-between; padding-right: 50px; align-items: center">
                 <span>描述</span>
-                <el-button @click="showDesc = false" text round style="font-size: 18px;"><font-awesome-icon :icon="['fas', 'pencil']" /></el-button>
+                <el-button @click="openClickEditor" text round style="font-size: 18px;"><font-awesome-icon :icon="['fas', 'pencil']" /></el-button>
               </div>
               <Toolbar
                   v-show="false"
@@ -716,8 +716,8 @@
                     @onCreated="handleCreatedClickEditor"
                 />
                 <div style="text-align: right; padding-right: 50px">
-                  <el-button @click="showDesc = !showDesc" type="text" text>取消</el-button>
-                  <el-button @click="showDesc = !showDesc" type="primary">保存</el-button>
+                  <el-button @click="closeClickEditor" type="text" text>取消</el-button>
+                  <el-button @click="submitClickEditor(clickedDemand.demandId)" type="primary">保存</el-button>
                 </div>
               </div>
               <el-tabs v-model="secondTagName">
@@ -770,7 +770,7 @@ import {
   queryDemandMembers,
   queryDemandSource,
   queryDemandTypes,
-  queryProByProId, updateDemandHeadId, updateDemandPriority, updateDemandStatus
+  queryProByProId, updateDemandDesc, updateDemandHeadId, updateDemandPriority, updateDemandStatus
 } from "../../../api/demandApi.ts";
 
 const proId = ref('')
@@ -952,6 +952,11 @@ const closeAddDemandDialog = () => {
   valueHtml.value = ''
 }
 
+const handleCloseClickRow = () => {
+  clickValueHtml.value = ''
+  showDesc.value = true
+}
+
 const addWorkItem = (row) => {
   newDemandFormData.value.proId = currentProInfo.value.proId
   newDemandFormData.value.fatherDemandId = row.demandId
@@ -1017,6 +1022,21 @@ const clickRow = (row) => {
   clickValueHtmlReadOnly.value = row.demandDesc
   clickRowDialogVisible.value = true
   clickedDemand.value = row
+}
+
+const openClickEditor = () => {
+  showDesc.value = false
+  clickValueHtml.value = clickValueHtmlReadOnly.value
+}
+
+const closeClickEditor = () => {
+  showDesc.value = true
+  clickValueHtml.value = ''
+}
+
+const submitClickEditor = (demandId) => {
+  console.log(demandId)
+  // updateDemandDesc()
 }
 
 const firstTagName = ref('baseInfo')
