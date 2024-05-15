@@ -738,7 +738,12 @@
               </div>
             </div>
             <el-tabs v-model="secondTagName" class="click-row-bottom-tags">
-              <el-tab-pane label="评论" name="comment">评论</el-tab-pane>
+              <el-tab-pane label="评论" name="comment">
+
+
+
+
+              </el-tab-pane>
               <el-tab-pane label="活动" name="active">活动</el-tab-pane>
               <el-tab-pane label="流转" name="circulation">流转</el-tab-pane>
             </el-tabs>
