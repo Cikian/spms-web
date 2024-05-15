@@ -13,3 +13,10 @@ export function queryRecentVisits() {
         method: 'get',
     })
 }
+
+export function queryRecentVisitsPro() {
+    return request({
+        url: '/recentVisit/getRecentVisitsPro',
+        method: 'get',
+    })
+}

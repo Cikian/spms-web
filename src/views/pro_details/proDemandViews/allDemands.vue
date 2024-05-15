@@ -1038,6 +1038,7 @@ import {
   updateDemandStatus,
   updateDemandType
 } from "../../../api/demandApi.ts";
+import {recordVisit} from "../../../api/RecentVisitApi.ts";
 
 const proId = ref('')
 const currentProInfo = ref({})
@@ -1317,7 +1318,7 @@ const demandSourceChange = (row) => {
 
 const clickedDemand = ref({})
 const clickRow = (row) => {
-  console.log(row)
+  recordVisit(row.demandId, 2)
   clickValueHtmlReadOnly.value = row.demandDesc
   clickRowDialogVisible.value = true
   clickedDemand.value = row

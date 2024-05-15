@@ -3,29 +3,42 @@
     最近打开
   </div>
 
-  <el-row style="padding: 0 40px 32px 40px">
-    <div class="lately-pro" v-for="pro in pros" :key="pro.name" @click="toProDetail(pro.proId)">
-      <div class="lately-pro-in"></div>
-      <div class="lately-pro-cont">
-        <font-awesome-icon style="font-size: 24px; color: #56abfb" icon="fa-solid fa-folder-plus"/>
-        <div class="pro-title" style="color: #333;margin: 14px 0 10px 0">
-          <el-text truncated>{{ pro.name }}</el-text>
+  <div>
+    <el-skeleton v-if="loadingVisitPro" style="width: 100%;display: flex;padding: 0 40px 32px 40px" animated>
+      <template #template>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
+      </template>
+    </el-skeleton>
+    <a-empty v-else-if="emptyVisitPro" description="暂无数据"/>
+    <div v-else>
+      <el-row style="padding: 0 40px 32px 40px">
+        <div class="lately-pro" v-for="pro in pros" :key="pro.name" @click="toProDetail(pro.proId)">
+          <div class="lately-pro-in"></div>
+          <div class="lately-pro-cont">
+            <font-awesome-icon style="font-size: 24px; color: #56abfb" icon="fa-solid fa-folder-plus"/>
+            <div class="pro-title" style="color: #333;margin: 14px 0 10px 0">
+              <el-text truncated>{{ pro.name }}</el-text>
+            </div>
+            <div class="pro-path" style="font-size: .75rem; color: #999">
+              <el-text truncated size="small">{{ pro.path }}</el-text>
+            </div>
+          </div>
         </div>
-        <div class="pro-path" style="font-size: .75rem; color: #999">
-          <el-text truncated size="small">{{ pro.path }}</el-text>
-        </div>
-      </div>
+      </el-row>
     </div>
-  </el-row>
-
+  </div>
 
   <div class="overView-title">
     最近访问
   </div>
 
   <div style="width: 100%; padding: 0 40px">
-    <el-skeleton v-if="isLoading" :rows="10" :throttle="500" animated/>
-    <el-empty v-else-if="isEmpty" description="暂无数据"/>
+    <el-skeleton v-if="loadingVisit" :rows="10" :throttle="500" animated/>
+    <el-empty v-else-if="emptyVisit" description="暂无数据"/>
     <div v-else>
       <el-row style="height: 56px; border-bottom: solid 0.8px #eee;" v-for="item in visited" :key="item.flag">
         <el-col :span="19" style="padding: 12px 16px;line-height: 32px">
@@ -43,44 +56,20 @@
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, ref} from "vue";
 import router from "../../router";
-import {queryRecentVisits} from "../../api/RecentVisitApi.ts";
+import {queryRecentVisits, queryRecentVisitsPro} from "../../api/RecentVisitApi.ts";
 
-const isLoading = ref(true);
-const isEmpty = ref(false)
+const loadingVisit = ref(true)
+const emptyVisit = ref(false)
+
+const loadingVisitPro = ref(true)
+const emptyVisitPro = ref(false)
 
 const toProDetail = (proId) => {
   localStorage.setItem('proDetailId', proId)
   router.push('/proDetail')
 }
 
-const pros = ref([
-  {
-    proId: '1056066526164565266',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    path: '/work_table/project1'
-  },
-  {
-    proId: '1056066526164565266',
-    name: '项目2',
-    path: '/work_table/project2'
-  },
-  {
-    proId: '1056066526164565266',
-    name: '项目3',
-    path: '/work_table/project2'
-  },
-  {
-    proId: '1056066526164565266',
-    name: '项目4',
-    path: '/work_table/project2'
-  },
-  {
-    proId: '1056066526164565266',
-    name: '项目5',
-    path: '/work_table/project2'
-  }
-])
-
+const pros = ref([])
 const visited = ref([])
 
 const getUserRecentVisit = () => {
@@ -88,19 +77,36 @@ const getUserRecentVisit = () => {
       .then(res => {
         if (res.data.code == 200) {
           visited.value = res.data.data
-          isEmpty.value = visited.value.length === 0;
+          emptyVisit.value = visited.value.length === 0;
         } else {
           visited.value = []
-          isEmpty.value = true
+          emptyVisit.value = true
         }
       })
       .finally(() => {
-        isLoading.value = false
+        loadingVisit.value = false
+      })
+}
+
+const getUserRecentVisitPro = () => {
+  queryRecentVisitsPro()
+      .then(res => {
+        if (res.data.code == 200) {
+          pros.value = res.data.data
+          emptyVisitPro.value = pros.value.length === 0;
+        } else {
+          pros.value = []
+          emptyVisitPro.value = true
+        }
+      })
+      .finally(() => {
+        loadingVisitPro.value = false
       })
 }
 
 onMounted(() => {
   getUserRecentVisit()
+  getUserRecentVisitPro()
 })
 
 </script>
