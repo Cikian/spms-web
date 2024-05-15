@@ -795,7 +795,21 @@
                     </a-form-item>
                   </a-modal>
                 </div>
+                <div style="width: 55vw; position: fixed; bottom: 10vh">
+                  <div class="post-comment-form" style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
+                    <a-textarea
+                        :auto-size="{ minRows: 3, maxRows: 6 }"
+                        placeholder="友善发言，文明评论~"
+                        v-model:value="postComment.content"
+                        id="postCommentInput"
+                        @keydown.enter.native="submitComment"
+                    />
 
+                    <a-button style="margin-left: 30px" type="primary" @click="submitComment"
+                              :disabled="postComment.content === ''">评论
+                    </a-button>
+                  </div>
+                </div>
               </el-tab-pane>
               <el-tab-pane label="活动" name="active">活动</el-tab-pane>
               <el-tab-pane label="流转" name="circulation">流转</el-tab-pane>
@@ -997,20 +1011,7 @@
       {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
     </template>
     <template #footer>
-      <div class="post-comment-form" style="width: 100%; display: flex; justify-content: space-between">
 
-        <a-textarea
-            :auto-size="{ minRows: 1, maxRows: 6 }"
-            placeholder="友善发言，文明评论~"
-            v-model:value="postComment.content"
-            id="postCommentInput"
-            @keydown.enter.native="submitComment"
-        />
-
-        <a-button style="float: right" type="primary" @click="submitComment"
-                  :disabled="postComment.content === ''">评论
-        </a-button>
-      </div>
     </template>
   </el-dialog>
 
