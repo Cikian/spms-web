@@ -68,9 +68,21 @@ export function updateDemandPriority(demandId, priority) {
         method: 'put',
     })
 }
-export function updateDemandDesc(demandId, data) {
+export function updateDemandType(demandId, type) {
     return request({
-        url: '/demand/changePriority/' + demandId,
+        url: '/demand/changeType/' + demandId + '/' + type,
+        method: 'put',
+    })
+}
+export function updateDemandSource(demandId, source) {
+    return request({
+        url: '/demand/changeSource/' + demandId + '/' + source,
+        method: 'put',
+    })
+}
+export function updateDemandDesc(data) {
+    return request({
+        url: '/demand/changeDesc',
         method: 'put',
         data
     })

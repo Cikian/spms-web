@@ -46,10 +46,12 @@
               class="box-item"
               effect="dark"
               :content="scope.row.workItemType===0?'新建特性':scope.row.workItemType===1?'新建用户故事':scope.row.workItemType===2?'新建任务':'任务'"
-              placement="top",
+              placement="top" ,
               v-if="scope.row.workItemType!==3"
           >
-            <el-button @click="addWorkItem(scope.row)" style="font-size: 20px; margin-right: 20px" type="text"><font-awesome-icon :icon="['fas', 'plus']" /></el-button>
+            <el-button @click="addWorkItem(scope.row)" style="font-size: 20px; margin-right: 20px" type="text">
+              <font-awesome-icon :icon="['fas', 'plus']"/>
+            </el-button>
           </el-tooltip>
           <el-tooltip
               class="box-item"
@@ -57,7 +59,9 @@
               content="Top Center prompts info"
               placement="top"
           >
-            <el-button style="font-size: 18px; margin-right: 30px" type="text"><font-awesome-icon :icon="['far', 'pen-to-square']" /></el-button>
+            <el-button style="font-size: 18px; margin-right: 30px" type="text">
+              <font-awesome-icon :icon="['far', 'pen-to-square']"/>
+            </el-button>
           </el-tooltip>
         </div>
       </template>
@@ -548,195 +552,362 @@
       top="3vh"
       @close="handleCloseClickRow"
   >
-      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
-        <div style="width: 75%; ">
-            <el-input class="click-dialog-input" v-model="clickedDemand.title" placeholder="请输入需求标题" size="large" style="height: 50px; font-size: 22px"></el-input>
+    <div style="width: 100%; height: 80vh; margin: 0 auto; display: flex; justify-content: space-between; overflow: hidden">
+      <el-scrollbar style="width: 75%;">
+        <el-input class="click-dialog-input" v-model="clickedDemand.title" placeholder="请输入需求标题" size="large"
+                  style="height: 50px; font-size: 22px"></el-input>
 
-          <div style="width: 100%; padding: 20px 20px;">
-            <el-descriptions
-                direction="vertical"
-                :column="4"
-                :size="size"
-            >
-              <el-descriptions-item width="25%" label="负责人" >
-                <el-select
-                    v-model="clickedDemand.headId"
-                    placeholder="—"
-                    class="demand-headId-select"
-                    @change="demandHeadIdChange(clickedDemand)"
-                    style="width: 80%"
+        <div style="width: 100%; padding: 20px 20px;">
+          <el-descriptions
+              direction="vertical"
+              :column="4"
+              :size="size"
+          >
+            <el-descriptions-item width="25%" label="负责人">
+              <el-select
+                  v-model="clickedDemand.headId"
+                  placeholder="—"
+                  class="demand-headId-select"
+                  @change="demandHeadIdChange(clickedDemand)"
+                  style="width: 80%"
+              >
+                <el-option
+                    class="member-select-options-menu"
+                    v-for="item in members"
+                    :key="item.userId"
+                    :label="item.nickName"
+                    :value="item.userId"
                 >
-                  <el-option
-                      class="member-select-options-menu"
-                      v-for="item in members"
-                      :key="item.userId"
-                      :label="item.nickName"
-                      :value="item.userId"
+                  <div style="display: flex; align-items: center; text-align: center">
+                    <div style="display: flex; align-items: center;">
+                      <el-avatar :size="'small'" :src="item.avatar" style="position: relative; top: 0.2vh;"/>
+                    </div>
+
+                    <span style="margin-left: 10px">{{ item.nickName }}</span>
+                  </div>
+                </el-option>
+
+                <template #prefix>
+                  <div v-for="member in members"
+                       v-show="member.userId === clickedDemand.headId"
+                       style="display: flex; align-items: center"
                   >
-                    <div style="display: flex; align-items: center; text-align: center">
-                      <div style="display: flex; align-items: center;">
-                        <el-avatar :size="'small'" :src="item.avatar" style="position: relative; top: 0.2vh;"/>
-                      </div>
-
-                      <span style="margin-left: 10px">{{ item.nickName }}</span>
-                    </div>
-                  </el-option>
-
-                  <template #prefix>
-                    <div v-for="member in members"
-                         v-show="member.userId === clickedDemand.headId"
-                         style="display: flex; align-items: center"
-                    >
-                      <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
-                    </div>
-                  </template>
-                </el-select>
-              </el-descriptions-item>
-              <el-descriptions-item width="25%" label="状态">
-                <el-select
-                    v-model="clickedDemand.demandStatus"
-                    placeholder="请选择优先级"
-                    class="demand-status-select"
-                    @change="demandStatusChange(clickedDemand)"
-                    style="width: 80%"
+                    <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                  </div>
+                </template>
+              </el-select>
+            </el-descriptions-item>
+            <el-descriptions-item width="25%" label="状态">
+              <el-select
+                  v-model="clickedDemand.demandStatus"
+                  placeholder="请选择优先级"
+                  class="demand-status-select"
+                  @change="demandStatusChange(clickedDemand)"
+                  style="width: 80%"
+              >
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="0"
+                    label="打开"
+                    :value="0"
+                    :disabled="clickedDemand.demandStatus === 0"
                 >
-                  <el-option
-                      class="demand-table-select-options-menu"
-                      :key="0"
-                      label="打开"
-                      :value="0"
-                      :disabled="clickedDemand.demandStatus === 0"
-                  >
-                    <div v-if="clickedDemand.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">打开</div>
-                    <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
-                  </el-option>
-                  <el-option
-                      class="demand-table-select-options-menu"
-                      :key="1"
-                      label="进行中"
-                      :value="1"
-                      :disabled="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1"
-                  >
-                    <div v-if="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1" class="table-statue"
-                         style="background-color: #fae3b2;">进行中
-                    </div>
-                    <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
-                  </el-option>
-                  <el-option
-                      class="demand-table-select-options-menu"
-                      :key="2"
-                      label="已完成"
-                      :value="2"
-                      :disabled="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1"
-                  >
-                    <div v-if="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1" class="table-statue"
-                         style="background-color: #c0fad5;">已完成
-                    </div>
-                    <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
-                  </el-option>
-                  <el-option
-                      class="demand-table-select-options-menu"
-                      :key="-1"
-                      label="关闭"
-                      :value="-1"
-                      :disabled="clickedDemand.demandStatus === -1"
-                  >
-                    <div v-if="clickedDemand.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">关闭</div>
-                    <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
-                  </el-option>
+                  <div v-if="clickedDemand.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">
+                    打开
+                  </div>
+                  <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="1"
+                    label="进行中"
+                    :value="1"
+                    :disabled="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1"
+                >
+                  <div v-if="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1" class="table-statue"
+                       style="background-color: #fae3b2;">进行中
+                  </div>
+                  <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="2"
+                    label="已完成"
+                    :value="2"
+                    :disabled="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1"
+                >
+                  <div v-if="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1" class="table-statue"
+                       style="background-color: #c0fad5;">已完成
+                  </div>
+                  <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="-1"
+                    label="关闭"
+                    :value="-1"
+                    :disabled="clickedDemand.demandStatus === -1"
+                >
+                  <div v-if="clickedDemand.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">
+                    关闭
+                  </div>
+                  <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
+                </el-option>
 
-                  <template #prefix>
-                    <div class="table-statue" style="background-color: #56abfb;" v-show="clickedDemand.demandStatus===0">打开</div>
-                    <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.demandStatus===1">进行中
-                    </div>
-                    <div class="table-statue" style="background-color: #9de4b6;" v-show="clickedDemand.demandStatus===2">已完成
-                    </div>
-                    <div class="table-statue" style="background-color: #c3c3c3;" v-show="clickedDemand.demandStatus===-1">关闭</div>
-                  </template>
-                </el-select>
-              </el-descriptions-item>
-              <el-descriptions-item width="25%" label="开始时间">
-                <el-date-picker
-                    v-model="clickedDemand.startTime"
-                    type="date"
-                    placeholder="——"
-                    class="click-dialog-input"
-                    :clearable="false"
-                />
-              </el-descriptions-item>
-              <el-descriptions-item width="25%" label="结束时间">
-                <el-date-picker
-                    v-model="clickedDemand.endTime"
-                    type="date"
-                    placeholder="——"
-                    class="click-dialog-input"
-                    :clearable="false"
-                />
-              </el-descriptions-item>
+                <template #prefix>
+                  <div class="table-statue" style="background-color: #56abfb;" v-show="clickedDemand.demandStatus===0">
+                    打开
+                  </div>
+                  <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.demandStatus===1">
+                    进行中
+                  </div>
+                  <div class="table-statue" style="background-color: #9de4b6;" v-show="clickedDemand.demandStatus===2">
+                    已完成
+                  </div>
+                  <div class="table-statue" style="background-color: #c3c3c3;" v-show="clickedDemand.demandStatus===-1">
+                    关闭
+                  </div>
+                </template>
+              </el-select>
+            </el-descriptions-item>
+            <el-descriptions-item width="25%" label="开始时间">
+              <el-date-picker
+                  v-model="clickedDemand.startTime"
+                  type="date"
+                  placeholder="——"
+                  class="click-dialog-input"
+                  :clearable="false"
+              />
+            </el-descriptions-item>
+            <el-descriptions-item width="25%" label="结束时间">
+              <el-date-picker
+                  v-model="clickedDemand.endTime"
+                  type="date"
+                  placeholder="——"
+                  class="click-dialog-input"
+                  :clearable="false"
+              />
+            </el-descriptions-item>
 
-            </el-descriptions>
-          </div>
+          </el-descriptions>
+        </div>
 
-          <el-tabs v-model="firstTagName">
-            <el-tab-pane label="基本信息" name="baseInfo">
-              <div style="display: flex; justify-content: space-between; padding-right: 50px; align-items: center">
-                <span>描述</span>
-                <el-button @click="openClickEditor" text round style="font-size: 18px;"><font-awesome-icon :icon="['fas', 'pencil']" /></el-button>
-              </div>
+        <el-tabs v-model="firstTagName">
+          <el-tab-pane label="基本信息" name="baseInfo">
+            <div style="display: flex; justify-content: space-between; padding-right: 50px; align-items: center">
+              <span>描述</span>
+              <el-button @click="openClickEditor" text round style="font-size: 18px;">
+                <font-awesome-icon :icon="['fas', 'pencil']"/>
+              </el-button>
+            </div>
+            <Toolbar
+                v-show="false"
+                style="border-bottom: 1px solid #ccc"
+                :editor="clickReadOnlyEditorRef"
+                :defaultConfig="toolbarConfig"
+                :mode="mode"
+            />
+            <Editor
+                v-show="showDesc"
+                style="height: 200px; overflow-y: hidden;"
+                v-model="clickValueHtmlReadOnly"
+                :defaultConfig="{
+                      readOnly: true
+                    }"
+                :mode="mode"
+                @onCreated="handleCreatedClickReadOnlyEditor"
+            />
+
+            <div v-show="!showDesc">
               <Toolbar
-                  v-show="false"
                   style="border-bottom: 1px solid #ccc"
-                  :editor="clickReadOnlyEditorRef"
+                  :editor="clickEditorRef"
                   :defaultConfig="toolbarConfig"
                   :mode="mode"
               />
               <Editor
-                  v-show="showDesc"
-                  style="height: 200px; overflow-y: hidden;"
-                  v-model="clickValueHtmlReadOnly"
-                  :defaultConfig="{
-                      readOnly: true
-                    }"
+                  style="height: 300px; overflow-y: hidden;"
+                  v-model="clickValueHtml"
+                  :defaultConfig="editorConfig"
                   :mode="mode"
-                  @onCreated="handleCreatedClickReadOnlyEditor"
+                  @onCreated="handleCreatedClickEditor"
               />
-
-              <div v-show="!showDesc">
-                <Toolbar
-                    style="border-bottom: 1px solid #ccc"
-                    :editor="clickEditorRef"
-                    :defaultConfig="toolbarConfig"
-                    :mode="mode"
-                />
-                <Editor
-                    style="height: 300px; overflow-y: hidden;"
-                    v-model="clickValueHtml"
-                    :defaultConfig="editorConfig"
-                    :mode="mode"
-                    @onCreated="handleCreatedClickEditor"
-                />
-                <div style="text-align: right; padding-right: 50px">
-                  <el-button @click="closeClickEditor" type="text" text>取消</el-button>
-                  <el-button @click="submitClickEditor(clickedDemand.demandId)" type="primary">保存</el-button>
-                </div>
+              <div style="text-align: right; padding-right: 50px">
+                <el-button @click="closeClickEditor" type="text" text>取消</el-button>
+                <el-button @click="submitClickEditor(clickedDemand.demandId)" type="primary">保存</el-button>
               </div>
-              <el-tabs v-model="secondTagName">
-                <el-tab-pane label="评论" name="comment">评论</el-tab-pane>
-                <el-tab-pane label="活动" name="active">活动</el-tab-pane>
-                <el-tab-pane label="流转" name="circulation">流转</el-tab-pane>
-              </el-tabs>
-            </el-tab-pane>
-            <el-tab-pane label="子工作项" name="childrenWorkItem">Config</el-tab-pane>
-            <el-tab-pane label="测试" name="tests">Role</el-tab-pane>
-          </el-tabs>
+            </div>
+            <el-tabs v-model="secondTagName" class="click-row-bottom-tags">
+              <el-tab-pane label="评论" name="comment">评论</el-tab-pane>
+              <el-tab-pane label="活动" name="active">活动</el-tab-pane>
+              <el-tab-pane label="流转" name="circulation">流转</el-tab-pane>
+            </el-tabs>
+          </el-tab-pane>
+          <el-tab-pane label="子工作项" name="childrenWorkItem">Config</el-tab-pane>
+          <el-tab-pane label="测试" name="tests">Role</el-tab-pane>
+        </el-tabs>
 
 
+      </el-scrollbar>
+      <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
+        <div style="width: 100%;">
+          <span style="font-size: 12px; color: #999999;">属性</span>
+          <div style="display: flex; margin-top: 18px; color: #666666">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">优先级</div>
+            <div style="line-height: 30px; width: 50%">
+              <el-select
+                  v-model="clickedDemand.priority"
+                  placeholder="请选择优先级"
+                  class="demand-status-select"
+                  @change="demandPriorityChange(clickedDemand)"
+              >
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="4"
+                    label="最高"
+                    :value="4"
+                >
+                  <div class="table-statue" style="background-color: #ff7575;">最高</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="3"
+                    label="较高"
+                    :value="3"
+                >
+                  <div class="table-statue" style="background-color: #ff9f73;">较高</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="2"
+                    label="普通"
+                    :value="2"
+                >
+                  <div class="table-statue" style="background-color: #f6c659;">普通</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="1"
+                    label="较低"
+                    :value="1"
+                >
+                  <div class="table-statue" style="background-color: #5dcfff;">较低</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="0"
+                    label="最低"
+                    :value="0"
+                >
+                  <div class="table-statue" style="background-color: #73d897;">最低</div>
+                </el-option>
 
+
+                <template #prefix>
+                  <div class="table-statue" style="background-color: #73d897;" v-show="clickedDemand.priority===0">最低</div>
+                  <div class="table-statue" style="background-color: #5dcfff;" v-show="clickedDemand.priority===1">较低</div>
+                  <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.priority===2">普通</div>
+                  <div class="table-statue" style="background-color: #ff9f73;" v-show="clickedDemand.priority===3">较高</div>
+                  <div class="table-statue" style="background-color: #ff7575;" v-show="clickedDemand.priority===4">最高</div>
+                </template>
+              </el-select>
+            </div>
+          </div>
+          <div style="display: flex;">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">需求类型</div>
+            <div style="width: 50%;line-height: 30px">
+              <el-select
+                  v-model="clickedDemand.type"
+                  placeholder="请选择需求类型"
+                  size="large"
+                  class="demand-status-select"
+                  @change="demandTypeChange(clickedDemand)"
+              >
+                <el-option
+                    v-for="item in demandTypes"
+                    :key="item.dictionaryDataId"
+                    :label="item.label"
+                    :value="item.dictionaryDataId"
+                />
+                <template #prefix>
+                  <div v-if="clickedDemand.type === null || clickedDemand.type === ''">——</div>
+                  <div v-for="item in demandTypes" :key="item.dictionaryDataId" v-show="item.dictionaryDataId === clickedDemand.type">{{ item.label }}</div>
+                </template>
+              </el-select>
+            </div>
+          </div>
+          <div style="display: flex;">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">需求来源</div>
+            <div style="width: 50%;line-height: 30px">
+              <el-select
+                  v-model="clickedDemand.source"
+                  placeholder="请选择需求类型"
+                  size="large"
+                  class="demand-status-select"
+                  @change="demandSourceChange(clickedDemand)"
+              >
+                <el-option
+                    v-for="item in demandSource"
+                    :key="item.dictionaryDataId"
+                    :label="item.label"
+                    :value="item.dictionaryDataId"
+                />
+                <template #prefix>
+                  <div v-if="clickedDemand.source === null || clickedDemand.source === ''">——</div>
+                  <div v-for="item in demandSource" :key="item.dictionaryDataId" v-show="item.dictionaryDataId === clickedDemand.source">{{ item.label }}</div>
+                </template>
+              </el-select>
+            </div>
+          </div>
         </div>
-        <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
-
-        </el-scrollbar>
-      </div>
+        <div style="width: 100%; margin-top: 50px">
+          <span style="font-size: 12px; color: #999999;">基础属性</span>
+          <div style="display: flex; margin-top: 18px; color: #666666">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">项目</div>
+            <div style="line-height: 30px; width: 50%">
+              <font-awesome-icon style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
+              {{ currentProInfo.proName }}
+            </div>
+          </div>
+          <div style="display: flex; margin-top: 14px">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">创建人</div>
+            <div style="width: 50%;line-height: 30px">
+              <div v-for="member in members"
+                   v-show="member.userId === clickedDemand.createBy"
+                   style="display: flex;"
+              >
+                <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                <span style="margin-left: 10px;">{{ member.nickName }}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; margin-top: 14px">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">创建时间</div>
+            <div style="width: 50%;line-height: 38px">
+              {{ clickedDemand.createTime }}
+            </div>
+          </div>
+          <div style="display: flex; margin-top: 14px">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">更新人</div>
+            <div style="width: 50%;line-height: 30px">
+              <div v-for="member in members"
+                   v-show="member.userId === clickedDemand.updateBy"
+                   style="display: flex;"
+              >
+                <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                <span style="margin-left: 10px;">{{ member.nickName }}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; margin-top: 14px">
+            <div style="width: 25%;font-size: 14px; line-height: 38px;">更新时间</div>
+            <div style="width: 50%;line-height: 38px">
+              {{ clickedDemand.updateTime }}
+            </div>
+          </div>
+        </div>
+      </el-scrollbar>
+    </div>
 
     <template #header>
       <span v-show="clickedDemand.workItemType===0"><font-awesome-icon
@@ -759,7 +930,7 @@
 
 
 <script setup lang="ts">
-import {nextTick, onMounted, ref, shallowRef,onBeforeUnmount} from "vue";
+import {nextTick, onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {DomEditor} from '@wangeditor/editor'
@@ -770,7 +941,13 @@ import {
   queryDemandMembers,
   queryDemandSource,
   queryDemandTypes,
-  queryProByProId, updateDemandDesc, updateDemandHeadId, updateDemandPriority, updateDemandStatus
+  queryProByProId,
+  updateDemandDesc,
+  updateDemandHeadId,
+  updateDemandPriority,
+  updateDemandSource,
+  updateDemandStatus,
+  updateDemandType
 } from "../../../api/demandApi.ts";
 
 const proId = ref('')
@@ -953,7 +1130,6 @@ const closeAddDemandDialog = () => {
 }
 
 const handleCloseClickRow = () => {
-  clickValueHtml.value = ''
   showDesc.value = true
 }
 
@@ -965,7 +1141,7 @@ const addWorkItem = (row) => {
 }
 
 const demandStatusChange = (row) => {
-  updateDemandStatus(row.demandId,row.demandStatus).then((res) => {
+  updateDemandStatus(row.demandId, row.demandStatus).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
         title: 'Success',
@@ -982,7 +1158,7 @@ const demandStatusChange = (row) => {
   })
 }
 const demandHeadIdChange = (row) => {
-  updateDemandHeadId(row.demandId,row.headId).then((res) => {
+  updateDemandHeadId(row.demandId, row.headId).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
         title: 'Success',
@@ -999,7 +1175,41 @@ const demandHeadIdChange = (row) => {
   })
 }
 const demandPriorityChange = (row) => {
-  updateDemandPriority(row.demandId,row.priority).then((res) => {
+  updateDemandPriority(row.demandId, row.priority).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+const demandTypeChange = (row) => {
+  updateDemandType(row.demandId, row.type).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+const demandSourceChange = (row) => {
+  updateDemandSource(row.demandId, row.source).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
         title: 'Success',
@@ -1031,12 +1241,33 @@ const openClickEditor = () => {
 
 const closeClickEditor = () => {
   showDesc.value = true
-  clickValueHtml.value = ''
+  // clickValueHtml.value = ''
 }
 
 const submitClickEditor = (demandId) => {
-  console.log(demandId)
-  // updateDemandDesc()
+  console.log("发送描述：" + clickValueHtml.value)
+  let demand = {
+    demandId: demandId,
+    demandDesc: clickValueHtml.value
+  }
+  updateDemandDesc(demand).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      getDemandsList()
+      showDesc.value = true
+      clickValueHtmlReadOnly.value = clickValueHtml.value
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
 }
 
 const firstTagName = ref('baseInfo')
@@ -1094,7 +1325,7 @@ onBeforeUnmount(() => {
   height: 50px;
 }
 
-.table-title-cell{
+.table-title-cell {
   display: inline-block;
   text-align: right;
   position: absolute;
@@ -1102,7 +1333,9 @@ onBeforeUnmount(() => {
   opacity: 0;
 }
 
-.el-table__row .is-left:hover .table-title-cell{
+.el-table__row .is-left:hover .table-title-cell {
   opacity: 1;
 }
+
+
 </style>
