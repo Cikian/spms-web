@@ -18,7 +18,6 @@
         <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
       </template>
     </el-input>
-
   </div>
 
   <div style="width: 100%; padding: 0 40px" v-loading="loadingPro">
@@ -190,6 +189,7 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, reactive, ref} from "vue";
 import {addPro, getAddMembers, getProList} from "../../api/allProApi.ts";
 import {useRouter} from "vue-router";
+import {recordVisit} from "../../api/RecentVisitApi.ts";
 
 let tableData = reactive({
   data: []
@@ -334,7 +334,7 @@ const submitAddPro = () => {
 
 const router = useRouter()
 const rowClick = (row) => {
-  console.log(row)
+  recordVisit(row.proId, 1)
   localStorage.setItem('proDetailId', row.proId)
   router.push('/proDetail')
 }

@@ -68,14 +68,6 @@ export function deleteTestCaseById(data) {
     })
 }
 
-export function uploadTestReport(data) {
-    return request({
-        url: '/common/upload/testReport',
-        method: 'post',
-        data
-    })
-}
-
 export function queryTestReportByPlanId(data) {
     return request({
         url: '/testReport/list/' + data,
@@ -87,5 +79,36 @@ export function deleteTestReportById(data) {
     return request({
         url: '/testReport/delete/' + data,
         method: 'post'
+    })
+}
+
+export function updateTestReportApprovalStatusById(data, status) {
+    return request({
+        url: '/testReport/update/' + data + '/' + status,
+        method: 'post'
+    })
+}
+
+export function uploadTestReport(data, config) {
+    return request({
+        url: '/common/upload/testReport',
+        method: 'post',
+        data,
+        ...config
+    })
+}
+
+export function submitTestPlanMessage(data) {
+    return request({
+        url: '/testPlanMessage/add',
+        method: 'post',
+        data
+    })
+}
+
+export function queryTestPlanMessageList(data) {
+    return request({
+        url: '/testPlanMessage/list/' + data,
+        method: 'get',
     })
 }

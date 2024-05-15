@@ -24,21 +24,29 @@
   </div>
 
   <div style="width: 100%; padding: 0 40px">
-    <el-row style="height: 56px; border-bottom: solid 0.8px #eee;" v-for="item in visited" :key="item.flag">
-      <el-col :span="19" style="padding: 12px 16px;line-height: 32px">
-        <font-awesome-icon style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
-        <span style="margin-right: 8px; color: #999;">{{ item.flag }}</span>
-        <span style="color: #333; font-weight: 500">{{ item.name }}</span>
-      </el-col>
-      <el-col :span="5" style="padding: 12px 16px">{{ item.proName }}</el-col>
-    </el-row>
+    <el-skeleton v-if="isLoading" :rows="10" :throttle="500" animated/>
+    <el-empty v-else-if="isEmpty" description="暂无数据"/>
+    <div v-else>
+      <el-row style="height: 56px; border-bottom: solid 0.8px #eee;" v-for="item in visited" :key="item.flag">
+        <el-col :span="19" style="padding: 12px 16px;line-height: 32px">
+          <font-awesome-icon style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
+          <span style="margin-right: 8px; color: #999;">{{ item.flag }}</span>
+          <span style="color: #333; font-weight: 500">{{ item.name }}</span>
+        </el-col>
+        <el-col :span="5" style="padding: 12px 16px">{{ item.proName }}</el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import router from "../../router";
+import {queryRecentVisits} from "../../api/RecentVisitApi.ts";
+
+const isLoading = ref(true);
+const isEmpty = ref(false)
 
 const toProDetail = (proId) => {
   localStorage.setItem('proDetailId', proId)
@@ -73,88 +81,27 @@ const pros = ref([
   }
 ])
 
-const visited = ref([
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  },
-  {
-    flag: 'SPMS',
-    name: '项目啊实打实大苏打的啊实打实的1',
-    proName: '项目1',
-  }
-])
+const visited = ref([])
+
+const getUserRecentVisit = () => {
+  queryRecentVisits()
+      .then(res => {
+        if (res.data.code == 200) {
+          visited.value = res.data.data
+          isEmpty.value = visited.value.length === 0;
+        } else {
+          visited.value = []
+          isEmpty.value = true
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
+}
+
+onMounted(() => {
+  getUserRecentVisit()
+})
 
 </script>
 

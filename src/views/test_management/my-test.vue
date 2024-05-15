@@ -162,7 +162,8 @@
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button @click="handleCloseAddTestPlanDialog" size="large" style="width: 90px;">取 消</el-button>
-      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;" :disabled="addTestPlanBtnDisable">
+      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;" :disabled="addTestPlanBtnDisable"
+                 :loading="loadingAddTestPlan">
         {{ addTestPlanBtnText }}
       </el-button>
     </div>
@@ -235,7 +236,8 @@
                 </el-form-item>
               </el-form>
               <div class="add-test-case-footer">
-                <el-button type="primary" @click="submitAddTestCase" :disabled="addTestCaseBtnDisable">
+                <el-button type="primary" @click="submitAddTestCase" :disabled="addTestCaseBtnDisable"
+                           :loading="loadingAddTestCase">
                   {{ addTestCaseBtnText }}
                 </el-button>
               </div>
@@ -244,7 +246,6 @@
               <el-upload
                   class="upload-report"
                   :show-file-list="false"
-                  :on-progress="handleProgress"
                   :before-upload="beforeUpload"
                   :http-request="handleUpload"
                   drag>
@@ -259,7 +260,10 @@
                 </template>
               </el-upload>
               <div class="upload-progress">
-                <el-progress v-if="uploadProgress > 0" :percentage="uploadProgress" :color="colors" :stroke-width="15"
+                <el-progress v-if="uploadProgress > 0"
+                             :percentage="uploadProgress"
+                             :color="colors"
+                             :stroke-width="15"
                              type="line"/>
               </div>
               <div class="test-report-card">
@@ -267,14 +271,11 @@
                   <div class="test-report-top">
                     <div class="test-report-title">{{ testReport.testReportName }}</div>
                     <div class="approval">
-                      <el-text class="test-report-approval" v-if="testReport.approvalStatus === 0" type='primary'>待审批
-                      </el-text>
-                      <el-text class="test-report-approval" v-else-if="testReport.approvalStatus === 1" type='success'>
-                        已通过
-                      </el-text>
-                      <el-text class="test-report-approval" v-else-if="testReport.approvalStatus === 2" type="danger">
-                        未通过
-                      </el-text>
+                      <el-select v-model="testReport.approvalStatus" @change="updateTestReportApprovalStatus">
+                        <el-option label="待审批" :value="0"/>
+                        <el-option label="已通过" :value="1"/>
+                        <el-option label="未通过" :value="2"/>
+                      </el-select>
                     </div>
                   </div>
                   <div class="test-report-footer">
@@ -286,13 +287,52 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <el-input type="textarea" placeholder="请输入留言内容" :rows="10" resize="none"></el-input>
+              <div class="message-container">
+                <div class="message-send-container">
+                  <el-avatar class="message-my-avatar" size="large" :src="userAvatar"/>
+                  <el-input class="message-input" type="textarea" v-model="messageContent" placeholder="请输入留言内容"
+                            show-word-limit
+                            maxlength="1000"
+                            :rows="5" resize="none"/>
+                </div>
+                <div class="message-btn">
+                  <el-button type="primary" size="default" :loading="loadingMessage" :disabled="disableMessage"
+                             @click="submitMessage">留言
+                  </el-button>
+                </div>
+              </div>
+              <el-scrollbar height="377px">
+                <div class="message-list" v-if="messageList.length > 0" v-loading="loadingMessageList">
+                  <div class="message-item" v-for="item in messageList" :key="item.messageId">
+                    <div class="message-item-top">
+                      <div class="message-avatar">
+                        <el-avatar size="large" :src="item.createAvatar"/>
+                      </div>
+                      <div class="message-item-content">
+                        <div class="message-userName">
+                          {{ item.createName }}
+                        </div>
+                        <div class="message-content">
+                          {{ item.content }}
+                        </div>
+                        <div class="message-footer">
+                          <div class="message-create-time">
+                            {{ item.createTime }}
+                          </div>
+                        </div>
+                        <el-divider class="message-divider"/>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <el-empty v-else description="暂无留言"/>
+              </el-scrollbar>
             </el-tab-pane>
           </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
           <el-form-item label="负责人" required>
-            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人" clearable>
+            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
               <el-option
                   v-for="item in projectTestMember"
                   :key="item.userId"
@@ -307,23 +347,27 @@
           <el-form-item label="关联需求">
             <el-input v-model="echoTestPlan.demandName" disabled></el-input>
           </el-form-item>
-          <el-form-item label="开始日期" required>
+          <el-form-item label="计划周期" required>
             <el-date-picker
+                style="width: 155px;"
                 v-model="echoTestPlan.startTime"
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 placeholder="选择开始日期">
             </el-date-picker>
-          </el-form-item>
-          <el-form-item label="结束日期" required>
+            <span style="margin: 0 18px">-</span>
             <el-date-picker
+                style="width: 155px;"
                 v-model="echoTestPlan.endTime"
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 placeholder="选择结束日期">
             </el-date-picker>
+          </el-form-item>
+          <el-form-item label="创建人">
+            <el-input v-model="echoTestPlan.creatorName" disabled/>
           </el-form-item>
           <el-progress
               style="margin-top: 10px"
@@ -338,7 +382,8 @@
           </el-progress>
           <div class="dialog-footer">
             <el-button @click="handleCloseEditTestPlan">取消</el-button>
-            <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable">
+            <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable"
+                       :loading="loadingEditTestPlan">
               {{ editTestPlanBtnText }}
             </el-button>
           </div>
@@ -387,7 +432,7 @@
     <div slot="footer" class="dialog-footer">
       <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
       <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
-                 :disabled="editTestCaseBtnDisable">
+                 :disabled="editTestCaseBtnDisable" :loading="loadingEditTestCase">
         {{ editTestCaseBtnText }}
       </el-button>
     </div>
@@ -404,14 +449,14 @@ import {
   queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, queryTestReportByPlanId,
+  queryTestPlanList, queryTestPlanMessageList, queryTestReportByPlanId, submitTestPlanMessage,
   updateTestCase,
-  updateTestPlan,
+  updateTestPlan, updateTestReportApprovalStatusById, uploadTestReport,
 } from "../../api/TestPlanApi.ts";
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
-import request from '../../utils/reqRepInterceptors'
+import axios from "axios";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -426,7 +471,6 @@ const tablePage = {
 }
 const pageSizes = [10, 15, 30, 50, 100]
 const currentTestPlanStatus = ref(0)
-const uploadProgress = ref(0)
 
 //新增测试计划
 const loading = ref(true)
@@ -443,14 +487,16 @@ const form = ref({
   startTime: '',
   endTime: '',
 })
+const loadingAddTestPlan = ref(false)
 
-//编辑需求
+//编辑测试计划
 const openDialog = ref(false)
 const editTestPlanBtnText = ref('确定')
 const editTestPlanBtnDisable = ref(false)
 const echoTestPlan = ref({})
+const loadingEditTestPlan = ref(false)
 
-//测试用例
+//新增测试用例
 const loadTestCase = ref(true)
 const activeName = ref('caseList')
 const testCaseTableData = ref([])
@@ -461,20 +507,31 @@ const addTestCaseForm = ref({
 })
 const addTestCaseBtnText = ref('提交')
 const addTestCaseBtnDisable = ref(false)
+const loadingAddTestCase = ref(false)
 
 //编辑测试用例
 const editTestCaseDialogVisible = ref(false)
 const editTestCaseBtnText = ref('确定')
 const editTestCaseBtnDisable = ref(false)
 const echoTestCase = ref({})
+const loadingEditTestCase = ref(false)
 
 //测试报告
 const testReport = ref(null)
+const uploadProgress = ref(0)
 
 //其他
 const allProject = ref([])
 const projectDemand = ref([])
 const projectTestMember = ref([])
+const userAvatar = ref('')
+
+//留言
+const messageList = ref([])
+const loadingMessage = ref(false)
+const disableMessage = ref(false)
+const messageContent = ref('')
+const loadingMessageList = ref(false)
 
 const changeStatus = (status) => {
   currentTestPlanStatus.value = status
@@ -546,6 +603,7 @@ const handleCloseAddTestPlanDialog = () => {
 const submitForm = () => {
   addTestPlanBtnText.value = '提交中...'
   addTestPlanBtnDisable.value = true
+  loadingAddTestPlan.value = true
 
   if (form.value.planName === '') {
     ElNotification({
@@ -555,6 +613,7 @@ const submitForm = () => {
     })
     addTestPlanBtnText.value = '提交'
     addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
     return;
   }
 
@@ -566,6 +625,7 @@ const submitForm = () => {
     })
     addTestPlanBtnText.value = '提交'
     addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
     return;
   }
 
@@ -577,6 +637,7 @@ const submitForm = () => {
     })
     addTestPlanBtnText.value = '提交'
     addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
     return;
   }
 
@@ -588,6 +649,7 @@ const submitForm = () => {
     })
     addTestPlanBtnText.value = '提交'
     addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
     return;
   }
 
@@ -599,6 +661,7 @@ const submitForm = () => {
     })
     addTestPlanBtnText.value = '提交'
     addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
     return;
   }
 
@@ -610,6 +673,7 @@ const submitForm = () => {
     })
     addTestPlanBtnText.value = '提交'
     addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
     return;
   }
 
@@ -641,6 +705,7 @@ const submitForm = () => {
         }
         addTestPlanBtnText.value = '提交'
         addTestPlanBtnDisable.value = false
+        loadingAddTestPlan.value = false
       })
 }
 
@@ -666,8 +731,8 @@ const getProjectListByStatus = () => {
 const getDemandListByProId = () => {
   queryDemandByProId(form.value.projectId)
       .then(res => {
-        if (res.data.code === 200) {
-          projectDemand.value = res.data.data
+        if (res.data.code === 2001) {
+          projectDemand.value = res.data.data.allDemands
         }
       })
   getProjectTestMember(form.value.projectId)
@@ -699,8 +764,46 @@ const rowClick = (row) => {
 }
 
 const submitAddTestCase = () => {
-  addTestCaseBtnText.value = '提交中...'
+  addTestCaseBtnText.value = '提交中'
   addTestCaseBtnDisable.value = true
+  loadingAddTestCase.value = true
+
+  if (addTestCaseForm.value.caseName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例名称',
+      type: 'warning'
+    })
+    addTestCaseBtnText.value = '提交'
+    addTestCaseBtnDisable.value = false
+    loadingAddTestCase.value = false
+    return;
+  }
+
+  if (addTestCaseForm.value.caseContent === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例描述',
+      type: 'warning'
+    })
+    addTestCaseBtnText.value = '提交'
+    addTestCaseBtnDisable.value = false
+    loadingAddTestCase.value = false
+    return;
+  }
+
+  if (addTestCaseForm.value.priority === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择优先级',
+      type: 'warning'
+    })
+    addTestCaseBtnText.value = '提交'
+    addTestCaseBtnDisable.value = false
+    loadingAddTestCase.value = false
+    return;
+  }
+
   let formData = {
     caseName: addTestCaseForm.value.caseName,
     caseContent: addTestCaseForm.value.caseContent,
@@ -715,8 +818,6 @@ const submitAddTestCase = () => {
             message: res.data.message,
             type: 'success'
           })
-          addTestCaseBtnText.value = '提交'
-          addTestCaseBtnDisable.value = false
           addTestCaseForm.value = {
             caseName: '',
             caseContent: '',
@@ -728,9 +829,10 @@ const submitAddTestCase = () => {
             message: res.data.message,
             type: 'warning'
           })
-          addTestCaseBtnText.value = '提交'
-          addTestCaseBtnDisable.value = false
         }
+        addTestCaseBtnText.value = '提交'
+        addTestCaseBtnDisable.value = false
+        loadingAddTestCase.value = false
       })
 }
 
@@ -752,11 +854,63 @@ const handleCloseEditTestPlan = () => {
   activeName.value = 'caseList'
   testReport.value = null
   uploadProgress.value = 0
+  messageList.value = []
+  messageContent.value = ''
 }
 
 const handleSubmitEditTestPlan = () => {
-  editTestPlanBtnText.value = '提交中...'
+  editTestPlanBtnText.value = '提交中'
   editTestPlanBtnDisable.value = true
+  loadingEditTestPlan.value = true
+
+  if (echoTestPlan.value.planName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入测试计划名称',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  if (echoTestPlan.value.head === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择负责人',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  if (echoTestPlan.value.startTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划开始时间',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  if (echoTestPlan.value.endTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划结束时间',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
   let fromData = {
     testPlanId: echoTestPlan.value.testPlanId,
     planName: echoTestPlan.value.planName,
@@ -764,6 +918,7 @@ const handleSubmitEditTestPlan = () => {
     startTime: echoTestPlan.value.startTime.replace('T', ' '),
     endTime: echoTestPlan.value.endTime.replace('T', ' ')
   }
+
   updateTestPlan(fromData)
       .then(res => {
         if (res.data.code === 200) {
@@ -783,6 +938,7 @@ const handleSubmitEditTestPlan = () => {
         }
         editTestPlanBtnText.value = '提交'
         editTestPlanBtnDisable.value = false
+        loadingEditTestPlan.value = false
       })
 }
 
@@ -791,6 +947,8 @@ const handleTabClick = (tab) => {
     getTestCaseData()
   } else if (tab.props.name === 'testReport') {
     queryTestReport()
+  } else if (tab.props.name === 'message') {
+    getPlanMessage(echoTestPlan.value.testPlanId)
   }
 }
 
@@ -837,8 +995,58 @@ const deleteTestCase = (row) => {
 }
 
 const submitEditTestCase = () => {
-  editTestCaseBtnText.value = '提交中...'
+  editTestCaseBtnText.value = '提交中'
   editTestCaseBtnDisable.value = true
+  loadingEditTestCase.value = true
+
+  if (echoTestCase.value.caseName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例名称',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  if (echoTestCase.value.caseContent === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例描述',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  if (echoTestCase.value.priority === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择优先级',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  if (echoTestCase.value.status === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择状态',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
   let formData = {
     testCaseId: echoTestCase.value.testCaseId,
     caseName: echoTestCase.value.caseName,
@@ -866,6 +1074,7 @@ const submitEditTestCase = () => {
         }
         editTestCaseBtnText.value = '提交'
         editTestCaseBtnDisable.value = false
+        loadingEditTestCase.value = false
       })
 }
 
@@ -890,22 +1099,22 @@ const beforeUpload = (file) => {
   return isLt5M && isDoc;
 }
 
-const handleProgress = (event) => {
-  uploadProgress.value = Math.floor((event.loaded / event.total) * 100);
-}
-
 const handleUpload = (file) => {
+  uploadProgress.value = 0
+
   let formData = new FormData();
   formData.append('file', file.file);
   formData.append('testPlanId', echoTestPlan.value.testPlanId);
 
   const config = {
     onUploadProgress: (progressEvent) => {
+      console.log(progressEvent.loaded * 100)
+      console.log(progressEvent.total)
       uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
     },
   };
 
-  request.post('/common/upload/testReport', formData, config)
+  uploadTestReport(formData, config)
       .then(res => {
         if (res.data.code === 200) {
           ElNotification({
@@ -930,13 +1139,14 @@ const queryTestReport = () => {
       .then(res => {
         if (res.data.code === 200) {
           testReport.value = res.data.data
+          testReport.value.oldStatus = res.data.data.approvalStatus
         } else {
           testReport.value = null
         }
       })
 }
 
-const deleteTestReport = () =>  {
+const deleteTestReport = () => {
   ElMessageBox.confirm('此操作将永久删除该测试报告, 是否继续?', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -972,9 +1182,135 @@ const downloadTestReport = () => {
   window.open(testReport.value.reportFile)
 }
 
+const updateTestReportApprovalStatus = () => {
+  ElMessageBox.confirm('是否确认修改测试报告审批状态?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+      .then(() => {
+        updateTestReportApprovalStatusById(testReport.value.testReportId, testReport.value.approvalStatus)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+              } else {
+                testReport.value.approvalStatus = testReport.value.oldStatus
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        testReport.value.approvalStatus = testReport.value.oldStatus
+        ElNotification({
+          title: '提示',
+          message: '已取消修改',
+          type: 'info'
+        })
+      })
+}
+
+const getUserAvatar = () => {
+  let userInfo = localStorage.getItem("userInfo");
+  if (userInfo) {
+    userInfo = JSON.parse(userInfo)
+    userAvatar.value = userInfo.avatar
+  }
+}
+
+const getPlanMessage = (testPlanId) => {
+  loadingMessageList.value = true
+  queryTestPlanMessageList(testPlanId)
+      .then(res => {
+        if (res.data.code === 200) {
+          messageList.value = res.data.data
+
+          for (let i = 0; i < messageList.value.length; i++) {
+            messageList.value[i].createTime = messageList.value[i].createTime.replace('T', ' ')
+          }
+          loadingMessageList.value = false
+        }
+      })
+}
+
+const submitMessage = () => {
+  loadingMessage.value = true
+  disableMessage.value = true
+
+  console.log(messageContent.value.trim())
+
+  //判断内容是否合法
+  if (!messageContent.value.trim()) {
+    ElNotification({
+      title: '提示',
+      message: '留言内容不能为空',
+      type: 'warning'
+    })
+    loadingMessage.value = false
+    disableMessage.value = false
+    return
+  }
+
+  let data = {
+    key: 'aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N',
+    content: messageContent.value.trim()
+  }
+
+  let header = {
+    'Content-Type': 'application/json'
+  }
+  let url = 'https://api.wordscheck.com/check'
+  axios.post(url, data, {headers: header})
+      .then(res => {
+        if (res.data.word_list.length > 0) {
+          ElNotification({
+            title: '提示',
+            message: '留言内容包含敏感词汇，请修改后重新提交',
+            type: 'warning'
+          })
+          loadingMessage.value = false
+          disableMessage.value = false
+          return;
+        } else {
+          let formData = {
+            testPlanId: echoTestPlan.value.testPlanId,
+            content: messageContent.value.trim()
+          }
+          submitTestPlanMessage(formData)
+              .then(res => {
+                if (res.data.code === 200) {
+                  ElNotification({
+                    title: '成功',
+                    message: res.data.message,
+                    type: 'success'
+                  })
+                  messageContent.value = ''
+                  getPlanMessage(formData.testPlanId)
+                } else {
+                  ElNotification({
+                    title: '提示',
+                    message: res.data.message,
+                    type: 'warning'
+                  })
+                }
+                loadingMessage.value = false
+                disableMessage.value = false
+              })
+        }
+      })
+}
+
 onMounted(() => {
   loadTestPlanList()
   getProjectListByStatus()
+  getUserAvatar()
 })
 
 </script>
@@ -1068,9 +1404,72 @@ onMounted(() => {
   font-weight: bold;
 }
 
+.approval {
+  width: 110px;
+}
+
 .test-report-footer {
   display: flex;
   justify-content: flex-start;
   margin-top: 10px;
 }
+
+.message-my-avatar {
+  margin-right: 10px;
+  margin-bottom: 59px;
+}
+
+.message-list {
+  width: 100%;
+}
+
+.message-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.message-item-top {
+  width: 100%;
+  display: flex;
+}
+
+.message-item-content {
+  width: calc(100% - 75px);
+  margin-left: 10px;
+}
+
+.message-userName {
+  color: #61666d;
+}
+
+.message-content {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.message-footer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.message-divider {
+  margin: 10px 0;
+}
+
+.message-btn {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.message-send-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 </style>
