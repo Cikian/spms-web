@@ -552,7 +552,8 @@
       top="3vh"
       @close="handleCloseClickRow"
   >
-    <div style="width: 100%; height: 80vh; margin: 0 auto; display: flex; justify-content: space-between; overflow: hidden">
+    <div
+        style="width: 100%; height: 75vh; margin: 0 auto; display: flex; justify-content: space-between; overflow: hidden">
       <el-scrollbar style="width: 75%;">
         <el-input class="click-dialog-input" v-model="clickedDemand.title" placeholder="请输入需求标题" size="large"
                   style="height: 50px; font-size: 22px"></el-input>
@@ -739,9 +740,61 @@
             </div>
             <el-tabs v-model="secondTagName" class="click-row-bottom-tags">
               <el-tab-pane label="评论" name="comment">
+                <div style="width: 90%">
+                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
+                    <template #actions>
+                      <span @click="beforeReply(item)">回复</span>
+                    </template>
+                    <template #author>
+                      <a @click="toUserCenter(item.userId)">{{ item.nickName }}</a>
+                    </template>
+                    <template #avatar>
+                      <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                    </template>
+                    <template #content>
+                      <p>
+                        {{ item.content }}
+                      </p>
+                    </template>
+                    <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                      <a-comment v-if="r.toCommentId === item.commentId">
+                        <template #actions>
+                          <span @click="beforeReply(r)">回复</span>
+                        </template>
+                        <template #author>
+                          <a style="font-size: 14px">{{ r.nickName }}</a><a><span
+                            style="color: #16acff"> @ {{ r.toUserNickName }}</span></a>
+                        </template>
+                        <template #avatar>
+                          <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                        </template>
+                        <template #content>
+                          <p>
+                            {{ r.content }}
+                          </p>
+                        </template>
+                      </a-comment>
+                    </div>
+                  </a-comment>
 
-
-
+                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                    <div class="rep-box">
+                      <a-textarea
+                          class="rep-con"
+                          v-model:value="replyContent"
+                          placeholder="友善发言，文明评论~"
+                          :auto-size="{ minRows: 3, maxRows: 5 }"
+                          id="repCommentInput"
+                          @keydown.enter.native="replyComment"
+                      />
+                    </div>
+                    <a-form-item>
+                      <a-button style="float: right" type="primary" @click="replyComment()"
+                                :disabled="replyContent === ''">回复
+                      </a-button>
+                    </a-form-item>
+                  </a-modal>
+                </div>
 
               </el-tab-pane>
               <el-tab-pane label="活动" name="active">活动</el-tab-pane>
@@ -809,11 +862,21 @@
 
 
                 <template #prefix>
-                  <div class="table-statue" style="background-color: #73d897;" v-show="clickedDemand.priority===0">最低</div>
-                  <div class="table-statue" style="background-color: #5dcfff;" v-show="clickedDemand.priority===1">较低</div>
-                  <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.priority===2">普通</div>
-                  <div class="table-statue" style="background-color: #ff9f73;" v-show="clickedDemand.priority===3">较高</div>
-                  <div class="table-statue" style="background-color: #ff7575;" v-show="clickedDemand.priority===4">最高</div>
+                  <div class="table-statue" style="background-color: #73d897;" v-show="clickedDemand.priority===0">
+                    最低
+                  </div>
+                  <div class="table-statue" style="background-color: #5dcfff;" v-show="clickedDemand.priority===1">
+                    较低
+                  </div>
+                  <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.priority===2">
+                    普通
+                  </div>
+                  <div class="table-statue" style="background-color: #ff9f73;" v-show="clickedDemand.priority===3">
+                    较高
+                  </div>
+                  <div class="table-statue" style="background-color: #ff7575;" v-show="clickedDemand.priority===4">
+                    最高
+                  </div>
                 </template>
               </el-select>
             </div>
@@ -836,7 +899,9 @@
                 />
                 <template #prefix>
                   <div v-if="clickedDemand.type === null || clickedDemand.type === ''">——</div>
-                  <div v-for="item in demandTypes" :key="item.dictionaryDataId" v-show="item.dictionaryDataId === clickedDemand.type">{{ item.label }}</div>
+                  <div v-for="item in demandTypes" :key="item.dictionaryDataId"
+                       v-show="item.dictionaryDataId === clickedDemand.type">{{ item.label }}
+                  </div>
                 </template>
               </el-select>
             </div>
@@ -859,7 +924,9 @@
                 />
                 <template #prefix>
                   <div v-if="clickedDemand.source === null || clickedDemand.source === ''">——</div>
-                  <div v-for="item in demandSource" :key="item.dictionaryDataId" v-show="item.dictionaryDataId === clickedDemand.source">{{ item.label }}</div>
+                  <div v-for="item in demandSource" :key="item.dictionaryDataId"
+                       v-show="item.dictionaryDataId === clickedDemand.source">{{ item.label }}
+                  </div>
                 </template>
               </el-select>
             </div>
@@ -929,6 +996,22 @@
           :icon="['fas', 'square-check']"/></span>
       {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
     </template>
+    <template #footer>
+      <div class="post-comment-form" style="width: 100%; display: flex; justify-content: space-between">
+
+        <a-textarea
+            :auto-size="{ minRows: 1, maxRows: 6 }"
+            placeholder="友善发言，文明评论~"
+            v-model:value="postComment.content"
+            id="postCommentInput"
+            @keydown.enter.native="submitComment"
+        />
+
+        <a-button style="float: right" type="primary" @click="submitComment"
+                  :disabled="postComment.content === ''">评论
+        </a-button>
+      </div>
+    </template>
   </el-dialog>
 
 </template>
@@ -941,7 +1024,8 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
-  getAllDemandByProId,
+  addComment,
+  getAllDemandByProId, getCommentList,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
@@ -1237,6 +1321,7 @@ const clickRow = (row) => {
   clickValueHtmlReadOnly.value = row.demandDesc
   clickRowDialogVisible.value = true
   clickedDemand.value = row
+  getComments(clickedDemand.value.demandId)
 }
 
 const openClickEditor = () => {
@@ -1277,6 +1362,145 @@ const submitClickEditor = (demandId) => {
 
 const firstTagName = ref('baseInfo')
 const secondTagName = ref('comment')
+
+const openRep = ref(false)
+const replyContent = ref('')
+const postComment = ref({
+  toCommentId: '',
+  content: '',
+  workItemId: '',
+  userId: '',
+  avatar: '',
+  nickName: '',
+  toUserId: '',
+  toUserNickName: '',
+})
+
+const getComments = (workItemId) => {
+  getCommentList(workItemId).then((res) => {
+    if (res.data.code === 2001) {
+      let comments = res.data.data
+      firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
+      notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+    } else {
+
+    }
+  })
+}
+
+const submitComment = () => {
+  if (postComment.value.content === '') {
+    ElNotification({
+      title: 'Error',
+      message: '评论内容不能为空',
+      type: 'error',
+    })
+    return;
+  }
+
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+  postComment.value.workItemId = clickedDemand.value.demandId;
+  postComment.value.toCommentId = '0';
+  postComment.value.toUserId = '0';
+  postComment.value.toUserNickName = '';
+  postComment.value.avatar = userInfo.avatar;
+  postComment.value.nickName = userInfo.nickName;
+
+  addComment(postComment.value).then((res) => {
+    if (res.data.code === 3001) {
+      postComment.value.content = '';
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      getComments(clickedDemand.value.demandId)
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+
+}
+
+const beforeReply = (comment) => {
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+  openRep.value = true;
+  postComment.value.workItemId = clickedDemand.value.demandId;
+  if (comment.toCommentId === '0') {
+    postComment.value.toCommentId = comment.commentId;
+  } else {
+    postComment.value.toCommentId = comment.toCommentId;
+  }
+  postComment.value.toUserId = comment.userId;
+  postComment.value.toUserNickName = comment.userNickName;
+  postComment.value.avatar = userInfo.avatar
+  postComment.value.nickName = userInfo.nickName
+}
+const replyComment = () => {
+  if (replyContent.value === '') {
+    ElNotification({
+      title: 'Error',
+      message: '评论内容不能为空',
+      type: 'error',
+    })
+    return;
+  }
+  postComment.value.content = replyContent.value;
+
+  addComment(postComment.value).then((res) => {
+    if (res.data.code === 3001) {
+      postComment.value.content = '';
+      replyContent.value = '';
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      openRep.value = false;
+      getComments(clickedDemand.value.demandId)
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+
+const firstLevelComment = ref([
+  {
+    commentId: '',
+    toCommentId: '',
+    content: '',
+    workItemId: '',
+    userId: '',
+    avatar: '',
+    nickName: '',
+    toUserId: '',
+    toUserNickName: '',
+  }
+]);
+const notFirstLevelComment = ref([
+  {
+    commentId: '',
+    toCommentId: '',
+    content: '',
+    workItemId: '',
+    userId: '',
+    avatar: '',
+    nickName: '',
+    toUserId: '',
+    toUserNickName: '',
+  }
+]);
+
 
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {

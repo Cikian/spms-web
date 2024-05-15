@@ -87,3 +87,18 @@ export function updateDemandDesc(data) {
         data
     })
 }
+
+export function addComment(data) {
+    return request({
+        url: '/comment',
+        method: 'post',
+        data
+    })
+}
+
+export function getCommentList(workItemId) {
+    return request({
+        url: '/comment?id=' + workItemId,
+        method: 'get',
+    })
+}
