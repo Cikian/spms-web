@@ -56,33 +56,55 @@ export function updateDemandStatus(demandId, status) {
         method: 'put',
     })
 }
+
 export function updateDemandHeadId(demandId, headId) {
     return request({
         url: '/demand/changeHeadId/' + demandId + '/' + headId,
         method: 'put',
     })
 }
+
 export function updateDemandPriority(demandId, priority) {
     return request({
         url: '/demand/changePriority/' + demandId + '/' + priority,
         method: 'put',
     })
 }
+
 export function updateDemandType(demandId, type) {
     return request({
         url: '/demand/changeType/' + demandId + '/' + type,
         method: 'put',
     })
 }
+
 export function updateDemandSource(demandId, source) {
     return request({
         url: '/demand/changeSource/' + demandId + '/' + source,
         method: 'put',
     })
 }
+
 export function updateDemandDesc(data) {
     return request({
         url: '/demand/changeDesc',
+        method: 'put',
+        data
+    })
+}
+
+export function updateDemandStartTime(data) {
+    console.log(data)
+    return request({
+        url: '/demand/changeStartTime',
+        method: 'put',
+        data
+    })
+}
+
+export function updateDemandEndTime(data) {
+    return request({
+        url: '/demand/changeEndTime',
         method: 'put',
         data
     })
@@ -106,6 +128,13 @@ export function getCommentList(workItemId) {
 export function getChildrenWorkItemList(workItemId) {
     return request({
         url: '/demand/child/' + workItemId,
+        method: 'get',
+    })
+}
+
+export function getDemandActiveList(workItemId) {
+    return request({
+        url: '/demandActive?demandId=' + workItemId,
         method: 'get',
     })
 }

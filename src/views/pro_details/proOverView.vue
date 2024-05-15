@@ -50,25 +50,25 @@
           </el-row>
           <el-row>
             <el-col :span="24" style="padding-bottom: 18px; display: flex; justify-content: space-around">
-              <el-progress type="circle" :percentage="25" width="200">
+              <el-progress type="circle" :percentage="25" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">任务</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="100" status="success" width="200">
+              <el-progress type="circle" :percentage="100" status="success" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">缺陷</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="70" status="warning" width="200">
+              <el-progress type="circle" :percentage="70" status="warning" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">缺陷</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="50" status="exception" width="200">
+              <el-progress type="circle" :percentage="50" status="exception" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">测试</span>
