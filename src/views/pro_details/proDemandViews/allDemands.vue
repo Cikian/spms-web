@@ -246,7 +246,11 @@
       </template>
     </el-table-column>
     <el-table-column align="center" prop="storyPoint" label="故事点"/>
-    <el-table-column align="center" prop="updateTime" label="更新时间"/>
+    <el-table-column align="center" prop="updateTime" label="更新时间">
+      <template #default="scope">
+        {{ formatDate(new Date(scope.row.updateTime), 'YYYY-MM-DD HH:mm:ss') }}
+      </template>
+    </el-table-column>
 
   </el-table>
 
@@ -413,6 +417,8 @@
                 placeholder="选择日期"
                 size="large"
                 clearable
+                value-format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD"
             />
           </el-form-item>
           <el-form-item labei="结束时间">
@@ -422,6 +428,8 @@
                 placeholder="选择日期"
                 size="large"
                 clearable
+                value-format="YYYY-MM-DD HH:mm:ss"
+                format="YYYY-MM-DD"
             />
           </el-form-item>
           <el-form-item label="优先级">
@@ -740,13 +748,16 @@
             </div>
             <el-tabs v-model="secondTagName" class="click-row-bottom-tags">
               <el-tab-pane label="评论" name="comment">
-                <div style="width: 90%">
+                <div v-if="firstLevelComment.length <= 0">
+                  <a-empty description="暂无评论" />
+                </div>
+                <div style="width: 90%" v-else>
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
                     <template #actions>
                       <span @click="beforeReply(item)">回复</span>
                     </template>
                     <template #author>
-                      <a @click="toUserCenter(item.userId)">{{ item.nickName }}</a>
+                      <a>{{ item.nickName }}</a>
                     </template>
                     <template #avatar>
                       <a-avatar :src="item.avatar" :alt="item.nickName"/>
@@ -762,8 +773,9 @@
                           <span @click="beforeReply(r)">回复</span>
                         </template>
                         <template #author>
-                          <a style="font-size: 14px">{{ r.nickName }}</a><a><span
-                            style="color: #16acff"> @ {{ r.toUserNickName }}</span></a>
+                          <a style="font-size: 14px">{{ r.nickName }}</a>
+                          <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                          <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
                         </template>
                         <template #avatar>
                           <a-avatar :src="r.avatar" :alt="r.nickName"/>
@@ -970,7 +982,7 @@
           <div style="display: flex; margin-top: 14px">
             <div style="width: 25%;font-size: 14px; line-height: 38px;">创建时间</div>
             <div style="width: 50%;line-height: 38px">
-              {{ clickedDemand.createTime }}
+              {{ formatDate(new Date(clickedDemand.createTime), 'YYYY-MM-DD HH:mm:ss') }}
             </div>
           </div>
           <div style="display: flex; margin-top: 14px">
@@ -988,7 +1000,7 @@
           <div style="display: flex; margin-top: 14px">
             <div style="width: 25%;font-size: 14px; line-height: 38px;">更新时间</div>
             <div style="width: 50%;line-height: 38px">
-              {{ clickedDemand.updateTime }}
+              {{ formatDate(new Date(clickedDemand.updateTime), 'YYYY-MM-DD HH:mm:ss') }}
             </div>
           </div>
         </div>
@@ -1040,6 +1052,7 @@ import {
   updateDemandType
 } from "../../../api/demandApi.ts";
 import {recordVisit} from "../../../api/RecentVisitApi.ts";
+import {formatDate} from "@vueuse/shared";
 
 const proId = ref('')
 const currentProInfo = ref({})
@@ -1222,6 +1235,8 @@ const closeAddDemandDialog = () => {
 
 const handleCloseClickRow = () => {
   showDesc.value = true
+  firstLevelComment.value = []
+  notFirstLevelComment.value = []
 }
 
 const addWorkItem = (row) => {
@@ -1476,32 +1491,8 @@ const replyComment = () => {
   })
 }
 
-const firstLevelComment = ref([
-  {
-    commentId: '',
-    toCommentId: '',
-    content: '',
-    workItemId: '',
-    userId: '',
-    avatar: '',
-    nickName: '',
-    toUserId: '',
-    toUserNickName: '',
-  }
-]);
-const notFirstLevelComment = ref([
-  {
-    commentId: '',
-    toCommentId: '',
-    content: '',
-    workItemId: '',
-    userId: '',
-    avatar: '',
-    nickName: '',
-    toUserId: '',
-    toUserNickName: '',
-  }
-]);
+const firstLevelComment = ref([]);
+const notFirstLevelComment = ref([]);
 
 
 // 组件销毁时，也及时销毁编辑器
