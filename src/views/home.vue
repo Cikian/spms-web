@@ -67,12 +67,6 @@
 
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting,
-} from '@element-plus/icons-vue'
 import router from "../router";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
