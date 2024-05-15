@@ -102,3 +102,10 @@ export function getCommentList(workItemId) {
         method: 'get',
     })
 }
+
+export function getChildrenWorkItemList(workItemId) {
+    return request({
+        url: '/demand/child/' + workItemId,
+        method: 'get',
+    })
+}

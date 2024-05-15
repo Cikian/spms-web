@@ -10,7 +10,7 @@
             :router="true"
         >
           <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px"
-                                                              icon="fa-solid fa-house"/>项目名称<el-divider
+                                                              icon="fa-solid fa-house"/>{{ currentProInfo.proName }}<el-divider
               style="margin: 0 16px" direction="vertical"/></span>
           <el-menu-item class="h-menu-item" index="/proDetail/overView">概览</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proDemand">需求</el-menu-item>
@@ -32,13 +32,30 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
+import {queryProByProId} from "../../api/demandApi.ts";
+
+const currentProId = ref('')
+const currentProInfo = ref({})
 
 onMounted(() => {
   // router.push("/proDetail/overView")
+  currentProId.value = localStorage.getItem('proDetailId')
+  getCurrentProInfo()
 })
+
+const getCurrentProInfo = () => {
+  queryProByProId(currentProId.value).then((res) => {
+    if (res.data.code === 2001) {
+      currentProInfo.value = res.data.data
+      console.log(currentProInfo.value)
+    } else {
+
+    }
+  })
+}
 
 
 </script>
