@@ -457,6 +457,7 @@ import {getProListByStatus} from "../../api/allProApi.ts";
 import {queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import axios from "axios";
+import {recordVisit} from "../../api/RecentVisitApi.ts";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -761,6 +762,7 @@ const rowClick = (row) => {
   openDialog.value = true
   getProjectTestMember(row.projectId)
   getTestPlanDetailById(row.testPlanId)
+  recordVisit(row.testPlanId, 3)
 }
 
 const submitAddTestCase = () => {
