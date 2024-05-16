@@ -287,86 +287,94 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <div v-if="firstLevelComment.length <= 0">
-                <a-empty description="暂无评论"/>
+              <div class="loading" v-if="loadingMessage">
+                <a-spin/>
               </div>
-              <div style="width: 90%" v-else>
-                <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
-                  <template #actions>
-                    <span @click="beforeReply(item)">回复</span>
-                  </template>
-                  <template #author>
-                    <a>{{ item.nickName }}</a>
-                  </template>
-                  <template #avatar>
-                    <a-avatar :src="item.avatar" :alt="item.nickName"/>
-                  </template>
-                  <template #content>
-                    <p>
-                      {{ item.content }}
-                    </p>
-                  </template>
-                  <div v-for="(r,i) in notFirstLevelComment" :key="i">
-                    <a-comment v-if="r.toCommentId === item.commentId">
-                      <template #actions>
-                        <span @click="beforeReply(r)">回复</span>
-                      </template>
-                      <template #author>
-                        <a style="font-size: 14px">{{ r.nickName }}</a>
-                        <span style="margin: 0 5px; font-size: 12px">回复了</span>
-                        <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
-                      </template>
-                      <template #avatar>
-                        <a-avatar :src="r.avatar" :alt="r.nickName"/>
-                      </template>
-                      <template #content>
-                        <p>
-                          {{ r.content }}
-                        </p>
-                      </template>
-                    </a-comment>
-                  </div>
-                </a-comment>
-
-                <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
-                  <div class="rep-box">
+              <div class="loaded" v-else>
+                <div class="message-container">
+                  <div class="post-comment-form">
                     <a-textarea
-                        class="rep-con"
-                        v-model:value="replyContent"
+                        :auto-size="{ minRows: 4, maxRows: 4 }"
                         placeholder="友善发言，文明评论~"
-                        :auto-size="{ minRows: 3, maxRows: 5 }"
-                        id="repCommentInput"
-                        @keydown.enter.native="replyComment"
+                        v-model:value="postComment.content"
+                        id="postCommentInput"
+                        @keydown.enter.native="submitComment"
                     />
                   </div>
-                  <a-form-item>
-                    <a-button style="float: right" type="primary" @click="replyComment()"
-                              :disabled="replyContent === ''">回复
-                    </a-button>
-                  </a-form-item>
-                </a-modal>
-              </div>
-              <div style="width: 55vw; position: fixed; bottom: 10vh">
-                <div class="post-comment-form"
-                     style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
-                  <a-textarea
-                      :auto-size="{ minRows: 3, maxRows: 6 }"
-                      placeholder="友善发言，文明评论~"
-                      v-model:value="postComment.content"
-                      id="postCommentInput"
-                      @keydown.enter.native="submitComment"
-                  />
-
-                  <a-button style="margin-left: 30px" type="primary" @click="submitComment"
+                  <a-button style="margin: 10px 0" type="primary" @click="submitComment"
                             :disabled="postComment.content === ''">评论
                   </a-button>
+                </div>
+                <div v-if="firstLevelComment.length <= 0">
+                  <a-empty description="暂无评论"/>
+                </div>
+                <div v-else>
+                  <el-scrollbar max-height="38vh">
+                    <a-comment v-for="(item,index) in firstLevelComment" :key="index"
+                               v-if="firstLevelComment.length > 0" style="border-bottom: 1px solid #f0f0f0">
+                      <template #actions>
+                        <span>{{ item.createTime }}</span>
+                        <span @click="beforeReply(item)">回复</span>
+                      </template>
+                      <template #author>
+                        <a>{{ item.nickName }}</a>
+                      </template>
+                      <template #avatar>
+                        <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                      </template>
+                      <template #content>
+                        <p style="font-size: 16px">
+                          {{ item.content }}
+                        </p>
+                      </template>
+                      <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                        <a-comment v-if="r.toCommentId === item.commentId">
+                          <template #actions>
+                            <span>{{ r.createTime }}</span>
+                            <span @click="beforeReply(r)">回复</span>
+                          </template>
+                          <template #author>
+                            <a style="font-size: 14px">{{ r.nickName }}</a>
+                            <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                            <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                          </template>
+                          <template #avatar>
+                            <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                          </template>
+                          <template #content>
+                            <p style="font-size: 16px">
+                              {{ r.content }}
+                            </p>
+                          </template>
+                        </a-comment>
+                      </div>
+                    </a-comment>
+                  </el-scrollbar>
+
+                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                    <div class="rep-box">
+                      <a-textarea
+                          class="rep-con"
+                          v-model:value="replyContent"
+                          placeholder="友善发言，文明评论~"
+                          :auto-size="{ minRows: 3, maxRows: 5 }"
+                          id="repCommentInput"
+                          @keydown.enter.native="replyComment"
+                      />
+                    </div>
+                    <a-form-item>
+                      <a-button style="float: right" type="primary" @click="replyComment()"
+                                :disabled="replyContent === ''">回复
+                      </a-button>
+                    </a-form-item>
+                  </a-modal>
                 </div>
               </div>
             </el-tab-pane>
           </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
-          <el-form-item label="负责人" required>
+          <el-form-item label="负责人" required v-loading="loadingTestMembers">
             <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
               <el-option
                   v-for="item in projectTestMember"
@@ -475,7 +483,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addTestCase,
@@ -492,6 +500,7 @@ import {getProListByStatus} from "../../api/allProApi.ts";
 import {addComment, getCommentList, queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
+import {useRoute} from "vue-router";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -530,6 +539,7 @@ const editTestPlanBtnText = ref('确定')
 const editTestPlanBtnDisable = ref(false)
 const echoTestPlan = ref({})
 const loadingEditTestPlan = ref(false)
+const loadingTestMembers = ref(true)
 
 //新增测试用例
 const loadTestCase = ref(true)
@@ -562,6 +572,7 @@ const projectTestMember = ref([])
 const userAvatar = ref('')
 
 //留言
+const loadingMessage = ref(true)
 const firstLevelComment = ref([]);
 const notFirstLevelComment = ref([]);
 const postComment = ref({
@@ -784,10 +795,12 @@ const getDemandListByProId = () => {
 }
 
 const getProjectTestMember = (projectId) => {
+  loadingTestMembers.value = true
   queryProjectTestMember(projectId)
       .then(res => {
         if (res.data.code === 200) {
           projectTestMember.value = res.data.data
+          loadingTestMembers.value = false
         }
       })
 }
@@ -798,13 +811,13 @@ const getTestPlanDetailById = (planId) => {
         if (res.data.code === 200) {
           echoTestPlan.value = res.data.data
           getTestCaseData()
+          getProjectTestMember(echoTestPlan.value.projectId)
         }
       })
 }
 
 const rowClick = (row) => {
   openDialog.value = true
-  getProjectTestMember(row.projectId)
   getTestPlanDetailById(row.testPlanId)
   recordVisit(row.testPlanId, 3)
 }
@@ -900,6 +913,17 @@ const handleCloseEditTestPlan = () => {
   activeName.value = 'caseList'
   testReport.value = null
   uploadProgress.value = 0
+  postComment.value = {
+    toCommentId: '',
+    content: '',
+    workItemId: '',
+    userId: '',
+    avatar: '',
+    nickName: '',
+    toUserId: '',
+    toUserNickName: '',
+  }
+  replyContent.value = ''
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -1270,13 +1294,37 @@ const getUserAvatar = () => {
 }
 
 const getComments = (workItemId) => {
-  getCommentList(workItemId).then((res) => {
-    if (res.data.code === 2001) {
-      let comments = res.data.data
-      firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
-      notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
-    }
-  })
+  loadingMessage.value = true
+  getCommentList(workItemId)
+      .then((res) => {
+        if (res.data.code === 2001) {
+          let comments = res.data.data
+          console.log(comments)
+          for (let i = 0; i < comments.length; i++) {
+            comments[i].createTime = comments[i].createTime.replace('T', ' ')
+          }
+
+          for (let i = 0; i < comments.length; i++) {
+            let now = new Date().getTime()
+            let createTime = new Date(comments[i].createTime).getTime()
+            let diff = now - createTime
+            if (diff < 86400000) {
+              if (diff < 60000) {
+                comments[i].createTime = '刚刚'
+              } else if (diff < 3600000) {
+                console.log(diff / 60000)
+                comments[i].createTime = Math.floor(diff / 60000) + '分钟前'
+              } else {
+                comments[i].createTime = Math.floor(diff / 3600000) + '小时前'
+              }
+            }
+          }
+
+          firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
+          notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+          loadingMessage.value = false
+        }
+      })
 }
 
 const submitComment = () => {
@@ -1366,10 +1414,22 @@ const replyComment = () => {
   })
 }
 
+const isFromRecentVisit = () => {
+  let recent = localStorage.getItem("recentVisit");
+  if (recent) {
+    let row = {
+      testPlanId: recent
+    }
+    rowClick(row)
+    localStorage.removeItem("recentVisit")
+  }
+}
+
 onMounted(() => {
   loadTestPlanList()
   getProjectListByStatus()
   getUserAvatar()
+  isFromRecentVisit()
 })
 
 </script>
@@ -1473,4 +1533,24 @@ onMounted(() => {
   margin-top: 10px;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.message-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.post-comment-form {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end
+}
 </style>

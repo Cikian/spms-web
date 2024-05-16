@@ -317,13 +317,13 @@ const router = createRouter({
                 {
                     path: '/test',
                     name: 'test',
-                    redirect: '/test/list/qualityTarget',
+                    redirect: '/test/list/myTest',
                     component: () => import('../views/test_management/test-home.vue'),
                     children: [
                         {
                             path: '/test/list',
                             name: 'testList',
-                            redirect: '/test/list/qualityTarget',
+                            redirect: '/test/list/myTest',
                             component: () => import('../views/test_management/test-list.vue'),
                             children: [
                                 {

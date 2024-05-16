@@ -105,7 +105,12 @@ const getUserRecentVisitPro = () => {
 }
 
 const rowClick = (item) => {
-  console.log(item)
+  if (item.type === 2){
+
+  }else if (item.type === 3){
+    localStorage.setItem("recentVisit", item.id)
+    router.push('/test/list/myTest')
+  }
 }
 
 onMounted(() => {
