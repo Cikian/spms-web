@@ -491,7 +491,6 @@ import {
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {addComment, getCommentList, queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
-import axios from "axios";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
 
 const colors = [
@@ -1270,128 +1269,12 @@ const getUserAvatar = () => {
   }
 }
 
-
-const getComments = (workItemId) => {
-  getCommentList(workItemId)
-      .then((res) => {
-        if (res.data.code === 2001) {
-          let comments = res.data.data
-          firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
-          notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
-        } else {
-
-        }
-      })
-}
-
-const submitComment = () => {
-  if (postComment.value.content === '') {
-    ElNotification({
-      title: 'Error',
-      message: '评论内容不能为空',
-      type: 'error',
-    })
-    return;
-  }
-
-  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
-
-  postComment.value.workItemId = clickedDemand.value.demandId;
-  postComment.value.toCommentId = '0';
-  postComment.value.toUserId = '0';
-  postComment.value.toUserNickName = '';
-  postComment.value.avatar = userInfo.avatar;
-  postComment.value.nickName = userInfo.nickName;
-
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      ElNotification({
-        title: 'Success',
-        message: res.data.message,
-        type: 'success',
-      })
-      getComments(clickedDemand.value.demandId)
-    } else {
-      ElNotification({
-        title: 'Error',
-        message: res.data.message,
-        type: 'error',
-      })
-    }
-  })
-
-}
-
-const beforeReply = (comment) => {
-  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
-
-  openRep.value = true;
-  postComment.value.workItemId = clickedDemand.value.demandId;
-  if (comment.toCommentId === '0') {
-    postComment.value.toCommentId = comment.commentId;
-  } else {
-    postComment.value.toCommentId = comment.toCommentId;
-  }
-  postComment.value.toUserId = comment.userId;
-  postComment.value.toUserNickName = comment.userNickName;
-  postComment.value.avatar = userInfo.avatar
-  postComment.value.nickName = userInfo.nickName
-}
-
-const replyComment = () => {
-  if (replyContent.value === '') {
-    ElNotification({
-      title: 'Error',
-      message: '评论内容不能为空',
-      type: 'error',
-    })
-    return;
-  }
-  postComment.value.content = replyContent.value;
-
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      replyContent.value = '';
-      ElNotification({
-        title: 'Success',
-        message: res.data.message,
-        type: 'success',
-      })
-      openRep.value = false;
-      getComments(clickedDemand.value.demandId)
-    } else {
-      ElNotification({
-        title: 'Error',
-        message: res.data.message,
-        type: 'error',
-      })
-    }
-  })
-}
-
-const openRep = ref(false)
-const replyContent = ref('')
-const postComment = ref({
-  toCommentId: '',
-  content: '',
-  workItemId: '',
-  userId: '',
-  avatar: '',
-  nickName: '',
-  toUserId: '',
-  toUserNickName: '',
-})
-
 const getComments = (workItemId) => {
   getCommentList(workItemId).then((res) => {
     if (res.data.code === 2001) {
       let comments = res.data.data
       firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
       notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
-    } else {
-
     }
   })
 }
@@ -1399,9 +1282,9 @@ const getComments = (workItemId) => {
 const submitComment = () => {
   if (postComment.value.content === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return;
   }
@@ -1419,16 +1302,16 @@ const submitComment = () => {
     if (res.data.code === 3001) {
       postComment.value.content = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
       getComments(echoTestPlan.value.testPlanId)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1450,12 +1333,13 @@ const beforeReply = (comment) => {
   postComment.value.avatar = userInfo.avatar
   postComment.value.nickName = userInfo.nickName
 }
+
 const replyComment = () => {
   if (replyContent.value === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning'
     })
     return;
   }
@@ -1474,17 +1358,13 @@ const replyComment = () => {
       getComments(echoTestPlan.value.testPlanId)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
 }
-
-const firstLevelComment = ref([]);
-const notFirstLevelComment = ref([]);
-
 
 onMounted(() => {
   loadTestPlanList()
@@ -1591,64 +1471,6 @@ onMounted(() => {
   display: flex;
   justify-content: flex-start;
   margin-top: 10px;
-}
-
-.message-my-avatar {
-  margin-right: 10px;
-  margin-bottom: 59px;
-}
-
-.message-list {
-  width: 100%;
-}
-
-.message-item {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
-}
-
-.message-item-top {
-  width: 100%;
-  display: flex;
-}
-
-.message-item-content {
-  width: calc(100% - 75px);
-  margin-left: 10px;
-}
-
-.message-userName {
-  color: #61666d;
-}
-
-.message-content {
-  margin-top: 10px;
-  font-size: 18px;
-}
-
-.message-footer {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.message-divider {
-  margin: 10px 0;
-}
-
-.message-btn {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.message-send-container {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
 }
 
 </style>
