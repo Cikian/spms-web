@@ -10,7 +10,7 @@
         >
           <span style="line-height: 52px;">
             <font-awesome-icon class="home-icon" style="color: #6bed7a;margin-right: 5px" icon="fa-solid fa-file-lines"/>
-            质量管理
+            测试管理
           </span>
           <Notification/>
           <AvatarMenu/>

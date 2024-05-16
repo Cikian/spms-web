@@ -26,7 +26,7 @@
               </el-menu-item>
               <el-menu-item index="/test">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-file-lines"/>
-                <template #title>质量管理</template>
+                <template #title>测试管理</template>
               </el-menu-item>
               <el-menu-item index="/user" v-if="isAdmin">
                 <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-user"/>

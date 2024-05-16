@@ -366,7 +366,7 @@
           </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
-          <el-form-item label="负责人" required>
+          <el-form-item label="负责人" required v-loading="loadingTestMembers">
             <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
               <el-option
                   v-for="item in projectTestMember"
@@ -475,7 +475,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addTestCase,
@@ -491,8 +491,8 @@ import {
 import {getProListByStatus} from "../../api/allProApi.ts";
 import {addComment, getCommentList, queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
-import axios from "axios";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
+import {useRoute} from "vue-router";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -531,6 +531,7 @@ const editTestPlanBtnText = ref('确定')
 const editTestPlanBtnDisable = ref(false)
 const echoTestPlan = ref({})
 const loadingEditTestPlan = ref(false)
+const loadingTestMembers = ref(true)
 
 //新增测试用例
 const loadTestCase = ref(true)
@@ -562,6 +563,22 @@ const projectDemand = ref([])
 const projectTestMember = ref([])
 const userAvatar = ref('')
 
+//留言
+const loadingMessage = ref(true)
+const firstLevelComment = ref([]);
+const notFirstLevelComment = ref([]);
+const postComment = ref({
+  toCommentId: '',
+  content: '',
+  workItemId: '',
+  userId: '',
+  avatar: '',
+  nickName: '',
+  toUserId: '',
+  toUserNickName: '',
+})
+const openRep = ref(false)
+const replyContent = ref('')
 
 
 const changeStatus = (status) => {
@@ -770,10 +787,12 @@ const getDemandListByProId = () => {
 }
 
 const getProjectTestMember = (projectId) => {
+  loadingTestMembers.value = true
   queryProjectTestMember(projectId)
       .then(res => {
         if (res.data.code === 200) {
           projectTestMember.value = res.data.data
+          loadingTestMembers.value = false
         }
       })
 }
@@ -784,6 +803,7 @@ const getTestPlanDetailById = (planId) => {
         if (res.data.code === 200) {
           echoTestPlan.value = res.data.data
           getTestCaseData()
+          getProjectTestMember(echoTestPlan.value.projectId)
         }
       })
 }
@@ -886,8 +906,17 @@ const handleCloseEditTestPlan = () => {
   activeName.value = 'caseList'
   testReport.value = null
   uploadProgress.value = 0
-  messageList.value = []
-  messageContent.value = ''
+  postComment.value = {
+    toCommentId: '',
+    content: '',
+    workItemId: '',
+    userId: '',
+    avatar: '',
+    nickName: '',
+    toUserId: '',
+    toUserNickName: '',
+  }
+  replyContent.value = ''
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -1257,37 +1286,46 @@ const getUserAvatar = () => {
   }
 }
 
-const openRep = ref(false)
-const replyContent = ref('')
-const postComment = ref({
-  toCommentId: '',
-  content: '',
-  workItemId: '',
-  userId: '',
-  avatar: '',
-  nickName: '',
-  toUserId: '',
-  toUserNickName: '',
-})
-
 const getComments = (workItemId) => {
-  getCommentList(workItemId).then((res) => {
-    if (res.data.code === 2001) {
-      let comments = res.data.data
-      firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
-      notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
-    } else {
+  loadingMessage.value = true
+  getCommentList(workItemId)
+      .then((res) => {
+        if (res.data.code === 2001) {
+          let comments = res.data.data
+          console.log(comments)
+          for (let i = 0; i < comments.length; i++) {
+            comments[i].createTime = comments[i].createTime.replace('T', ' ')
+          }
 
-    }
-  })
+          for (let i = 0; i < comments.length; i++) {
+            let now = new Date().getTime()
+            let createTime = new Date(comments[i].createTime).getTime()
+            let diff = now - createTime
+            if (diff < 86400000) {
+              if (diff < 60000) {
+                comments[i].createTime = '刚刚'
+              } else if (diff < 3600000) {
+                console.log(diff / 60000)
+                comments[i].createTime = Math.floor(diff / 60000) + '分钟前'
+              } else {
+                comments[i].createTime = Math.floor(diff / 3600000) + '小时前'
+              }
+            }
+          }
+
+          firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
+          notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+          loadingMessage.value = false
+        }
+      })
 }
 
 const submitComment = () => {
   if (postComment.value.content === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return;
   }
@@ -1305,16 +1343,16 @@ const submitComment = () => {
     if (res.data.code === 3001) {
       postComment.value.content = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
       getComments(echoTestPlan.value.testPlanId)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1336,12 +1374,13 @@ const beforeReply = (comment) => {
   postComment.value.avatar = userInfo.avatar
   postComment.value.nickName = userInfo.nickName
 }
+
 const replyComment = () => {
   if (replyContent.value === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning'
     })
     return;
   }
@@ -1360,22 +1399,30 @@ const replyComment = () => {
       getComments(echoTestPlan.value.testPlanId)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
 }
 
-const firstLevelComment = ref([]);
-const notFirstLevelComment = ref([]);
-
+const isFromRecentVisit = () => {
+  let recent = localStorage.getItem("recentVisit");
+  if (recent) {
+    let row = {
+      testPlanId: recent
+    }
+    rowClick(row)
+    localStorage.removeItem("recentVisit")
+  }
+}
 
 onMounted(() => {
   loadTestPlanList()
   getProjectListByStatus()
   getUserAvatar()
+  isFromRecentVisit()
 })
 
 </script>
@@ -1479,62 +1526,24 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.message-my-avatar {
-  margin-right: 10px;
-  margin-bottom: 59px;
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
 }
 
-.message-list {
-  width: 100%;
-}
-
-.message-item {
+.message-container {
   width: 100%;
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
+  align-items: flex-end;
 }
 
-.message-item-top {
+.post-comment-form {
   width: 100%;
   display: flex;
+  justify-content: space-between;
+  align-items: flex-end
 }
-
-.message-item-content {
-  width: calc(100% - 75px);
-  margin-left: 10px;
-}
-
-.message-userName {
-  color: #61666d;
-}
-
-.message-content {
-  margin-top: 10px;
-  font-size: 18px;
-}
-
-.message-footer {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.message-divider {
-  margin: 10px 0;
-}
-
-.message-btn {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.message-send-container {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
 </style>

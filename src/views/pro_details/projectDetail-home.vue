@@ -9,8 +9,7 @@
             style="height: 52px; padding: 0 20px; box-shadow: rgba(0, 0, 0, 0.1) 0 0 4px"
             :router="true"
         >
-          <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px"
-                                                              icon="fa-solid fa-house"/>{{ currentProInfo.proName }}<el-divider
+          <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px" icon="fa-solid fa-house"/>{{ currentProInfo.proName }}<el-divider
               style="margin: 0 16px" direction="vertical"/></span>
           <el-menu-item class="h-menu-item" index="/proDetail/overView">概览</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proDemand">需求</el-menu-item>

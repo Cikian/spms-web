@@ -330,6 +330,11 @@ const router = createRouter({
                                     path: '/test/list/myTest',
                                     name: 'myTest',
                                     component: () => import('../views/test_management/my-test.vue')
+                                },
+                                {
+                                    path: '/test/list/qualityTarget',
+                                    name: 'qualityTarget',
+                                    component: () => import('../views/test_management/quality-target.vue')
                                 }
                             ]
                         }

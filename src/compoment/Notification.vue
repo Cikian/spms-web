@@ -1,8 +1,9 @@
 <template>
   <!--  通知图标-->
   <div class="notification" @click="openNotificationList">
-    <span class="tip" v-if="notificationList.length !== 0"></span>
-    <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" style=""/>
+    <a-badge :dot="notificationList.length !== 0">
+      <font-awesome-icon icon="fa-regular fa-bell" class="notification-icon" style=""/>
+    </a-badge>
   </div>
 
   <el-drawer
@@ -37,7 +38,9 @@
             <el-card v-else v-for="(item,index) in notificationOldList" :key="index"
                      style="margin-bottom: 10px;cursor: pointer" shadow="hover"
                      @click="readNotify(item.notificationId,index)">
-              <div>{{ item.content }}&nbsp;<span style="color: #409eff;text-decoration: underline">{{ item.title }}</span></div>
+              <div>{{ item.content }}&nbsp;<span style="color: #409eff;text-decoration: underline">{{
+                  item.title
+                }}</span></div>
             </el-card>
           </div>
         </transition>
