@@ -2,14 +2,14 @@
   <el-container>
     <el-aside width="260px">
       <el-menu
-          default-active="/test/list/myTest"
+          default-active="/test/list/qualityTarget"
           class="el-menu-vertical-demo"
           background-color="#fbfbfb"
           active-text-color="#6698ff"
           :router="true"
       >
         <div class="group-title">项目质量</div>
-        <el-menu-item style="margin:0 0 12px 0;" index="1">
+        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/qualityTarget">
           <font-awesome-icon class="list-icons" :icon="['fas', 'list']"/>
           <template #title>质量目标</template>
         </el-menu-item>

@@ -40,7 +40,7 @@
     <el-skeleton v-if="loadingVisit" :rows="10" :throttle="500" animated/>
     <el-empty v-else-if="emptyVisit" description="暂无数据"/>
     <div v-else>
-      <el-row style="height: 56px; border-bottom: solid 0.8px #eee;" v-for="item in visited" :key="item.flag">
+      <el-row style="height: 56px; border-bottom: solid 0.8px #eee;" v-for="item in visited" :key="item.flag" @click="rowClick(item)">
         <el-col :span="19" style="padding: 12px 16px;line-height: 32px">
           <font-awesome-icon style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
           <span style="margin-right: 8px; color: #999;">{{ item.flag }}</span>
@@ -64,13 +64,13 @@ const emptyVisit = ref(false)
 const loadingVisitPro = ref(true)
 const emptyVisitPro = ref(false)
 
+const pros = ref([])
+const visited = ref([])
+
 const toProDetail = (proId) => {
   localStorage.setItem('proDetailId', proId)
   router.push('/proDetail')
 }
-
-const pros = ref([])
-const visited = ref([])
 
 const getUserRecentVisit = () => {
   queryRecentVisits()
@@ -102,6 +102,10 @@ const getUserRecentVisitPro = () => {
       .finally(() => {
         loadingVisitPro.value = false
       })
+}
+
+const rowClick = (item) => {
+  console.log(item)
 }
 
 onMounted(() => {

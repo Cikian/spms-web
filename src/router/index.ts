@@ -317,19 +317,24 @@ const router = createRouter({
                 {
                     path: '/test',
                     name: 'test',
-                    redirect: '/test/list/myTest',
+                    redirect: '/test/list/qualityTarget',
                     component: () => import('../views/test_management/test-home.vue'),
                     children: [
                         {
                             path: '/test/list',
                             name: 'testList',
-                            redirect: '/test/list/myTest',
+                            redirect: '/test/list/qualityTarget',
                             component: () => import('../views/test_management/test-list.vue'),
                             children: [
                                 {
                                     path: '/test/list/myTest',
                                     name: 'myTest',
                                     component: () => import('../views/test_management/my-test.vue')
+                                },
+                                {
+                                    path: '/test/list/qualityTarget',
+                                    name: 'qualityTarget',
+                                    component: () => import('../views/test_management/quality-target.vue')
                                 }
                             ]
                         }

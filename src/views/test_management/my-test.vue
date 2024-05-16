@@ -901,8 +901,6 @@ const handleCloseEditTestPlan = () => {
   activeName.value = 'caseList'
   testReport.value = null
   uploadProgress.value = 0
-  messageList.value = []
-  messageContent.value = ''
 }
 
 const handleSubmitEditTestPlan = () => {
