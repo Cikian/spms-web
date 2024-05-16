@@ -370,21 +370,40 @@
                 placeholder="请选父工作项"
                 size="large"
                 clearable
+                @change="addDemandFatherDemandIdChange"
             >
               <el-option
-                  v-for="item in allDemands"
+                  v-for="item in allFatherDemands"
                   :key="item.demandId"
                   :label="item.title"
                   :value="item.demandId"
-              />
+              >
+                <div style="display: flex; align-items: center; text-align: center">
+                  <div style="display: flex; align-items: center;">
+                    <font-awesome-icon style="color: #ff877b;width: 18px" :icon="['fas', 'bolt-lightning']"
+                                       v-show="item.workItemType===0"/>
+                    <font-awesome-icon style="color: #9191f9;width: 18px" :icon="['fas', 'flag']"
+                                       v-show="item.workItemType===1"/>
+                    <font-awesome-icon style="color: #30d1fc;width: 18px" :icon="['fas', 'book-open']"
+                                       v-show="item.workItemType===2"/>
+                    <font-awesome-icon style="color: #73d897;width: 18px" :icon="['fas', 'square-check']"
+                                       v-show="item.workItemType===3"/>
+                  </div>
+                  <span style="margin-left: 10px">{{ item.title }}</span>
+                </div>
+              </el-option>
 
 
-              <!--              <template #prefix>-->
-              <!--                <font-awesome-icon style="color: #ff877b;width: 18px" :icon="['fas', 'bolt-lightning']" v-show=".dType===0"/>-->
-              <!--                <font-awesome-icon style="color: #9191f9;width: 18px" :icon="['fas', 'flag']" v-show="newDemandFormData.dType===1"/>-->
-              <!--                <font-awesome-icon style="color: #30d1fc;width: 18px" :icon="['fas', 'book-open']" v-show="newDemandFormData.dType===2"/>-->
-              <!--                <font-awesome-icon style="color: #73d897;width: 18px" :icon="['fas', 'square-check']" v-show="newDemandFormData.dType===3"/>-->
-              <!--              </template>-->
+              <template #prefix>
+                <font-awesome-icon style="color: #ff877b;width: 18px" :icon="['fas', 'bolt-lightning']"
+                                   v-show="addDemandFatherDemandSelected.workItemType===0"/>
+                <font-awesome-icon style="color: #9191f9;width: 18px" :icon="['fas', 'flag']"
+                                   v-show="addDemandFatherDemandSelected.workItemType===1"/>
+                <font-awesome-icon style="color: #30d1fc;width: 18px" :icon="['fas', 'book-open']"
+                                   v-show="addDemandFatherDemandSelected.workItemType===2"/>
+                <font-awesome-icon style="color: #73d897;width: 18px" :icon="['fas', 'square-check']"
+                                   v-show="addDemandFatherDemandSelected.workItemType===3"/>
+              </template>
             </el-select>
           </el-form-item>
           <el-form-item label="负责人">
@@ -936,19 +955,22 @@
                   <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
                        v-show="active.activeContent === '开始时间' || active.activeContent === '结束时间'">
                     <div>
-                      <span v-if="active.fromActive !== ''">{{ formatDate(new Date(active.fromActive), 'YYYY年MM月DD日') }}</span>
+                      <span v-if="active.fromActive !== ''">{{
+                          formatDate(new Date(active.fromActive), 'YYYY年MM月DD日')
+                        }}</span>
                       <span v-else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;无&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                     </div>
                     <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
                     <div>
-                      {{ formatDate(new Date(active.toActive), 'YYYY年MM月DD日')}}
+                      {{ formatDate(new Date(active.toActive), 'YYYY年MM月DD日') }}
                     </div>
 
                   </div>
                   <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
                        v-show="active.activeContent === '需求类型'">
                     <div>
-                      <span v-if="active.fromActive !== ''" v-for="type in demandTypes" v-show="type.dictionaryDataId === active.fromActive">{{
+                      <span v-if="active.fromActive !== ''" v-for="type in demandTypes"
+                            v-show="type.dictionaryDataId === active.fromActive">{{
                           type.label
                         }}</span>
                       <span v-else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;无&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -984,7 +1006,8 @@
                             v-show="item.dictionaryDataId === active.fromActive">{{ item.label }}
                       </span>
 
-                      <div v-if="active.fromActive !== ''" style="display: flex; align-items: center; text-align: center" v-for="member in members"
+                      <div v-if="active.fromActive !== ''"
+                           style="display: flex; align-items: center; text-align: center" v-for="member in members"
                            :key="member.userId" v-show="member.userId === active.fromActive">
                         <div style="display: flex; align-items: center;">
                           <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
@@ -1507,6 +1530,7 @@ const currentProInfo = ref({})
 
 const demandsByLevel = ref([])
 const allDemands = ref([])
+const allFatherDemands = ref([])
 
 onMounted(() => {
   proId.value = localStorage.getItem('proDetailId')
@@ -1577,7 +1601,7 @@ const getDemandsList = () => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
       allDemands.value = res.data.data.allDemands.filter((item) => item.demandStatus === 1)
-      console.log(res.data.data.allDemands)
+      allFatherDemands.value = allDemands.value.filter(item => item.workItemType !== 3)
       loadingWorkItems.value = false
     } else {
       ElNotification({
@@ -1617,6 +1641,12 @@ const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
     "group-video",// 排除菜单组，写菜单组 key 的值即可
     "fullScreen",
   ]
+}
+
+const addDemandFatherDemandSelected = ref({})
+const addDemandFatherDemandIdChange = (val) => {
+  addDemandFatherDemandSelected.value = allDemands.value.find(item => item.demandId === val)
+  console.log(addDemandFatherDemandSelected.value)
 }
 
 const submitAddDemand = () => {
@@ -1682,6 +1712,7 @@ const closeAddDemandDialog = () => {
   newDemandFormData.value.startTime = ''
   newDemandFormData.value.endTime = ''
 
+  addDemandFatherDemandSelected.value = {}
 
   valueHtml.value = ''
 }
