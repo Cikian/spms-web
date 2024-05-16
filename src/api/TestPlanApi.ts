@@ -98,17 +98,17 @@ export function uploadTestReport(data, config) {
     })
 }
 
-export function submitTestPlanMessage(data) {
+export function queryTestPlanMessage(data) {
     return request({
-        url: '/testPlanMessage/add',
-        method: 'post',
-        data
+        url: '/comment?id=' + data,
+        method: 'get',
     })
 }
 
-export function queryTestPlanMessageList(data) {
+export function addTestPlanMessage(data) {
     return request({
-        url: '/testPlanMessage/list/' + data,
-        method: 'get',
+        url: '/comment',
+        method: 'post',
+        data
     })
 }
