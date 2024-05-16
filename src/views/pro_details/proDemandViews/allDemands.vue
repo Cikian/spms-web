@@ -13,7 +13,15 @@
     </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
   </div>
+
+  <div style="width: 100%; height: 70vh; display: flex; justify-content: center; align-items: center"
+       v-if="demandsByLevel.length <= 0">
+    <a-spin v-if="loadingWorkItems" size="large" style="margin: 0 auto"/>
+    <el-empty v-else description="暂无需求"/>
+  </div>
+
   <el-table
+      v-else
       :data="demandsByLevel"
       row-key="demandId"
       :indent="40"
@@ -26,7 +34,11 @@
   >
     <el-table-column align="center" type="selection"/>
     <el-table-column align="center" label="序号" type="index" min-width="30px"/>
-    <el-table-column align="center" prop="demandNo" label="编号" sortable type=""/>
+    <el-table-column align="center" prop="demandNo" label="编号" sortable type="">
+      <template #default="scope">
+        <span>{{ currentProInfo.proFlag }}—{{ scope.row.demandNo }}</span>
+      </template>
+    </el-table-column>
     <el-table-column align="left" prop="title" label="标题" min-width="200px">
       <template #default="scope">
           <span v-show="scope.row.workItemType===0"><font-awesome-icon
@@ -49,17 +61,17 @@
               placement="top" ,
               v-if="scope.row.workItemType!==3"
           >
-            <el-button @click="addWorkItem(scope.row)" style="font-size: 20px; margin-right: 20px" type="text">
+            <el-button @click="addWorkItem(scope.row)" style="font-size: 20px; margin-right: 20px; color: #79bbff" link>
               <font-awesome-icon :icon="['fas', 'plus']"/>
             </el-button>
           </el-tooltip>
           <el-tooltip
               class="box-item"
               effect="dark"
-              content="Top Center prompts info"
+              content="编辑"
               placement="top"
           >
-            <el-button style="font-size: 18px; margin-right: 30px" type="text">
+            <el-button style="font-size: 18px; margin-right: 30px; color: #79bbff" link>
               <font-awesome-icon :icon="['far', 'pen-to-square']"/>
             </el-button>
           </el-tooltip>
@@ -275,7 +287,6 @@
           <el-form-item label="标题" required>
             <el-input v-model="newDemandFormData.title" placeholder="请输入需求标题"></el-input>
           </el-form-item>
-
           <el-form-item label="描述">
             <div style="width: 100%">
               <Toolbar
@@ -293,9 +304,8 @@
               />
             </div>
           </el-form-item>
-
         </div>
-        <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
+        <el-scrollbar style="width: 25%; padding: 0 20px; border-left: rgba(0,0,0,0.1) solid 1px">
           <el-form-item label="项目" required>
             <el-input readonly disabled v-model="currentProInfo.proName">
               <template #prefix>
@@ -377,7 +387,6 @@
               <!--              </template>-->
             </el-select>
           </el-form-item>
-
           <el-form-item label="负责人">
             <el-select
                 v-model="newDemandFormData.headId"
@@ -410,7 +419,7 @@
               </template>
             </el-select>
           </el-form-item>
-          <el-form-item labei="开始时间">
+          <el-form-item label="开始时间">
             <el-date-picker
                 v-model="newDemandFormData.startTime"
                 type="date"
@@ -419,9 +428,10 @@
                 clearable
                 value-format="YYYY-MM-DD HH:mm:ss"
                 format="YYYY-MM-DD"
+                style="width: 100%"
             />
           </el-form-item>
-          <el-form-item labei="结束时间">
+          <el-form-item label="结束时间">
             <el-date-picker
                 v-model="newDemandFormData.endTime"
                 type="date"
@@ -430,6 +440,7 @@
                 clearable
                 value-format="YYYY-MM-DD HH:mm:ss"
                 format="YYYY-MM-DD"
+                style="width: 100%"
             />
           </el-form-item>
           <el-form-item label="优先级">
@@ -570,7 +581,6 @@
           <el-descriptions
               direction="vertical"
               :column="4"
-              :size="size"
           >
             <el-descriptions-item width="25%" label="负责人">
               <el-select
@@ -686,6 +696,9 @@
                   placeholder="——"
                   class="click-dialog-input"
                   :clearable="false"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD"
+                  @change="demandStartTimeChange(clickedDemand)"
               />
             </el-descriptions-item>
             <el-descriptions-item width="25%" label="结束时间">
@@ -695,6 +708,9 @@
                   placeholder="——"
                   class="click-dialog-input"
                   :clearable="false"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  format="YYYY-MM-DD"
+                  @change="demandEndTimeChange(clickedDemand)"
               />
             </el-descriptions-item>
 
@@ -709,24 +725,29 @@
                 <font-awesome-icon :icon="['fas', 'pencil']"/>
               </el-button>
             </div>
-            <Toolbar
-                v-show="false"
-                style="border-bottom: 1px solid #ccc"
-                :editor="clickReadOnlyEditorRef"
-                :defaultConfig="toolbarConfig"
-                :mode="mode"
-            />
-            <Editor
-                v-show="showDesc"
-                style="height: 200px; overflow-y: hidden;"
-                v-model="clickValueHtmlReadOnly"
-                :defaultConfig="{
+            <div style="width: 100%; height: 100px"
+                 v-if="clickedDemand.demandDesc === '<p><br></p>' || clickedDemand.demandDesc === null || clickedDemand.demandDesc === '' ">
+              <a-empty description="暂无描述"/>
+            </div>
+            <div v-else>
+              <Toolbar
+                  v-show="false"
+                  style="border-bottom: 1px solid #ccc"
+                  :editor="clickReadOnlyEditorRef"
+                  :defaultConfig="toolbarConfig"
+                  :mode="mode"
+              />
+              <Editor
+                  v-show="showDesc"
+                  style="height: 300px; overflow-y: hidden;"
+                  v-model="clickValueHtmlReadOnly"
+                  :defaultConfig="{
                       readOnly: true
                     }"
-                :mode="mode"
-                @onCreated="handleCreatedClickReadOnlyEditor"
-            />
-
+                  :mode="mode"
+                  @onCreated="handleCreatedClickReadOnlyEditor"
+              />
+            </div>
             <div v-show="!showDesc">
               <Toolbar
                   style="border-bottom: 1px solid #ccc"
@@ -742,14 +763,14 @@
                   @onCreated="handleCreatedClickEditor"
               />
               <div style="text-align: right; padding-right: 50px">
-                <el-button @click="closeClickEditor" type="text" text>取消</el-button>
+                <el-button @click="closeClickEditor" link text>取消</el-button>
                 <el-button @click="submitClickEditor(clickedDemand.demandId)" type="primary">保存</el-button>
               </div>
             </div>
             <el-tabs v-model="secondTagName" class="click-row-bottom-tags">
               <el-tab-pane label="评论" name="comment">
                 <div v-if="firstLevelComment.length <= 0">
-                  <a-empty description="暂无评论" />
+                  <a-empty description="暂无评论"/>
                 </div>
                 <div style="width: 90%" v-else>
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
@@ -789,7 +810,7 @@
                     </div>
                   </a-comment>
 
-                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" :z-index="9999">
                     <div class="rep-box">
                       <a-textarea
                           class="rep-con"
@@ -808,7 +829,8 @@
                   </a-modal>
                 </div>
                 <div style="width: 55vw; position: fixed; bottom: 10vh">
-                  <div class="post-comment-form" style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
+                  <div class="post-comment-form"
+                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
                     <a-textarea
                         :auto-size="{ minRows: 3, maxRows: 6 }"
                         placeholder="友善发言，文明评论~"
@@ -823,11 +845,437 @@
                   </div>
                 </div>
               </el-tab-pane>
-              <el-tab-pane label="活动" name="active">活动</el-tab-pane>
-              <el-tab-pane label="流转" name="circulation">流转</el-tab-pane>
+              <el-tab-pane label="活动" name="active">
+                <div v-if="demandActive.length <= 0">
+                  <a-empty description="暂无活动记录"/>
+                </div>
+                <div v-else v-for="active in demandActive" :key="active.activeId" style="margin-bottom: 30px">
+                  <div style="display: flex; align-items: center; text-align: center" v-for="member in members"
+                       :key="member.userId" v-show="member.userId === active.createBy">
+                    <div style="display: flex; align-items: center;">
+                      <el-avatar :size="'default'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                    </div>
+                    <span style="margin-left: 10px">{{ member.nickName }}</span>
+                    <span style="margin-left: 10px; font-size: 12px; color: #aaa">{{
+                        formatDate(new Date(active.createTime), 'YYYY-MM-DD HH:mm:ss')
+                      }}</span>
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 10px">
+                    <span>{{ active.activeType }}了</span>
+                    <span>{{ active.activeContent }}</span>
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
+                       v-show="active.activeContent === '状态'">
+                    <div>
+                      <div class="table-statue" style="background-color: #56abfb;" v-show="active.fromActive==='0'">
+                        打开
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="active.fromActive==='1'">进行中
+                      </div>
+                      <div class="table-statue" style="background-color: #9de4b6;" v-show="active.fromActive==='2'">已完成
+                      </div>
+                      <div class="table-statue" style="background-color: #c3c3c3;" v-show="active.fromActive==='-1'">
+                        关闭
+                      </div>
+                    </div>
+                    <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+                    <div>
+                      <div class="table-statue" style="background-color: #56abfb;" v-show="active.toActive==='0'">打开
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="active.toActive==='1'">进行中
+                      </div>
+                      <div class="table-statue" style="background-color: #9de4b6;" v-show="active.toActive==='2'">已完成
+                      </div>
+                      <div class="table-statue" style="background-color: #c3c3c3;" v-show="active.toActive==='-1'">
+                        关闭
+                      </div>
+                    </div>
+
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
+                       v-show="active.activeContent === '优先级'">
+                    <div>
+                      <div class="table-statue" style="background-color: #73d897;" v-show="active.fromActive==='0'">
+                        最低
+                      </div>
+                      <div class="table-statue" style="background-color: #5dcfff;" v-show="active.fromActive==='1'">
+                        较低
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="active.fromActive==='2'">
+                        普通
+                      </div>
+                      <div class="table-statue" style="background-color: #ff9f73;" v-show="active.fromActive==='3'">
+                        较高
+                      </div>
+                      <div class="table-statue" style="background-color: #ff7575;" v-show="active.fromActive==='4'">
+                        最高
+                      </div>
+                    </div>
+                    <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+                    <div>
+                      <div>
+                        <div class="table-statue" style="background-color: #73d897;" v-show="active.toActive==='0'">
+                          最低
+                        </div>
+                        <div class="table-statue" style="background-color: #5dcfff;" v-show="active.toActive==='1'">
+                          较低
+                        </div>
+                        <div class="table-statue" style="background-color: #f6c659;" v-show="active.toActive==='2'">
+                          普通
+                        </div>
+                        <div class="table-statue" style="background-color: #ff9f73;" v-show="active.toActive==='3'">
+                          较高
+                        </div>
+                        <div class="table-statue" style="background-color: #ff7575;" v-show="active.toActive==='4'">
+                          最高
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
+                       v-show="active.activeContent === '开始时间' || active.activeContent === '结束时间'">
+                    <div>
+                      <span v-if="active.fromActive !== ''">{{ formatDate(new Date(active.fromActive), 'YYYY年MM月DD日') }}</span>
+                      <span v-else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;无&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+                    <div>
+                      {{ formatDate(new Date(active.toActive), 'YYYY年MM月DD日')}}
+                    </div>
+
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
+                       v-show="active.activeContent === '需求类型'">
+                    <div>
+                      <span v-if="active.fromActive !== ''" v-for="type in demandTypes" v-show="type.dictionaryDataId === active.fromActive">{{
+                          type.label
+                        }}</span>
+                      <span v-else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;无&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+                    <div>
+                      <span v-for="type in demandTypes" v-show="type.dictionaryDataId === active.toActive">{{
+                          type.label
+                        }}</span>
+                    </div>
+
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center "
+                       v-show="active.activeContent === '需求来源'">
+                    <div>
+                      <span v-if="active.fromActive !== ''" v-for="item in demandSource" :key="item.dictionaryDataId"
+                           v-show="item.dictionaryDataId === active.fromActive">{{ item.label }}
+                      </span>
+                      <span v-else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;无&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+                    <div>
+                      <span v-for="type in demandSource" v-show="type.dictionaryDataId === active.toActive">{{
+                          type.label
+                        }}</span>
+                    </div>
+
+                  </div>
+                  <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center"
+                       v-show="active.activeContent === '负责人'">
+                    <div>
+                      <span v-if="active.fromActive !== ''" v-for="item in demandSource" :key="item.dictionaryDataId"
+                           v-show="item.dictionaryDataId === active.fromActive">{{ item.label }}
+                      </span>
+
+                      <div v-if="active.fromActive !== ''" style="display: flex; align-items: center; text-align: center" v-for="member in members"
+                           :key="member.userId" v-show="member.userId === active.fromActive">
+                        <div style="display: flex; align-items: center;">
+                          <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                        </div>
+                        <span style="margin-left: 10px">{{ member.nickName }}</span>
+                      </div>
+
+                      <span v-else>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;无&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </div>
+                    <span>&nbsp;&nbsp;→&nbsp;&nbsp;</span>
+                    <div>
+                      <div style="display: flex; align-items: center; text-align: center" v-for="member in members"
+                           :key="member.userId" v-show="member.userId === active.toActive">
+                        <div style="display: flex; align-items: center;">
+                          <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                        </div>
+                        <span style="margin-left: 10px">{{ member.nickName }}</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </el-tab-pane>
+              <el-tab-pane label="流转" name="circulation">
+                <div v-if="demandStatueActive.length <= 0">
+                  <a-empty description="暂无流转记录"/>
+                </div>
+                <el-timeline v-else style="margin-top: 16px">
+                  <el-timeline-item
+                      v-for="(active, index) in demandStatueActive"
+                      :key="active.activeId"
+                      :color="index === 0 ? '#0bbd87' : ''"
+                      :timestamp="formatDate(new Date(active.createTime), 'YYYY-MM-DD HH:mm:ss')"
+                  >
+                    <div class="table-statue" style="background-color: #56abfb;" v-show="active.toActive==='0'">打开
+                    </div>
+                    <div class="table-statue" style="background-color: #f6c659;" v-show="active.toActive==='1'">进行中
+                    </div>
+                    <div class="table-statue" style="background-color: #9de4b6;" v-show="active.toActive==='2'">已完成
+                    </div>
+                    <div class="table-statue" style="background-color: #c3c3c3;" v-show="active.toActive==='-1'">
+                      关闭
+                    </div>
+                  </el-timeline-item>
+                </el-timeline>
+              </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
-          <el-tab-pane label="子工作项" name="childrenWorkItem">Config</el-tab-pane>
+          <el-tab-pane label="子工作项" name="childrenWorkItem"
+                       @click="clickDemandChildWorkItem(clickedDemand.demandId)">
+            <div v-if="childrenWorkItem.length <= 0">
+              <a-empty description="无子工作项"/>
+            </div>
+            <el-table
+                v-else
+                :data="childrenWorkItem"
+                row-key="demandId"
+                :indent="40"
+                border
+                style="width: 100%"
+                size="large"
+                @selection-change="handleSelectionChange"
+                :header-cell-style="{'text-align': 'center',}"
+                @row-click="clickRow"
+            >
+              <el-table-column align="center" type="selection"/>
+              <el-table-column align="center" label="序号" type="index" min-width="30px"/>
+              <el-table-column align="center" prop="demandNo" label="编号" sortable type="">
+                <template #default="scope">
+                  <span>{{ currentProInfo.proFlag }}—{{ scope.row.demandNo }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="left" prop="title" label="标题" min-width="150px">
+                <template #default="scope">
+                  <span v-show="scope.row.workItemType===0"><font-awesome-icon
+                      style="color: #ff877b;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'bolt-lightning']"/>{{ scope.row.title }}</span>
+                  <span v-show="scope.row.workItemType===1"><font-awesome-icon
+                      style="color: #9191f9;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'flag']"/>{{ scope.row.title }}</span>
+                  <span v-show="scope.row.workItemType===2"><font-awesome-icon
+                      style="color: #30d1fc;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'book-open']"/>{{ scope.row.title }}</span>
+                  <span v-show="scope.row.workItemType===3"><font-awesome-icon
+                      style="color: #73d897;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'square-check']"/>{{ scope.row.title }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="demandStatus" label="状态" class-name="table-statue-column">
+                <template #default="scope">
+                  <el-select
+                      v-model="scope.row.demandStatus"
+                      placeholder="请选择状态"
+                      class="demand-status-select"
+                      @change="demandStatusChange(scope.row)"
+                  >
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="0"
+                        label="打开"
+                        :value="0"
+                        :disabled="scope.row.demandStatus === 0"
+                    >
+                      <div v-if="scope.row.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">
+                        打开
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="1"
+                        label="进行中"
+                        :value="1"
+                        :disabled="scope.row.demandStatus === 1 || scope.row.demandStatus === -1"
+                    >
+                      <div v-if="scope.row.demandStatus === 1 || scope.row.demandStatus === -1" class="table-statue"
+                           style="background-color: #fae3b2;">进行中
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="2"
+                        label="已完成"
+                        :value="2"
+                        :disabled="scope.row.demandStatus === 2 || scope.row.demandStatus === -1"
+                    >
+                      <div v-if="scope.row.demandStatus === 2 || scope.row.demandStatus === -1" class="table-statue"
+                           style="background-color: #c0fad5;">已完成
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="-1"
+                        label="关闭"
+                        :value="-1"
+                        :disabled="scope.row.demandStatus === -1"
+                    >
+                      <div v-if="scope.row.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">
+                        关闭
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
+                    </el-option>
+
+                    <template #prefix>
+                      <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">
+                        打开
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">
+                        进行中
+                      </div>
+                      <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">
+                        已完成
+                      </div>
+                      <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">
+                        关闭
+                      </div>
+                    </template>
+                  </el-select>
+
+
+                  <!--        <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>-->
+                  <!--        <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中</div>-->
+                  <!--        <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成</div>-->
+                  <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="headId" label="负责人" min-width="100px">
+                <template #default="scope">
+                  <el-select
+                      v-model="scope.row.headId"
+                      placeholder="—"
+                      class="demand-headId-select"
+                      @change="demandHeadIdChange(scope.row)"
+                  >
+                    <el-option
+                        class="member-select-options-menu"
+                        v-for="item in members"
+                        :key="item.userId"
+                        :label="item.nickName"
+                        :value="item.userId"
+                    >
+                      <div style="display: flex; align-items: center; text-align: center">
+                        <div style="display: flex; align-items: center;">
+                          <el-avatar :size="'small'" :src="item.avatar" style="position: relative; top: 0.2vh;"/>
+                        </div>
+
+                        <span style="margin-left: 10px">{{ item.nickName }}</span>
+                      </div>
+                    </el-option>
+
+                    <template #prefix>
+                      <div v-for="member in members"
+                           v-show="member.userId === scope.row.headId"
+                           style="display: flex; align-items: center"
+                      >
+                        <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                      </div>
+                    </template>
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="priority" label="优先级">
+                <template #default="scope">
+                  <el-select
+                      v-model="scope.row.priority"
+                      placeholder="请选择优先级"
+                      class="demand-status-select"
+                      @change="demandPriorityChange(scope.row)"
+                  >
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="4"
+                        label="最高"
+                        :value="4"
+                    >
+                      <div class="table-statue" style="background-color: #ff7575;">最高</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="3"
+                        label="较高"
+                        :value="3"
+                    >
+                      <div class="table-statue" style="background-color: #ff9f73;">较高</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="2"
+                        label="普通"
+                        :value="2"
+                    >
+                      <div class="table-statue" style="background-color: #f6c659;">普通</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="1"
+                        label="较低"
+                        :value="1"
+                    >
+                      <div class="table-statue" style="background-color: #5dcfff;">较低</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="0"
+                        label="最低"
+                        :value="0"
+                    >
+                      <div class="table-statue" style="background-color: #73d897;">最低</div>
+                    </el-option>
+
+
+                    <template #prefix>
+                      <div class="table-statue" style="background-color: #73d897;" v-show="scope.row.priority===0">
+                        最低
+                      </div>
+                      <div class="table-statue" style="background-color: #5dcfff;" v-show="scope.row.priority===1">
+                        较低
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.priority===2">
+                        普通
+                      </div>
+                      <div class="table-statue" style="background-color: #ff9f73;" v-show="scope.row.priority===3">
+                        较高
+                      </div>
+                      <div class="table-statue" style="background-color: #ff7575;" v-show="scope.row.priority===4">
+                        最高
+                      </div>
+                    </template>
+                  </el-select>
+
+
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="type" label="需求类型">
+                <template #default="scope">
+                  <span v-for="type in demandTypes" v-show="type.dictionaryDataId === scope.row.type">{{
+                      type.label
+                    }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="storyPoint" label="故事点"/>
+              <el-table-column align="center" prop="updateTime" label="更新时间">
+                <template #default="scope">
+                  {{ formatDate(new Date(scope.row.updateTime), 'YYYY-MM-DD HH:mm:ss') }}
+                </template>
+              </el-table-column>
+
+            </el-table>
+          </el-tab-pane>
           <el-tab-pane label="测试" name="tests">Role</el-tab-pane>
         </el-tabs>
 
@@ -1038,16 +1486,16 @@ import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
-  getAllDemandByProId, getCommentList,
+  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
   queryDemandTypes,
   queryProByProId,
-  updateDemandDesc,
+  updateDemandDesc, updateDemandEndTime,
   updateDemandHeadId,
   updateDemandPriority,
-  updateDemandSource,
+  updateDemandSource, updateDemandStartTime,
   updateDemandStatus,
   updateDemandType
 } from "../../../api/demandApi.ts";
@@ -1069,6 +1517,8 @@ onMounted(() => {
   getDemandMembers()
   getDemandsList()
 })
+
+const loadingWorkItems = ref(true)
 
 const newDemandFormData = ref({
   proId: '',
@@ -1127,12 +1577,14 @@ const getDemandsList = () => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
       allDemands.value = res.data.data.allDemands
+      loadingWorkItems.value = false
     } else {
       ElNotification({
         title: '通知',
         message: res.data.message,
         duration: 2000,
       })
+      loadingWorkItems.value = false
     }
   })
 }
@@ -1237,9 +1689,12 @@ const handleCloseClickRow = () => {
   showDesc.value = true
   firstLevelComment.value = []
   notFirstLevelComment.value = []
+  childrenWorkItem.value = []
 }
 
+const clickIcon = ref(false)
 const addWorkItem = (row) => {
+  clickIcon.value = true
   newDemandFormData.value.proId = currentProInfo.value.proId
   newDemandFormData.value.fatherDemandId = row.demandId
   newDemandFormData.value.workItemType = row.workItemType + 1
@@ -1331,14 +1786,101 @@ const demandSourceChange = (row) => {
     }
   })
 }
+const demandStartTimeChange = (row) => {
+  let demand = {
+    demandId: row.demandId,
+    startTime: row.startTime
+  }
+  updateDemandStartTime(demand).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+const demandEndTimeChange = (row) => {
+  let demand = {
+    demandId: row.demandId,
+    endTime: row.endTime
+  }
+  updateDemandEndTime(demand).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
 
 const clickedDemand = ref({})
 const clickRow = (row) => {
-  recordVisit(row.demandId, 2)
+  if (clickIcon.value) {
+    clickIcon.value = false
+    return
+  }
   clickValueHtmlReadOnly.value = row.demandDesc
   clickRowDialogVisible.value = true
   clickedDemand.value = row
   getComments(clickedDemand.value.demandId)
+  getChildrenWorkItem(clickedDemand.value.demandId)
+  getDemandActive(clickedDemand.value.demandId)
+  firstTagName.value = 'baseInfo'
+  secondTagName.value = 'comment'
+  recordVisit(row.demandId, 2)
+
+}
+
+const demandActive = ref([])
+const demandStatueActive = ref([])
+
+const getDemandActive = (demandId) => {
+  console.log("获取活动：" + demandId)
+  getDemandActiveList(demandId).then((res) => {
+    if (res.data.code === 2001) {
+      demandActive.value = res.data.data
+      demandStatueActive.value = demandActive.value.filter((item) => item.activeContent === "状态")
+      demandStatueActive.value.push({
+        activeId: '0',
+        demandId: demandId,
+        activeType: '创建',
+        activeContent: '状态',
+        toActive: '0',
+        createTime: clickedDemand.value.createTime,
+      })
+    } else {
+      demandActive.value = []
+      demandStatueActive.value = []
+    }
+  })
+}
+
+const childrenWorkItem = ref([])
+
+const getChildrenWorkItem = (workItemId) => {
+  getChildrenWorkItemList(workItemId).then((res) => {
+    if (res.data.code === 2001) {
+      childrenWorkItem.value = res.data.data
+    } else {
+      childrenWorkItem.value = []
+    }
+  })
 }
 
 const openClickEditor = () => {
@@ -1367,6 +1909,7 @@ const submitClickEditor = (demandId) => {
       getDemandsList()
       showDesc.value = true
       clickValueHtmlReadOnly.value = clickValueHtml.value
+      clickedDemand.value.demandDesc = clickValueHtml.value
     } else {
       ElNotification({
         title: 'Error',
@@ -1493,7 +2036,6 @@ const replyComment = () => {
 
 const firstLevelComment = ref([]);
 const notFirstLevelComment = ref([]);
-
 
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
