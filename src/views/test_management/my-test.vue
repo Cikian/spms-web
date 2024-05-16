@@ -287,46 +287,81 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <div class="message-container">
-                <div class="message-send-container">
-                  <el-avatar class="message-my-avatar" size="large" :src="userAvatar"/>
-                  <el-input class="message-input" type="textarea" v-model="messageContent" placeholder="请输入留言内容"
-                            show-word-limit
-                            maxlength="1000"
-                            :rows="5" resize="none"/>
-                </div>
-                <div class="message-btn">
-                  <el-button type="primary" size="default" :loading="loadingMessage" :disabled="disableMessage"
-                             @click="submitMessage">留言
-                  </el-button>
+              <div v-if="firstLevelComment.length <= 0">
+                <a-empty description="暂无评论"/>
+              </div>
+              <div style="width: 90%" v-else>
+                <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
+                  <template #actions>
+                    <span @click="beforeReply(item)">回复</span>
+                  </template>
+                  <template #author>
+                    <a>{{ item.nickName }}</a>
+                  </template>
+                  <template #avatar>
+                    <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                  </template>
+                  <template #content>
+                    <p>
+                      {{ item.content }}
+                    </p>
+                  </template>
+                  <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                    <a-comment v-if="r.toCommentId === item.commentId">
+                      <template #actions>
+                        <span @click="beforeReply(r)">回复</span>
+                      </template>
+                      <template #author>
+                        <a style="font-size: 14px">{{ r.nickName }}</a>
+                        <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                        <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                      </template>
+                      <template #avatar>
+                        <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                      </template>
+                      <template #content>
+                        <p>
+                          {{ r.content }}
+                        </p>
+                      </template>
+                    </a-comment>
+                  </div>
+                </a-comment>
+
+                <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                  <div class="rep-box">
+                    <a-textarea
+                        class="rep-con"
+                        v-model:value="replyContent"
+                        placeholder="友善发言，文明评论~"
+                        :auto-size="{ minRows: 3, maxRows: 5 }"
+                        id="repCommentInput"
+                        @keydown.enter.native="replyComment"
+                    />
+                  </div>
+                  <a-form-item>
+                    <a-button style="float: right" type="primary" @click="replyComment()"
+                              :disabled="replyContent === ''">回复
+                    </a-button>
+                  </a-form-item>
+                </a-modal>
+              </div>
+              <div style="width: 55vw; position: fixed; bottom: 10vh">
+                <div class="post-comment-form"
+                     style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
+                  <a-textarea
+                      :auto-size="{ minRows: 3, maxRows: 6 }"
+                      placeholder="友善发言，文明评论~"
+                      v-model:value="postComment.content"
+                      id="postCommentInput"
+                      @keydown.enter.native="submitComment"
+                  />
+
+                  <a-button style="margin-left: 30px" type="primary" @click="submitComment"
+                            :disabled="postComment.content === ''">评论
+                  </a-button>
                 </div>
               </div>
-              <el-scrollbar height="377px">
-                <div class="message-list" v-if="messageList.length > 0" v-loading="loadingMessageList">
-                  <div class="message-item" v-for="item in messageList" :key="item.messageId">
-                    <div class="message-item-top">
-                      <div class="message-avatar">
-                        <el-avatar size="large" :src="item.createAvatar"/>
-                      </div>
-                      <div class="message-item-content">
-                        <div class="message-userName">
-                          {{ item.createName }}
-                        </div>
-                        <div class="message-content">
-                          {{ item.content }}
-                        </div>
-                        <div class="message-footer">
-                          <div class="message-create-time">
-                            {{ item.createTime }}
-                          </div>
-                        </div>
-                        <el-divider class="message-divider"/>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <el-empty v-else description="暂无留言"/>
-              </el-scrollbar>
             </el-tab-pane>
           </el-tabs>
         </div>
@@ -449,12 +484,12 @@ import {
   queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, queryTestPlanMessageList, queryTestReportByPlanId, submitTestPlanMessage,
+  queryTestPlanList, queryTestPlanMessage, queryTestReportByPlanId,
   updateTestCase,
   updateTestPlan, updateTestReportApprovalStatusById, uploadTestReport,
 } from "../../api/TestPlanApi.ts";
 import {getProListByStatus} from "../../api/allProApi.ts";
-import {queryDemandByProId} from "../../api/demandApi.ts";
+import {addComment, getCommentList, queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import axios from "axios";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
@@ -528,11 +563,21 @@ const projectTestMember = ref([])
 const userAvatar = ref('')
 
 //留言
-const messageList = ref([])
-const loadingMessage = ref(false)
-const disableMessage = ref(false)
-const messageContent = ref('')
-const loadingMessageList = ref(false)
+const firstLevelComment = ref([]);
+const notFirstLevelComment = ref([]);
+const postComment = ref({
+  toCommentId: '',
+  content: '',
+  workItemId: '',
+  userId: '',
+  avatar: '',
+  nickName: '',
+  toUserId: '',
+  toUserNickName: '',
+})
+const openRep = ref(false)
+const replyContent = ref('')
+
 
 const changeStatus = (status) => {
   currentTestPlanStatus.value = status
@@ -950,7 +995,7 @@ const handleTabClick = (tab) => {
   } else if (tab.props.name === 'testReport') {
     queryTestReport()
   } else if (tab.props.name === 'message') {
-    getPlanMessage(echoTestPlan.value.testPlanId)
+    getComments(echoTestPlan.value.testPlanId)
   }
 }
 
@@ -1227,86 +1272,105 @@ const getUserAvatar = () => {
   }
 }
 
-const getPlanMessage = (testPlanId) => {
-  loadingMessageList.value = true
-  queryTestPlanMessageList(testPlanId)
-      .then(res => {
-        if (res.data.code === 200) {
-          messageList.value = res.data.data
 
-          for (let i = 0; i < messageList.value.length; i++) {
-            messageList.value[i].createTime = messageList.value[i].createTime.replace('T', ' ')
-          }
-          loadingMessageList.value = false
+const getComments = (workItemId) => {
+  getCommentList(workItemId)
+      .then((res) => {
+        if (res.data.code === 2001) {
+          let comments = res.data.data
+          firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
+          notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+        } else {
+
         }
       })
 }
 
-const submitMessage = () => {
-  loadingMessage.value = true
-  disableMessage.value = true
-
-  console.log(messageContent.value.trim())
-
-  //判断内容是否合法
-  if (!messageContent.value.trim()) {
+const submitComment = () => {
+  if (postComment.value.content === '') {
     ElNotification({
-      title: '提示',
-      message: '留言内容不能为空',
-      type: 'warning'
+      title: 'Error',
+      message: '评论内容不能为空',
+      type: 'error',
     })
-    loadingMessage.value = false
-    disableMessage.value = false
-    return
+    return;
   }
 
-  let data = {
-    key: 'aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N',
-    content: messageContent.value.trim()
-  }
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
-  let header = {
-    'Content-Type': 'application/json'
-  }
-  let url = 'https://api.wordscheck.com/check'
-  axios.post(url, data, {headers: header})
-      .then(res => {
-        if (res.data.word_list.length > 0) {
-          ElNotification({
-            title: '提示',
-            message: '留言内容包含敏感词汇，请修改后重新提交',
-            type: 'warning'
-          })
-          loadingMessage.value = false
-          disableMessage.value = false
-          return;
-        } else {
-          let formData = {
-            testPlanId: echoTestPlan.value.testPlanId,
-            content: messageContent.value.trim()
-          }
-          submitTestPlanMessage(formData)
-              .then(res => {
-                if (res.data.code === 200) {
-                  ElNotification({
-                    title: '成功',
-                    message: res.data.message,
-                    type: 'success'
-                  })
-                  messageContent.value = ''
-                  getPlanMessage(formData.testPlanId)
-                } else {
-                  ElNotification({
-                    title: '提示',
-                    message: res.data.message,
-                    type: 'warning'
-                  })
-                }
-                loadingMessage.value = false
-                disableMessage.value = false
-              })
-        }
+  postComment.value.workItemId = clickedDemand.value.demandId;
+  postComment.value.toCommentId = '0';
+  postComment.value.toUserId = '0';
+  postComment.value.toUserNickName = '';
+  postComment.value.avatar = userInfo.avatar;
+  postComment.value.nickName = userInfo.nickName;
+
+  addComment(postComment.value).then((res) => {
+    if (res.data.code === 3001) {
+      postComment.value.content = '';
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
       })
+      getComments(clickedDemand.value.demandId)
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+
+}
+
+const beforeReply = (comment) => {
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+  openRep.value = true;
+  postComment.value.workItemId = clickedDemand.value.demandId;
+  if (comment.toCommentId === '0') {
+    postComment.value.toCommentId = comment.commentId;
+  } else {
+    postComment.value.toCommentId = comment.toCommentId;
+  }
+  postComment.value.toUserId = comment.userId;
+  postComment.value.toUserNickName = comment.userNickName;
+  postComment.value.avatar = userInfo.avatar
+  postComment.value.nickName = userInfo.nickName
+}
+
+const replyComment = () => {
+  if (replyContent.value === '') {
+    ElNotification({
+      title: 'Error',
+      message: '评论内容不能为空',
+      type: 'error',
+    })
+    return;
+  }
+  postComment.value.content = replyContent.value;
+
+  addComment(postComment.value).then((res) => {
+    if (res.data.code === 3001) {
+      postComment.value.content = '';
+      replyContent.value = '';
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      openRep.value = false;
+      getComments(clickedDemand.value.demandId)
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
 }
 
 onMounted(() => {
