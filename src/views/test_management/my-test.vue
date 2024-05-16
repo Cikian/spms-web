@@ -484,7 +484,7 @@ import {
   queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, queryTestPlanMessage, queryTestReportByPlanId,
+  queryTestPlanList, queryTestReportByPlanId,
   updateTestCase,
   updateTestPlan, updateTestReportApprovalStatusById, uploadTestReport,
 } from "../../api/TestPlanApi.ts";
@@ -1370,6 +1370,121 @@ const replyComment = () => {
     }
   })
 }
+
+const openRep = ref(false)
+const replyContent = ref('')
+const postComment = ref({
+  toCommentId: '',
+  content: '',
+  workItemId: '',
+  userId: '',
+  avatar: '',
+  nickName: '',
+  toUserId: '',
+  toUserNickName: '',
+})
+
+const getComments = (workItemId) => {
+  getCommentList(workItemId).then((res) => {
+    if (res.data.code === 2001) {
+      let comments = res.data.data
+      firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
+      notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+    } else {
+
+    }
+  })
+}
+
+const submitComment = () => {
+  if (postComment.value.content === '') {
+    ElNotification({
+      title: 'Error',
+      message: '评论内容不能为空',
+      type: 'error',
+    })
+    return;
+  }
+
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+  postComment.value.workItemId = echoTestPlan.value.testPlanId;
+  postComment.value.toCommentId = '0';
+  postComment.value.toUserId = '0';
+  postComment.value.toUserNickName = '';
+  postComment.value.avatar = userInfo.avatar;
+  postComment.value.nickName = userInfo.nickName;
+
+  addComment(postComment.value).then((res) => {
+    if (res.data.code === 3001) {
+      postComment.value.content = '';
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      getComments(echoTestPlan.value.testPlanId)
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+
+}
+
+const beforeReply = (comment) => {
+  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+  openRep.value = true;
+  postComment.value.workItemId = echoTestPlan.value.testPlanId;
+  if (comment.toCommentId === '0') {
+    postComment.value.toCommentId = comment.commentId;
+  } else {
+    postComment.value.toCommentId = comment.toCommentId;
+  }
+  postComment.value.toUserId = comment.userId;
+  postComment.value.toUserNickName = comment.userNickName;
+  postComment.value.avatar = userInfo.avatar
+  postComment.value.nickName = userInfo.nickName
+}
+const replyComment = () => {
+  if (replyContent.value === '') {
+    ElNotification({
+      title: 'Error',
+      message: '评论内容不能为空',
+      type: 'error',
+    })
+    return;
+  }
+  postComment.value.content = replyContent.value;
+
+  addComment(postComment.value).then((res) => {
+    if (res.data.code === 3001) {
+      postComment.value.content = '';
+      replyContent.value = '';
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      openRep.value = false;
+      getComments(echoTestPlan.value.testPlanId)
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+
+const firstLevelComment = ref([]);
+const notFirstLevelComment = ref([]);
+
 
 onMounted(() => {
   loadTestPlanList()
