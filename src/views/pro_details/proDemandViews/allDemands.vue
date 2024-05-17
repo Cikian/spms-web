@@ -1326,12 +1326,12 @@
             </el-table>
           </el-tab-pane>
           <el-tab-pane label="测试" name="tests">
-            <div class="addTest">
+            <div style="display: flex; justify-content: right; padding: 0 50px"  class="addTest" v-show="!hasTestPlan">
               <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
                   style="font-size: 20px; margin-right: 5px;">+</span>新建测试
               </el-button>
             </div>
-            <div class="table">
+            <div v-if="hasTestPlan" class="table">
               <el-table :data="testTableData"
                         style="width: 100%"
                         size="large"
@@ -1375,6 +1375,9 @@
                 <el-table-column prop="endTime" label="计划结束时间" align="center">
                 </el-table-column>
               </el-table>
+            </div>
+            <div v-else style="width: 95%;">
+              <a-empty description="暂无测试计划"/>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -1881,6 +1884,69 @@
     </div>
   </el-dialog>
 
+  <!--  新增测试计划dialog-->
+  <el-dialog
+      title="新建测试计划"
+      v-model="addTestPlanDialogVisible"
+      width="42%"
+      center
+      :show-close="false"
+  >
+    <el-form :model="form" label-width="100px" label-position="top">
+      <el-form-item label="测试计划名称">
+        <el-input v-model="form.planName"
+                  placeholder="请输入测试计划名称"
+                  maxlength="255"
+                  show-word-limit
+                  type="text"
+                  clearable
+                  size="large"/>
+      </el-form-item>
+      <el-form-item label="关联项目">
+        <el-input size="large" v-model="currentProInfo.proName" placeholder="请选择关联项目" disabled>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="关联需求">
+        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled no-data-text="暂无需求">
+        </el-input>
+      </el-form-item>
+      <el-form-item label="负责人">
+        <el-select size="large" v-model="form.head" placeholder="请选择负责人" no-data-text="暂无成员">
+          <el-option
+              v-for="item in projectTestMember"
+              :key="item.userId"
+              :label="item.nickName"
+              :value="item.userId"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="计划周期">
+        <el-date-picker
+            v-model="form.startTime"
+            type="date"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择开始日期">
+        </el-date-picker>
+        <span style="margin: 0 15px">-</span>
+        <el-date-picker
+            v-model="form.endTime"
+            type="date"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择结束日期">
+        </el-date-picker>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="handleCloseAddTestPlanDialog" size="large" style="width: 90px;">取 消</el-button>
+      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;" :disabled="addTestPlanBtnDisable"
+                 :loading="loadingAddTestPlan">
+        {{ addTestPlanBtnText }}
+      </el-button>
+    </div>
+  </el-dialog>
+
 </template>
 
 
@@ -1908,7 +1974,7 @@ import {recordVisit} from "../../../api/RecentVisitApi.ts";
 import {formatDate} from "@vueuse/shared";
 import {queryProjectTestMember} from "../../../api/userApi.ts";
 import {
-  addTestCase,
+  addTestCase, addTestPlan,
   deleteTestCaseById,
   deleteTestReportById,
   queryTestCaseById,
@@ -2130,6 +2196,7 @@ const handleCloseClickRow = () => {
   firstLevelComment.value = []
   notFirstLevelComment.value = []
   childrenWorkItem.value = []
+  testTableData.value = []
 }
 
 const clickIcon = ref(false)
@@ -2282,6 +2349,7 @@ const clickRow = (row) => {
   getChildrenWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
   loadTestPlanList(clickedDemand.value.demandId)
+  getProjectTestMember(currentProInfo.value.proId)
   firstTagName.value = 'baseInfo'
   secondTagName.value = 'comment'
   recordVisit(row.demandId, 2)
@@ -2514,19 +2582,156 @@ const loadingEditTestPlan = ref(false)
 const editTestCaseBtnText = ref('确定')
 const editTestCaseBtnDisable = ref(false)
 const loadingEditTestCase = ref(false)
+const addTestPlanDialogVisible = ref(false)
+const form = ref({
+  planName: '',
+  projectId: '',
+  demandId: '',
+  head: '',
+  startTime: '',
+  endTime: '',
+})
+const addTestPlanBtnText = ref('提交')
+const addTestPlanBtnDisable = ref(false)
+const loadingAddTestPlan = ref(false)
+
 
 const openAddTestPlanDialog = () => {
-  projectDemand.value = []
-  projectTestMember.value = []
+  form.value.projectId = currentProInfo.value.proId
+  form.value.demandId = clickedDemand.value.demandId
+  // projectTestMember.value = []
   addTestPlanDialogVisible.value = true
 }
 
+const handleCloseAddTestPlanDialog = () => {
+  form.value = {
+    planName: '',
+    projectId: '',
+    demandId: '',
+    head: '',
+    startTime: '',
+    endTime: '',
+  }
+  addTestPlanDialogVisible.value = false
+}
+
+const submitForm = () => {
+  addTestPlanBtnText.value = '提交中...'
+  addTestPlanBtnDisable.value = true
+  loadingAddTestPlan.value = true
+
+  if (form.value.planName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入测试计划名称',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.projectId === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择关联项目',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.demandId === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择关联需求',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.head === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择负责人',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.startTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划开始时间',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.endTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划结束时间',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  let formData = {
+    planName: form.value.planName,
+    projectId: form.value.projectId,
+    demandId: form.value.demandId,
+    head: form.value.head,
+    startTime: form.value.startTime,
+    endTime: form.value.endTime,
+  }
+
+  addTestPlan(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          handleCloseAddTestPlanDialog()
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          loadTestPlanList(clickedDemand.value.demandId)
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        addTestPlanBtnText.value = '提交'
+        addTestPlanBtnDisable.value = false
+        loadingAddTestPlan.value = false
+      })
+}
+
+const hasTestPlan = ref(false)
 const loadTestPlanList = (demandId) => {
   loading.value = true
   queryTestPlanByDemandId(demandId)
       .then(res => {
         if (res.data.code === 200) {
           testTableData.value = res.data.data
+          hasTestPlan.value = testTableData.value !== null && testTableData.value.length > 0
         } else {
           ElNotification({
             title: '提示',
@@ -2549,11 +2754,13 @@ const clickTest = (row) => {
 
 const getProjectTestMember = (projectId) => {
   loadingTestMembers.value = true
+  console.log("获取项目成员：" + projectId)
   queryProjectTestMember(projectId)
       .then(res => {
         if (res.data.code === 200) {
           projectTestMember.value = res.data.data
           loadingTestMembers.value = false
+          console.log(projectTestMember.value)
         }
       })
 }
@@ -2937,7 +3144,7 @@ const handleSubmitEditTestPlan = () => {
             type: 'success'
           })
           handleCloseEditTestPlan()
-          loadTestPlanList()
+          loadTestPlanList(clickedDemand.value.demandId)
         } else {
           ElNotification({
             title: '提示',
