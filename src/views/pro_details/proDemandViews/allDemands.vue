@@ -1885,10 +1885,9 @@
 
 
 <script setup lang="ts">
-import {nextTick, onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
+import {onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
@@ -1916,7 +1915,6 @@ import {
   queryTestCaseByPlanId,
   queryTestPlanByDemandId,
   queryTestPlanById,
-  queryTestPlanList,
   queryTestReportByPlanId,
   updateTestCase,
   updateTestPlan,
