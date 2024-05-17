@@ -810,7 +810,6 @@ const getTestPlanDetailById = (planId) => {
 
 const rowClick = (row) => {
   openDialog.value = true
-  getProjectTestMember(row.projectId)
   getTestPlanDetailById(row.testPlanId)
   recordVisit(row.testPlanId, 3)
 }

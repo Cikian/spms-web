@@ -1534,13 +1534,24 @@ const allFatherDemands = ref([])
 
 onMounted(() => {
   proId.value = localStorage.getItem('proDetailId')
-
   getCurrentProInfo()
   getDemandTypes()
   getDemandSource()
   getDemandMembers()
   getDemandsList()
+  isFromRecentVisit()
 })
+
+const isFromRecentVisit = () => {
+  let recent = localStorage.getItem("recentVisit");
+  if (recent) {
+    let row = {
+      demandId: recent
+    }
+    clickRow(row)
+    localStorage.removeItem("recentVisit")
+  }
+}
 
 const loadingWorkItems = ref(true)
 
@@ -1876,7 +1887,6 @@ const clickRow = (row) => {
   firstTagName.value = 'baseInfo'
   secondTagName.value = 'comment'
   recordVisit(row.demandId, 2)
-
 }
 
 const demandActive = ref([])

@@ -42,7 +42,8 @@
     <div v-else>
       <el-row style="height: 56px; border-bottom: solid 0.8px #eee;" v-for="item in visited" :key="item.flag" @click="rowClick(item)">
         <el-col :span="19" style="padding: 12px 16px;line-height: 32px">
-          <font-awesome-icon style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
+          <font-awesome-icon v-if="item.type === 2" style="color: #56abfb; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
+          <font-awesome-icon v-if="item.type === 3" style="color: #da259e; margin-right: 8px" icon="fa-solid fa-folder-plus"/>
           <span style="margin-right: 8px; color: #999;">{{ item.flag }}</span>
           <span style="color: #333; font-weight: 500">{{ item.name }}</span>
         </el-col>
@@ -105,10 +106,10 @@ const getUserRecentVisitPro = () => {
 }
 
 const rowClick = (item) => {
+  localStorage.setItem("recentVisit", item.id)
   if (item.type === 2){
-
+    router.push('/proDetail/proDemand/allDemands')
   }else if (item.type === 3){
-    localStorage.setItem("recentVisit", item.id)
     router.push('/test/list/myTest')
   }
 }
