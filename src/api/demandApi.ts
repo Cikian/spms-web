@@ -132,6 +132,13 @@ export function getChildrenWorkItemList(workItemId) {
     })
 }
 
+export function getDemandById(workItemId) {
+    return request({
+        url: '/demand/' + workItemId,
+        method: 'get',
+    })
+}
+
 export function getDemandActiveList(workItemId) {
     return request({
         url: '/demandActive?demandId=' + workItemId,
