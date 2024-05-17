@@ -788,11 +788,11 @@
             </div>
             <el-tabs v-model="secondTagName" class="click-row-bottom-tags">
               <el-tab-pane label="评论" name="comment">
-                <div v-if="firstLevelComment.length <= 0">
+                <div v-if="firstLevelComment.length <= 0" v-loading="loadingComments">
                   <a-empty description="暂无评论"/>
                 </div>
                 <div style="width: 90%" v-else>
-                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
+                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0" style="background-color: rgba(234,234,234,0.12); border-radius: 10px; margin-bottom: 10px; padding: 10px 10px">
                     <template #actions>
                       <span @click="beforeReply(item)">回复</span>
                     </template>
@@ -800,7 +800,7 @@
                       <a>{{ item.nickName }}</a>
                     </template>
                     <template #avatar>
-                      <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                      <a-avatar :src="item.avatar" :alt="item.nickName" size="large"/>
                     </template>
                     <template #content>
                       <p>
@@ -808,17 +808,17 @@
                       </p>
                     </template>
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
-                      <a-comment v-if="r.toCommentId === item.commentId">
+                      <a-comment v-if="r.toCommentId === item.commentId" style="margin: -20px 0">
                         <template #actions>
                           <span @click="beforeReply(r)">回复</span>
                         </template>
                         <template #author>
-                          <a style="font-size: 14px">{{ r.nickName }}</a>
+                          <a style="font-size: 14px;" @click="beforeReply(r)">{{ r.nickName }}</a>
                           <span style="margin: 0 5px; font-size: 12px">回复了</span>
-                          <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                          <a><span style="color: #16acff; font-size: 14px; cursor: default"> @{{ r.toUserNickName }}</span></a>
                         </template>
                         <template #avatar>
-                          <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                          <a-avatar :src="r.avatar" :alt="r.nickName" size="default" />
                         </template>
                         <template #content>
                           <p>
@@ -1967,15 +1967,19 @@ const postComment = ref({
   toUserId: '',
   toUserNickName: '',
 })
-
+const loadingComments = ref(false)
 const getComments = (workItemId) => {
+  loadingComments.value = true
   getCommentList(workItemId).then((res) => {
     if (res.data.code === 2001) {
       let comments = res.data.data
       firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
       notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+      loadingComments.value = false
     } else {
-
+      firstLevelComment.value = []
+      notFirstLevelComment.value = []
+      loadingComments.value = false
     }
   })
 }

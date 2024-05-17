@@ -42,6 +42,12 @@ a {
     background-color: rgba(0, 0, 0, 0);
 }
 
+.line-throw .el-input__wrapper {
+    text-decoration: line-through;
+    text-decoration-style: double;
+    color: rgba(51, 51, 51, 0.38);
+}
+
 .click-dialog-input .el-input__wrapper:hover {
     box-shadow: none !important;
     border: 1px solid #409EFF !important;

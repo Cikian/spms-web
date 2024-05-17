@@ -8,6 +8,13 @@ export function queryTestPlanList(data, condition, type) {
     })
 }
 
+export function queryTestPlanByDemandId(demandId) {
+    return request({
+        url: '/testPlan/byDemand/' + demandId,
+        method: 'get',
+    })
+}
+
 export function queryTestPlanById(data) {
     return request({
         url: '/testPlan/queryById/' + data,
