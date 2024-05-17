@@ -1951,10 +1951,9 @@
 
 
 <script setup lang="ts">
-import {nextTick, onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
+import {onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
@@ -1982,7 +1981,6 @@ import {
   queryTestCaseByPlanId,
   queryTestPlanByDemandId,
   queryTestPlanById,
-  queryTestPlanList,
   queryTestReportByPlanId,
   updateTestCase,
   updateTestPlan,
@@ -1999,13 +1997,24 @@ const allFatherDemands = ref([])
 
 onMounted(() => {
   proId.value = localStorage.getItem('proDetailId')
-
   getCurrentProInfo()
   getDemandTypes()
   getDemandSource()
   getDemandMembers()
   getDemandsList()
+  isFromRecentVisit()
 })
+
+const isFromRecentVisit = () => {
+  let recent = localStorage.getItem("recentVisit");
+  if (recent) {
+    let row = {
+      demandId: recent
+    }
+    clickRow(row)
+    localStorage.removeItem("recentVisit")
+  }
+}
 
 const loadingWorkItems = ref(true)
 
@@ -2344,7 +2353,6 @@ const clickRow = (row) => {
   firstTagName.value = 'baseInfo'
   secondTagName.value = 'comment'
   recordVisit(row.demandId, 2)
-
 }
 
 const demandActive = ref([])
