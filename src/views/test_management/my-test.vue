@@ -631,6 +631,7 @@ const search = () => {
 }
 
 const openAddTestPlanDialog = () => {
+  form.value.projectId = ''
   projectDemand.value = []
   projectTestMember.value = []
   addTestPlanDialogVisible.value = true
@@ -780,6 +781,7 @@ const getDemandListByProId = () => {
   queryDemandByProId(form.value.projectId)
       .then(res => {
         if (res.data.code === 2001) {
+
           projectDemand.value = res.data.data.allDemands
         }
       })
@@ -788,6 +790,7 @@ const getDemandListByProId = () => {
 
 const getProjectTestMember = (projectId) => {
   loadingTestMembers.value = true
+  projectTestMember.value = []
   queryProjectTestMember(projectId)
       .then(res => {
         if (res.data.code === 200) {
