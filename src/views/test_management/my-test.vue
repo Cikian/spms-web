@@ -172,6 +172,7 @@
   <!--  编辑测试计划dialog-->
   <el-dialog
       v-model="openDialog"
+      top="7vh"
       title="编辑测试计划"
       width="80vw"
       :show-close="false"
@@ -287,79 +288,85 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <div v-if="firstLevelComment.length <= 0">
-                <a-empty description="暂无评论"/>
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center" v-if="loadingMessage">
+                <a-spin size="large"/>
               </div>
-              <div style="width: 90%" v-else>
-                <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
-                  <template #actions>
-                    <span @click="beforeReply(item)">回复</span>
-                  </template>
-                  <template #author>
-                    <a>{{ item.nickName }}</a>
-                  </template>
-                  <template #avatar>
-                    <a-avatar :src="item.avatar" :alt="item.nickName"/>
-                  </template>
-                  <template #content>
-                    <p>
-                      {{ item.content }}
-                    </p>
-                  </template>
-                  <div v-for="(r,i) in notFirstLevelComment" :key="i">
-                    <a-comment v-if="r.toCommentId === item.commentId">
+              <div v-else>
+                <div v-if="firstLevelComment.length <= 0">
+                  <a-empty description="暂无评论"/>
+                </div>
+                <div style="width: 100%" v-else>
+                  <div class="post-comment-form"
+                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end; flex-direction: column">
+                    <a-textarea
+                        :auto-size="{ minRows: 4, maxRows: 4 }"
+                        placeholder="友善发言，文明评论~"
+                        v-model:value="postComment.content"
+                        id="postCommentInput"
+                        @keydown.enter.native="submitComment"
+                    />
+                    <a-button style="margin: 10px 0" type="primary" @click="submitComment"
+                              :disabled="postComment.content === ''">评论
+                    </a-button>
+                  </div>
+                  <el-scrollbar max-height="38vh">
+                    <a-comment v-for="(item,index) in firstLevelComment" :key="index"
+                               v-if="firstLevelComment.length > 0">
                       <template #actions>
-                        <span @click="beforeReply(r)">回复</span>
+                        <span>{{ item.createTime }}</span>
+                        <span @click="beforeReply(item)">回复</span>
                       </template>
                       <template #author>
-                        <a style="font-size: 14px">{{ r.nickName }}</a>
-                        <span style="margin: 0 5px; font-size: 12px">回复了</span>
-                        <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                        <a>{{ item.nickName }}</a>
                       </template>
                       <template #avatar>
-                        <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                        <a-avatar :src="item.avatar" :alt="item.nickName"/>
                       </template>
                       <template #content>
                         <p>
-                          {{ r.content }}
+                          {{ item.content }}
                         </p>
                       </template>
+                      <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                        <a-comment v-if="r.toCommentId === item.commentId">
+                          <template #actions>
+                            <span>{{ r.createTime }}</span>
+                            <span @click="beforeReply(r)">回复</span>
+                          </template>
+                          <template #author>
+                            <a style="font-size: 14px">{{ r.nickName }}</a>
+                            <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                            <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                          </template>
+                          <template #avatar>
+                            <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                          </template>
+                          <template #content>
+                            <p>
+                              {{ r.content }}
+                            </p>
+                          </template>
+                        </a-comment>
+                      </div>
                     </a-comment>
-                  </div>
-                </a-comment>
-
-                <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
-                  <div class="rep-box">
-                    <a-textarea
-                        class="rep-con"
-                        v-model:value="replyContent"
-                        placeholder="友善发言，文明评论~"
-                        :auto-size="{ minRows: 3, maxRows: 5 }"
-                        id="repCommentInput"
-                        @keydown.enter.native="replyComment"
-                    />
-                  </div>
-                  <a-form-item>
-                    <a-button style="float: right" type="primary" @click="replyComment()"
-                              :disabled="replyContent === ''">回复
-                    </a-button>
-                  </a-form-item>
-                </a-modal>
-              </div>
-              <div style="width: 55vw; position: fixed; bottom: 10vh">
-                <div class="post-comment-form"
-                     style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
-                  <a-textarea
-                      :auto-size="{ minRows: 3, maxRows: 6 }"
-                      placeholder="友善发言，文明评论~"
-                      v-model:value="postComment.content"
-                      id="postCommentInput"
-                      @keydown.enter.native="submitComment"
-                  />
-
-                  <a-button style="margin-left: 30px" type="primary" @click="submitComment"
-                            :disabled="postComment.content === ''">评论
-                  </a-button>
+                  </el-scrollbar>
+                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                    <div class="rep-box">
+                      <a-textarea
+                          class="rep-con"
+                          v-model:value="replyContent"
+                          placeholder="友善发言，文明评论~"
+                          :auto-size="{ minRows: 3, maxRows: 5 }"
+                          id="repCommentInput"
+                          @keydown.enter.native="replyComment"
+                      />
+                    </div>
+                    <a-form-item>
+                      <a-button style="float: right" type="primary" @click="replyComment()"
+                                :disabled="replyContent === ''">回复
+                      </a-button>
+                    </a-form-item>
+                  </a-modal>
                 </div>
               </div>
             </el-tab-pane>
@@ -475,7 +482,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addTestCase,
@@ -492,7 +499,6 @@ import {getProListByStatus} from "../../api/allProApi.ts";
 import {addComment, getCommentList, queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
-import {useRoute} from "vue-router";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -1294,7 +1300,7 @@ const getComments = (workItemId) => {
       .then((res) => {
         if (res.data.code === 2001) {
           let comments = res.data.data
-          console.log(comments)
+
           for (let i = 0; i < comments.length; i++) {
             comments[i].createTime = comments[i].createTime.replace('T', ' ')
           }
@@ -1317,6 +1323,10 @@ const getComments = (workItemId) => {
 
           firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
           notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
+          loadingMessage.value = false
+        } else if (res.data.code === 2002) {
+          firstLevelComment.value = []
+          notFirstLevelComment.value = []
           loadingMessage.value = false
         }
       })
@@ -1526,20 +1536,6 @@ onMounted(() => {
   display: flex;
   justify-content: flex-start;
   margin-top: 10px;
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;
-}
-
-.message-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
 }
 
 .post-comment-form {
