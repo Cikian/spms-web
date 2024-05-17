@@ -1299,7 +1299,7 @@ const getComments = (workItemId) => {
       .then((res) => {
         if (res.data.code === 2001) {
           let comments = res.data.data
-          console.log(comments)
+
           for (let i = 0; i < comments.length; i++) {
             comments[i].createTime = comments[i].createTime.replace('T', ' ')
           }

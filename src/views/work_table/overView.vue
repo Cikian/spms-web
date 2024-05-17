@@ -16,15 +16,15 @@
     <a-empty v-else-if="emptyVisitPro" description="暂无数据"/>
     <div v-else>
       <el-row style="padding: 0 40px 32px 40px">
-        <div class="lately-pro" v-for="pro in pros" :key="pro.name" @click="toProDetail(pro.proId)">
+        <div class="lately-pro" v-for="pro in pros" :key="pro.id" @click="toProDetail(pro.id)">
           <div class="lately-pro-in"></div>
           <div class="lately-pro-cont">
             <font-awesome-icon style="font-size: 24px; color: #56abfb" icon="fa-solid fa-folder-plus"/>
-            <div class="pro-title" style="color: #333;margin: 14px 0 10px 0">
-              <el-text truncated>{{ pro.name }}</el-text>
+            <div class="pro-title" style="margin: 14px 0 10px 0">
+              {{ pro.name }}
             </div>
             <div class="pro-path" style="font-size: .75rem; color: #999">
-              <el-text truncated size="small">{{ pro.path }}</el-text>
+              <el-text truncated size="small">{{ pro.desc }}</el-text>
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, ref} from "vue";
 import router from "../../router";
-import {queryRecentVisits, queryRecentVisitsPro} from "../../api/RecentVisitApi.ts";
+import {queryRecentVisits, queryRecentVisitsPro, recordVisit} from "../../api/RecentVisitApi.ts";
 
 const loadingVisit = ref(true)
 const emptyVisit = ref(false)
@@ -78,6 +78,7 @@ const pros = ref([])
 const visited = ref([])
 
 const toProDetail = (proId) => {
+  recordVisit(proId, 1)
   localStorage.setItem('proDetailId', proId)
   router.push('/proDetail')
 }
@@ -171,7 +172,8 @@ onMounted(() => {
   width: 100%;
   height: 100px;
   line-height: 100px;
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 700;
   padding: 0 40px;
 }
 
@@ -182,7 +184,12 @@ onMounted(() => {
   margin-right: 16px;
   border-radius: 4px;
   overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
 
+.lately-pro:hover {
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 }
 
 .lately-pro-in {
@@ -208,5 +215,14 @@ onMounted(() => {
 
 .recent-visit:hover {
   background-color: #f5f7fa;
+}
+
+.pro-title {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
