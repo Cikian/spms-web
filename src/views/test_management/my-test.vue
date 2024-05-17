@@ -172,6 +172,7 @@
   <!--  编辑测试计划dialog-->
   <el-dialog
       v-model="openDialog"
+      top="7vh"
       title="编辑测试计划"
       width="80vw"
       :show-close="false"
