@@ -475,7 +475,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addTestCase,
@@ -492,7 +492,6 @@ import {getProListByStatus} from "../../api/allProApi.ts";
 import {addComment, getCommentList, queryDemandByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
-import {useRoute} from "vue-router";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
