@@ -3073,6 +3073,7 @@ const handleCloseEditTestPlan = () => {
   }
   replyContent.value = ''
   getComments(clickedDemand.value.demandId)
+  loadTestPlanList(clickedDemand.value.demandId)
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -3230,6 +3231,7 @@ const submitEditTestCase = () => {
           })
           editTestCaseDialogVisible.value = false
           getTestCaseData()
+          getTestPlanDetailById(formData.testPlanId)
         } else {
           ElNotification({
             title: '提示',
