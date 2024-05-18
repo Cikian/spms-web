@@ -176,6 +176,7 @@
       title="编辑测试计划"
       width="80vw"
       :show-close="false"
+      @close="closeTestPlanDialog"
   >
     <el-form
         :model="echoTestPlan"
@@ -1134,6 +1135,7 @@ const submitEditTestCase = () => {
           })
           editTestCaseDialogVisible.value = false
           getTestCaseData()
+          getTestPlanDetailById(formData.testPlanId)
         } else {
           ElNotification({
             title: '提示',
@@ -1428,6 +1430,10 @@ const isFromRecentVisit = () => {
     rowClick(row)
     localStorage.removeItem("recentVisit")
   }
+}
+
+const closeTestPlanDialog = () => {
+  loadTestPlanList()
 }
 
 onMounted(() => {
