@@ -274,7 +274,35 @@ const router = createRouter({
                         {
                             path: '/proDetail/proDefect',
                             name: '项目缺陷',
-                            component: () => import('../views/pro_details/proDefect.vue')
+                            redirect: '/proDetail/proDefect/all',
+                            component: () => import('../views/pro_details/proDefect.vue'),
+                            children: [
+                                {
+                                    path: '/proDetail/proDefect/all',
+                                    name: '全部缺陷',
+                                    component: () => import('../views/pro_details/proDefectViews/allDefects.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDefect/unresolved',
+                                    name: '未解决的缺陷',
+                                    component: () => import('../views/pro_details/proDefectViews/unresolvedDefects.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDefect/onGoing',
+                                    name: '处理中的缺陷',
+                                    component: () => import('../views/pro_details/proDefectViews/onGoingDefects.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDefect/my',
+                                    name: '我负责的缺陷',
+                                    component: () => import('../views/pro_details/proDefectViews/myDefects.vue')
+                                },
+                                {
+                                    path: '/proDetail/proDefect/mySubmit',
+                                    name: '我提交的缺陷',
+                                    component: () => import('../views/pro_details/proDefectViews/mySubmitDefects.vue')
+                                },
+                            ]
                         },
                         {
                             path: '/proDetail/proWorkItem',

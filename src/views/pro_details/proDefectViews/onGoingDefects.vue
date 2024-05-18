@@ -2090,7 +2090,7 @@ const getDemandsList = (proId) => {
   getAllDemandByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
-      allDemands.value = res.data.data.allDemands.filter((item) => item.workItemType === 1)
+      allDemands.value = res.data.data.allDemands.filter((item) => item.demandStatus === 1)
       allFatherDemands.value = allDemands.value.filter(item => item.workItemType !== 3)
       loadingWorkItems.value = false
     } else {
@@ -2152,7 +2152,7 @@ const submitAddDemand = () => {
         type: 'success',
       })
       addDemandDialogVisible.value = false
-      getDemandsList(proId.value)
+      getDemandsList()
     } else {
       ElNotification({
         title: 'Error',
@@ -2432,7 +2432,7 @@ const submitClickEditor = (demandId) => {
         message: res.data.message,
         type: 'success',
       })
-      getDemandsList(proId.value)
+      getDemandsList()
       showDesc.value = true
       clickValueHtmlReadOnly.value = clickValueHtml.value
       clickedDemand.value.demandDesc = clickValueHtml.value

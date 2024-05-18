@@ -2152,7 +2152,7 @@ const submitAddDemand = () => {
         type: 'success',
       })
       addDemandDialogVisible.value = false
-      getDemandsList()
+      getDemandsList(proId.value)
     } else {
       ElNotification({
         title: 'Error',
@@ -2432,7 +2432,7 @@ const submitClickEditor = (demandId) => {
         message: res.data.message,
         type: 'success',
       })
-      getDemandsList()
+      getDemandsList(proId.value)
       showDesc.value = true
       clickValueHtmlReadOnly.value = clickValueHtml.value
       clickedDemand.value.demandDesc = clickValueHtml.value
