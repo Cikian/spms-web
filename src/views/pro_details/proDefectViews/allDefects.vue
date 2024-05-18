@@ -1106,10 +1106,6 @@
                   <div style="margin-left: 4%; margin-top: 20px; display: flex; align-items: center"
                        v-show="active.activeContent === '负责人'">
                     <div>
-                      <span v-if="active.fromActive !== ''" v-for="item in demandSource" :key="item.dictionaryDataId"
-                            v-show="item.dictionaryDataId === active.fromActive">{{ item.label }}
-                      </span>
-
                       <div v-if="active.fromActive !== ''"
                            style="display: flex; align-items: center; text-align: center" v-for="member in members"
                            :key="member.userId" v-show="member.userId === active.fromActive">
@@ -1483,7 +1479,7 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
-  getAllDefectByProId,
+  getAllDefectsByProId,
   getCommentList,
   getDefectById,
   getDemandActiveList,
@@ -1588,7 +1584,7 @@ const getDefectTypes = () => {
 }
 
 const getDefectList = (proId) => {
-  getAllDefectByProId(proId).then((res) => {
+  getAllDefectsByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
       allDemands.value = res.data.data.allDemands
@@ -1636,9 +1632,6 @@ const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
 const addDemandFatherDemandSelected = ref({})
 
 const submitAddDefect = () => {
-  if (newDemandFormData.value.fatherDemandId === "") {
-    newDemandFormData.value.fatherDemandId = "0"
-  }
   newDemandFormData.value.demandDesc = valueHtml.value
   insertNewDefect(newDemandFormData.value).then((res) => {
     if (res.data.code === 3001) {
@@ -1648,7 +1641,7 @@ const submitAddDefect = () => {
         type: 'success',
       })
       addDemandDialogVisible.value = false
-      getDefectList()
+      getDefectList(proId.value)
     } else {
       ElNotification({
         title: 'Error',
@@ -1685,6 +1678,7 @@ const openAddDefectDialog = () => {
 
 const closeAddDefectDialog = () => {
   newDemandFormData.value.proId = currentProInfo.value.proId
+  newDemandFormData.value.workItemType = 0
   newDemandFormData.value.title = ''
   newDemandFormData.value.demandDesc = ''
   newDemandFormData.value.demandStatus = 0
@@ -1910,7 +1904,7 @@ const submitClickEditor = (demandId) => {
         message: res.data.message,
         type: 'success',
       })
-      getDefectList()
+      getDefectList(proId.value)
       showDesc.value = true
       clickValueHtmlReadOnly.value = clickValueHtml.value
       clickedDemand.value.demandDesc = clickValueHtml.value

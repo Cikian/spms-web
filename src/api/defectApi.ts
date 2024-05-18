@@ -43,7 +43,7 @@ export function insertNewDefect(data) {
     })
 }
 
-export function getAllDefectByProId(proId) {
+export function getAllDefectsByProId(proId) {
     return request({
         url: '/defect/list/' + proId,
         method: 'get'
