@@ -14,3 +14,10 @@ export function selectByProId(proId) {
         method: 'get',
     })
 }
+
+export function getCalcProTestProgress(proId) {
+    return request({
+        url: '/testCase/calcProTestProgress/' + proId,
+        method: 'get',
+    })
+}

@@ -198,7 +198,7 @@ import {IToolbarConfig} from '@wangeditor/editor'
 import {onBeforeUnmount, ref, shallowRef, onMounted} from 'vue'
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {addAnno, selectByProId} from "../../api/proOverViewApi.ts";
+import {addAnno, getCalcProTestProgress, selectByProId} from "../../api/proOverViewApi.ts";
 
 
 const mode = 'default' // 或 'simple'
@@ -209,11 +209,6 @@ const issueEditorRef = shallowRef()
 // 内容 HTML
 const valueHtml = ref('<p>无公告</p>')
 const valueHtmlIssue = ref('<p>无公告</p>')
-
-// 模拟 ajax 异步获取内容
-onMounted(() => {
-
-})
 
 const toolbarConfig: Partial<IToolbarConfig> = {  // TS 语法
   excludeKeys: [
@@ -236,6 +231,7 @@ onBeforeUnmount(() => {
   editorIssue.destroy()
 })
 
+
 const handleCreatedEditor = (editor) => {
   editorRef.value = editor // 记录 editor 实例，重要！
 }
@@ -249,9 +245,20 @@ onMounted(() => {
   let currentProId = localStorage.getItem('proDetailId')
   if (currentProId) {
     proId.value = currentProId
+    getTestProgress(currentProId)
   }
   getAnno()
 })
+
+const proTestProgress = ref(0)
+
+const getTestProgress = (currentProId) =>{
+  getCalcProTestProgress(currentProId).then(res => {
+    if (res.data.code === 200) {
+      proTestProgress.value = res.data.data
+    }
+  })
+}
 
 const issueAnnouncementDialog = ref(false)
 

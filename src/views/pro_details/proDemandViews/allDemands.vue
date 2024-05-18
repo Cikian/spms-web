@@ -819,7 +819,7 @@
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0"
                              style="background-color: rgba(234,234,234,0.12); border-radius: 10px; margin-bottom: 10px; padding: 10px 10px">
                     <template #actions>
-                      <span @click="beforeReply(item)">回复</span>
+                      <span @click="beforeReply(item, 'fromDemand')">回复</span>
                     </template>
                     <template #author>
                       <a>{{ item.nickName }}</a>
@@ -835,10 +835,10 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId" style="margin: -20px 0">
                         <template #actions>
-                          <span @click="beforeReply(r)">回复</span>
+                          <span @click="beforeReply(r, 'fromDemand')">回复</span>
                         </template>
                         <template #author>
-                          <a style="font-size: 14px;" @click="beforeReply(r)">{{ r.nickName }}</a>
+                          <a style="font-size: 14px;" @click="beforeReply(r, 'fromDemand')">{{ r.nickName }}</a>
                           <span style="margin: 0 5px; font-size: 12px">回复了</span>
                           <a><span style="color: #16acff; font-size: 14px; cursor: default"> @{{
                               r.toUserNickName
@@ -864,11 +864,11 @@
                           placeholder="友善发言，文明评论~"
                           :auto-size="{ minRows: 3, maxRows: 5 }"
                           id="repCommentInput"
-                          @keydown.enter.native="replyComment"
+                          @keydown.enter.native="replyComment('fromDemand')"
                       />
                     </div>
                     <a-form-item>
-                      <a-button style="float: right" type="primary" @click="replyComment()"
+                      <a-button style="float: right" type="primary" @click="replyComment('fromDemand')"
                                 :disabled="replyContent === ''">回复
                       </a-button>
                     </a-form-item>
@@ -1704,7 +1704,7 @@
                 <div style="width: 90%" v-else>
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
                     <template #actions>
-                      <span @click="beforeReply(item)">回复</span>
+                      <span @click="beforeReply(item, 'fromTest')">回复</span>
                     </template>
                     <template #author>
                       <a>{{ item.nickName }}</a>
@@ -1720,7 +1720,7 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId">
                         <template #actions>
-                          <span @click="beforeReply(r)">回复</span>
+                          <span @click="beforeReply(r,'fromTest')">回复</span>
                         </template>
                         <template #author>
                           <a style="font-size: 14px">{{ r.nickName }}</a>
@@ -1739,7 +1739,7 @@
                     </div>
                   </a-comment>
 
-                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                  <a-modal v-model:open="openTestRep" width="60%" :footer="null" :closable="false" z-index="9999">
                     <div class="rep-box">
                       <a-textarea
                           class="rep-con"
@@ -1747,11 +1747,11 @@
                           placeholder="友善发言，文明评论~"
                           :auto-size="{ minRows: 3, maxRows: 5 }"
                           id="repCommentInput"
-                          @keydown.enter.native="replyComment"
+                          @keydown.enter.native="replyComment('fromTest')"
                       />
                     </div>
                     <a-form-item>
-                      <a-button style="float: right" type="primary" @click="replyComment()"
+                      <a-button style="float: right" type="primary" @click="replyComment('fromTest')"
                                 :disabled="replyContent === ''">回复
                       </a-button>
                     </a-form-item>
@@ -1958,7 +1958,7 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
-  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList,
+  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList, getDemandById,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
@@ -1997,25 +1997,30 @@ const allDemands = ref([])
 const allFatherDemands = ref([])
 
 onMounted(() => {
-  proId.value = localStorage.getItem('proDetailId')
-  getCurrentProInfo()
-  getDemandTypes()
-  getDemandSource()
-  getDemandMembers()
-  getDemandsList()
-  isFromRecentVisit()
-})
-
-const isFromRecentVisit = () => {
   let recent = localStorage.getItem("recentVisit");
   if (recent) {
-    let row = {
-      demandId: recent
-    }
-    clickRow(row)
-    localStorage.removeItem("recentVisit")
+    getDemandById(recent).then((res) => {
+      if (res.data.code === 2001) {
+        clickedDemand.value = res.data.data
+        clickValueHtmlReadOnly.value = clickedDemand.demandDesc
+        proId.value = clickedDemand.proId
+        getCurrentProInfo(res.data.data.proId)
+        getDemandTypes()
+        getDemandSource()
+        getDemandMembers(res.data.data.proId)
+        getDemandsList(res.data.data.proId)
+        clickRowDialogVisible.value = true
+      }
+    })
+  } else {
+    proId.value = localStorage.getItem('proDetailId')
+    getCurrentProInfo(proId.value)
+    getDemandTypes()
+    getDemandSource()
+    getDemandMembers(proId.value)
+    getDemandsList(proId.value)
   }
-}
+})
 
 const loadingWorkItems = ref(true)
 
@@ -2039,19 +2044,29 @@ const members = ref([])
 const demandTypes = ref([])
 const demandSource = ref([])
 
-const getCurrentProInfo = () => {
-  queryProByProId(proId.value).then((res) => {
+const getCurrentProInfo = (proId) => {
+  queryProByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       currentProInfo.value = res.data.data
       console.log(currentProInfo.value)
+
+
+
+      if (localStorage.getItem("recentVisit")) {
+        clickRow(clickedDemand.value)
+        localStorage.removeItem("recentVisit")
+      }
+
+
+
     } else {
 
     }
   })
 }
 
-const getDemandMembers = () => {
-  queryDemandMembers(proId.value).then((res) => {
+const getDemandMembers = (proId) => {
+  queryDemandMembers(proId).then((res) => {
     members.value = res.data.data
     console.log(res)
   })
@@ -2071,8 +2086,8 @@ const getDemandSource = () => {
   })
 }
 
-const getDemandsList = () => {
-  getAllDemandByProId(proId.value).then((res) => {
+const getDemandsList = (proId) => {
+  getAllDemandByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
       allDemands.value = res.data.data.allDemands
@@ -2350,7 +2365,9 @@ const clickRow = (row) => {
   getChildrenWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
   loadTestPlanList(clickedDemand.value.demandId)
+
   getProjectTestMember(currentProInfo.value.proId)
+
   firstTagName.value = 'baseInfo'
   secondTagName.value = 'comment'
   recordVisit(row.demandId, 2)
@@ -2433,6 +2450,7 @@ const firstTagName = ref('baseInfo')
 const secondTagName = ref('comment')
 
 const openRep = ref(false)
+const openTestRep = ref(false)
 const replyContent = ref('')
 const postComment = ref({
   toCommentId: '',
@@ -2500,11 +2518,20 @@ const submitComment = (workItemId) => {
 
 }
 
-const beforeReply = (comment) => {
+const beforeReply = (comment, flag) => {
   let userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
-  openRep.value = true;
-  postComment.value.workItemId = clickedDemand.value.demandId;
+  console.log("打开回复框")
+  console.log(clickedDemand.value)
+
+  if (flag === 'fromDemand') {
+    openRep.value = true;
+  } else if (flag === 'fromTest') {
+    openTestRep.value = true;
+  }
+
+  postComment.value.workItemId = comment.workItemId
+  // postComment.value.workItemId = clickedDemand.value.demandId;
   if (comment.toCommentId === '0') {
     postComment.value.toCommentId = comment.commentId;
   } else {
@@ -2515,7 +2542,7 @@ const beforeReply = (comment) => {
   postComment.value.avatar = userInfo.avatar
   postComment.value.nickName = userInfo.nickName
 }
-const replyComment = () => {
+const replyComment = (flag) => {
   if (replyContent.value === '') {
     ElNotification({
       title: 'Error',
@@ -2536,7 +2563,17 @@ const replyComment = () => {
         type: 'success',
       })
       openRep.value = false;
-      getComments(clickedDemand.value.demandId)
+      openTestRep.value = false;
+      if (flag === 'fromDemand'){
+        console.log("从需求")
+        console.log(clickedDemand.value)
+        getComments(clickedDemand.value.demandId)
+      } else if (flag === 'fromTest') {
+        console.log("从测试")
+        console.log(echoTestPlan.value)
+        getComments(echoTestPlan.value.testPlanId)
+      }
+
     } else {
       ElNotification({
         title: 'Error',
