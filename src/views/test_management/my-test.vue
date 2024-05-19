@@ -176,6 +176,8 @@
       title="编辑测试计划"
       width="80vw"
       :show-close="false"
+      :close-on-press-escape="false"
+      :close-on-click-modal="false"
       @close="closeTestPlanDialog"
   >
     <el-form

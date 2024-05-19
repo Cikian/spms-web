@@ -18,14 +18,14 @@
           <template #title>账号设置</template>
         </el-menu-item>
         <el-divider/>
-        <div class="group-title">其他</div>
-        <el-menu-item style="margin:0 0 12px 0;" index="1">
-          <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
-          <template #title>设置1</template>
+        <div class="group-title">系统安全</div>
+        <el-menu-item style="margin:0 0 12px 0;" index="/setting/list/backup">
+          <font-awesome-icon class="list-icons" :icon="['fas', 'database']"/>
+          <template #title>数据备份</template>
         </el-menu-item>
-        <el-menu-item style="margin:0 0 12px 0;" index="2">
-          <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
-          <template #title>设置2</template>
+        <el-menu-item style="margin:0 0 12px 0;" index="/setting/list/log">
+          <font-awesome-icon class="list-icons" icon="fa-solid fa-file-pen" />
+          <template #title>日志</template>
         </el-menu-item>
       </el-menu>
     </el-aside>

@@ -165,6 +165,16 @@ const router = createRouter({
                                     path: '/setting/list/account',
                                     name: 'account',
                                     component: () => import('../views/setting/account-setting.vue')
+                                },
+                                {
+                                    path: '/setting/list/backup',
+                                    name: 'backup',
+                                    component: () => import('../views/setting/backup.vue')
+                                },
+                                {
+                                    path: '/setting/list/log',
+                                    name: 'log',
+                                    component: () => import('../views/setting/log.vue')
                                 }
                             ]
                         }
