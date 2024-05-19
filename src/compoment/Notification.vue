@@ -23,8 +23,20 @@
           <el-card v-for="(item,index) in notificationList" :key="index"
                    style="margin-bottom: 10px; cursor: pointer" shadow="hover"
                    @click="readNotify(item.notificationId,index)">
-            <div>{{ item.content }}&nbsp;<span style="color: #409eff;text-decoration: underline">{{ item.title }}</span>
+            <div class="notification-title">
+              <div class="notification-title-top">
+                <div class="notification-title-icon">
+                  <font-awesome-icon style="color: #4682fa" :icon="['fas', 'circle-exclamation']"/>
+                </div>
+                <div class="notification-title-content">
+                  {{ item.content }}
+                </div>
+              </div>
+              <div class="notification-title-time">
+                {{ item.createTime }}
+              </div>
             </div>
+            <div class="notification-goat">{{ item.title }}</div>
           </el-card>
         </div>
 
@@ -38,9 +50,20 @@
             <el-card v-else v-for="(item,index) in notificationOldList" :key="index"
                      style="margin-bottom: 10px;cursor: pointer" shadow="hover"
                      @click="readNotify(item.notificationId,index)">
-              <div>{{ item.content }}&nbsp;<span style="color: #409eff;text-decoration: underline">{{
-                  item.title
-                }}</span></div>
+              <div class="notification-title">
+                <div class="notification-title-top">
+                  <div class="notification-title-icon">
+                    <font-awesome-icon style="color: #4682fa" :icon="['fas', 'circle-exclamation']"/>
+                  </div>
+                  <div class="notification-title-content">
+                    {{ item.content }}
+                  </div>
+                </div>
+                <div class="notification-title-time">
+                  {{ item.createTime }}
+                </div>
+              </div>
+              <div class="notification-goat">{{ item.title }}</div>
             </el-card>
           </div>
         </transition>
@@ -74,6 +97,21 @@ const getNotificationList = () => {
         if (res.data.code === 200) {
           if (res.data.data !== null) {
             notificationList.value = res.data.data;
+
+            for (let i = 0; i < notificationOldList.value.length; i++) {
+              let time = new Date().getTime() - new Date(notificationOldList.value[i].createTime).getTime();
+              if (time < 60000) {
+                notificationOldList.value[i].createTime = '刚刚';
+              } else if (time < 3600000) {
+                notificationOldList.value[i].createTime = Math.floor(time / 60000) + '分钟前';
+              } else if (time < 86400000) {
+                notificationOldList.value[i].createTime = Math.floor(time / 3600000) + '小时前';
+              } else if (time < 604800000) {
+                notificationOldList.value[i].createTime = Math.floor(time / 86400000) + '天前';
+              } else {
+                notificationOldList.value[i].createTime = new Date(notificationOldList.value[i].createTime).toLocaleDateString();
+              }
+            }
           } else {
             notificationList.value = [];
           }
@@ -88,6 +126,21 @@ const getOldNotificationList = () => {
         if (res.data.code === 200) {
           if (res.data.data !== null) {
             notificationOldList.value = res.data.data;
+
+            for (let i = 0; i < notificationOldList.value.length; i++) {
+              let time = new Date().getTime() - new Date(notificationOldList.value[i].createTime).getTime();
+              if (time < 60000) {
+                notificationOldList.value[i].createTime = '刚刚';
+              } else if (time < 3600000) {
+                notificationOldList.value[i].createTime = Math.floor(time / 60000) + '分钟前';
+              } else if (time < 86400000) {
+                notificationOldList.value[i].createTime = Math.floor(time / 3600000) + '小时前';
+              } else if (time < 604800000) {
+                notificationOldList.value[i].createTime = Math.floor(time / 86400000) + '天前';
+              } else {
+                notificationOldList.value[i].createTime = new Date(notificationOldList.value[i].createTime).toLocaleDateString();
+              }
+            }
           } else {
             notificationOldList.value = [];
           }
@@ -198,4 +251,35 @@ onMounted(() => {
   opacity: 0;
 }
 
+.notification-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-title-top {
+  display: flex;
+  align-items: center;
+}
+
+.notification-title-icon {
+  margin-right: 10px;
+}
+
+.notification-title-content {
+  font-size: 15px;
+  font-weight: 700;
+  color: #303133;
+}
+
+.notification-title-time {
+  font-size: 12px;
+  color: #909399;
+}
+
+.notification-goat {
+  font-size: 15px;
+  color: #606266;
+  margin-top: 20px;
+}
 </style>
