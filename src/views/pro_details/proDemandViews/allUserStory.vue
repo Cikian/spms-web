@@ -31,29 +31,48 @@
       @selection-change="handleSelectionChange"
       :header-cell-style="{'text-align': 'center',}"
       @row-click="clickRow"
+      flexible
   >
     <el-table-column align="center" type="selection"/>
-    <el-table-column align="center" label="序号" type="index" min-width="30px"/>
-    <el-table-column align="center" prop="demandNo" label="编号" sortable type="">
+    <el-table-column min-width="61px" align="center" label="序号" type="index" fixed/>
+    <el-table-column min-width="128px" align="center" prop="demandNo" label="编号" sortable fixed type="">
       <template #default="scope">
         <span>{{ currentProInfo.proFlag }}—{{ scope.row.demandNo }}</span>
       </template>
     </el-table-column>
-    <el-table-column align="left" prop="title" label="标题" min-width="200px">
+    <el-table-column min-width="380px" align="left" prop="title" label="标题" resizable fixed>
       <template #default="scope">
-          <span v-show="scope.row.workItemType===0"><font-awesome-icon
-              style="color: #ff877b;width: 18px; margin-right: 5px"
-              :icon="['fas', 'bolt-lightning']"/>{{ scope.row.title }}</span>
-        <span v-show="scope.row.workItemType===1"><font-awesome-icon
-            style="color: #9191f9;width: 18px; margin-right: 5px"
-            :icon="['fas', 'flag']"/>{{ scope.row.title }}</span>
-        <span v-show="scope.row.workItemType===2"><font-awesome-icon
-            style="color: #30d1fc;width: 18px; margin-right: 5px"
-            :icon="['fas', 'book-open']"/>{{ scope.row.title }}</span>
-        <span v-show="scope.row.workItemType===3"><font-awesome-icon
-            style="color: #73d897;width: 18px; margin-right: 5px"
-            :icon="['fas', 'square-check']"/>{{ scope.row.title }}</span>
-        <div class="table-title-cell">
+        <span v-show="scope.row.workItemType===0"
+              class="demand-title"
+              style="max-width: 100px"
+              :class="{'line-throw': scope.row.demandStatus === 2 || scope.row.demandStatus === -1}">
+          <font-awesome-icon
+              :class="[(scope.row.demandStatus === 2 || scope.row.demandStatus === -1) ? 'epic-throw-icon':'epic-default-icon']"
+              :icon="['fas', 'bolt-lightning']"/>
+          {{ scope.row.title }}
+        </span>
+        <span v-show="scope.row.workItemType===1"
+              :class="{'line-throw': scope.row.demandStatus === 2 || scope.row.demandStatus === -1}">
+          <font-awesome-icon
+              :class="[(scope.row.demandStatus === 2 || scope.row.demandStatus === -1) ? 'special-throw-icon':'special-default-icon']"
+              :icon="['fas', 'flag']"/>
+          {{ scope.row.title }}
+        </span>
+        <span v-show="scope.row.workItemType===2"
+              :class="{'line-throw': scope.row.demandStatus === 2 || scope.row.demandStatus === -1}">
+          <font-awesome-icon
+              :class="[(scope.row.demandStatus === 2 || scope.row.demandStatus === -1) ? 'story-throw-icon':'story-default-icon']"
+              :icon="['fas', 'book-open']"/>
+          {{ scope.row.title }}
+        </span>
+        <span v-show="scope.row.workItemType===3"
+              :class="{'line-throw': scope.row.demandStatus === 2 || scope.row.demandStatus === -1}">
+          <font-awesome-icon
+              :class="[(scope.row.demandStatus === 2 || scope.row.demandStatus === -1) ? 'task-throw-icon':'task-default-icon']"
+              :icon="['fas', 'square-check']"/>
+          {{ scope.row.title }}
+        </span>
+        <div class="table-title-cell" style="background-color: #f5f7fa">
           <el-tooltip
               class="box-item"
               effect="dark"
@@ -78,7 +97,7 @@
         </div>
       </template>
     </el-table-column>
-    <el-table-column align="center" prop="demandStatus" label="状态" class-name="table-statue-column">
+    <el-table-column min-width="150px" align="center" prop="demandStatus" label="状态" class-name="table-statue-column">
       <template #default="scope">
         <el-select
             v-model="scope.row.demandStatus"
@@ -148,7 +167,7 @@
         <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
       </template>
     </el-table-column>
-    <el-table-column align="center" prop="headId" label="负责人">
+    <el-table-column min-width="150px" align="center" prop="headId" label="负责人">
       <template #default="scope">
         <el-select
             v-model="scope.row.headId"
@@ -183,7 +202,7 @@
         </el-select>
       </template>
     </el-table-column>
-    <el-table-column align="center" prop="priority" label="优先级">
+    <el-table-column min-width="150px" align="center" prop="priority" label="优先级">
       <template #default="scope">
         <el-select
             v-model="scope.row.priority"
@@ -245,20 +264,21 @@
 
       </template>
     </el-table-column>
-    <el-table-column align="center" prop="fatherDemandId" label="父工作项">
+    <el-table-column min-width="150px" align="center" prop="fatherDemandId" label="父工作项">
       <template #default="scope">
-        <span v-for="demand in demandsByLevel" v-show="demand.demandId === scope.row.fatherDemandId">{{
+        <el-text truncated v-for="demand in allDemands" v-show="demand.demandId === scope.row.fatherDemandId">{{
             demand.title
-          }}</span>
+          }}
+        </el-text>
       </template>
     </el-table-column>
-    <el-table-column align="center" prop="type" label="需求类型">
+    <el-table-column min-width="130px" align="center" prop="type" label="需求类型">
       <template #default="scope">
         <span v-for="type in demandTypes" v-show="type.dictionaryDataId === scope.row.type">{{ type.label }}</span>
       </template>
     </el-table-column>
-    <el-table-column align="center" prop="storyPoint" label="故事点"/>
-    <el-table-column align="center" prop="updateTime" label="更新时间">
+    <el-table-column min-width="80px" align="center" prop="storyPoint" label="故事点"/>
+    <el-table-column min-width="180px" align="center" prop="updateTime" label="更新时间">
       <template #default="scope">
         {{ formatDate(new Date(scope.row.updateTime), 'YYYY-MM-DD HH:mm:ss') }}
       </template>
@@ -582,6 +602,7 @@
       </div>
     </template>
   </el-dialog>
+
   <!--  点击需求弹窗-->
   <el-dialog
       v-model="clickRowDialogVisible"
@@ -593,7 +614,10 @@
     <div
         style="width: 100%; height: 75vh; margin: 0 auto; display: flex; justify-content: space-between; overflow: hidden">
       <el-scrollbar style="width: 75%;">
-        <el-input class="click-dialog-input" v-model="clickedDemand.title" placeholder="请输入需求标题" size="large"
+        <el-input class="click-dialog-input"
+                  :class="{'line-throw': clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1}"
+                  v-model="clickedDemand.title"
+                  placeholder="请输入需求标题" size="large"
                   style="height: 50px; font-size: 22px"></el-input>
 
         <div style="width: 100%; padding: 20px 20px;">
@@ -792,9 +816,10 @@
                   <a-empty description="暂无评论"/>
                 </div>
                 <div style="width: 90%" v-else>
-                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0" style="background-color: rgba(234,234,234,0.12); border-radius: 10px; margin-bottom: 10px; padding: 10px 10px">
+                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0"
+                             style="background-color: rgba(234,234,234,0.12); border-radius: 10px; margin-bottom: 10px; padding: 10px 10px">
                     <template #actions>
-                      <span @click="beforeReply(item)">回复</span>
+                      <span @click="beforeReply(item, 'fromDemand')">回复</span>
                     </template>
                     <template #author>
                       <a>{{ item.nickName }}</a>
@@ -810,15 +835,17 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId" style="margin: -20px 0">
                         <template #actions>
-                          <span @click="beforeReply(r)">回复</span>
+                          <span @click="beforeReply(r, 'fromDemand')">回复</span>
                         </template>
                         <template #author>
-                          <a style="font-size: 14px;" @click="beforeReply(r)">{{ r.nickName }}</a>
+                          <a style="font-size: 14px;" @click="beforeReply(r, 'fromDemand')">{{ r.nickName }}</a>
                           <span style="margin: 0 5px; font-size: 12px">回复了</span>
-                          <a><span style="color: #16acff; font-size: 14px; cursor: default"> @{{ r.toUserNickName }}</span></a>
+                          <a><span style="color: #16acff; font-size: 14px; cursor: default"> @{{
+                              r.toUserNickName
+                            }}</span></a>
                         </template>
                         <template #avatar>
-                          <a-avatar :src="r.avatar" :alt="r.nickName" size="default" />
+                          <a-avatar :src="r.avatar" :alt="r.nickName" size="default"/>
                         </template>
                         <template #content>
                           <p>
@@ -837,11 +864,11 @@
                           placeholder="友善发言，文明评论~"
                           :auto-size="{ minRows: 3, maxRows: 5 }"
                           id="repCommentInput"
-                          @keydown.enter.native="replyComment"
+                          @keydown.enter.native="replyComment('fromDemand')"
                       />
                     </div>
                     <a-form-item>
-                      <a-button style="float: right" type="primary" @click="replyComment()"
+                      <a-button style="float: right" type="primary" @click="replyComment('fromDemand')"
                                 :disabled="replyContent === ''">回复
                       </a-button>
                     </a-form-item>
@@ -855,10 +882,10 @@
                         placeholder="友善发言，文明评论~"
                         v-model:value="postComment.content"
                         id="postCommentInput"
-                        @keydown.enter.native="submitComment"
+                        @keydown.enter.native="submitComment(clickedDemand.demandId)"
                     />
 
-                    <a-button style="margin-left: 30px" type="primary" @click="submitComment"
+                    <a-button style="margin-left: 30px" type="primary" @click="submitComment(clickedDemand.demandId)"
                               :disabled="postComment.content === ''">评论
                     </a-button>
                   </div>
@@ -1299,10 +1326,62 @@
 
             </el-table>
           </el-tab-pane>
-          <el-tab-pane label="测试" name="tests">Role</el-tab-pane>
+          <el-tab-pane label="测试" name="tests">
+            <div style="display: flex; justify-content: right; padding: 0 50px"  class="addTest" v-show="!hasTestPlan">
+              <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
+                  style="font-size: 20px; margin-right: 5px;">+</span>新建测试
+              </el-button>
+            </div>
+            <div v-if="hasTestPlan" class="table">
+              <el-table :data="testTableData"
+                        style="width: 100%"
+                        size="large"
+                        stripe
+                        v-loading="loading"
+                        @row-click="clickTest"
+              >
+                <el-table-column prop="planName" label="测试计划名称">
+                  <template #default="scope">
+                    <div style="display: flex; align-items: center">
+                      <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']"/>
+                      <span style="margin-left: 10px">{{ scope.row.planName }}</span>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态">
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.progress>0 && scope.row.progress < 100" type="warning" size="large" round
+                            effect="dark">进行中
+                    </el-tag>
+                    <el-tag v-else-if="scope.row.progress === 100" type="success" size="large" round effect="dark">已完成
+                    </el-tag>
+                    <el-tag v-else-if="scope.row.progress === 0" type="danger" size="large" round effect="dark">未开始
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="headName" label="负责人">
+                </el-table-column>
+                <el-table-column prop="progress" label="计划进度">
+                  <template #default="scope">
+                    <el-progress
+                        :percentage="scope.row.progress"
+                        status="success"
+                        :text-inside="true"
+                        :stroke-width="24"
+                        color="green"/>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="startTime" label="计划开始时间" align="center">
+                </el-table-column>
+                <el-table-column prop="endTime" label="计划结束时间" align="center">
+                </el-table-column>
+              </el-table>
+            </div>
+            <div v-else style="width: 95%;">
+              <a-empty description="暂无测试计划"/>
+            </div>
+          </el-tab-pane>
         </el-tabs>
-
-
       </el-scrollbar>
       <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
         <div style="width: 100%;">
@@ -1498,18 +1577,388 @@
     </template>
   </el-dialog>
 
+  <!--  编辑测试计划dialog-->
+  <el-dialog
+      v-model="openTestPlanDialog"
+      title="编辑测试计划"
+      width="80vw"
+      top="8vh"
+      :show-close="false"
+      @close="handleCloseEditTestPlan"
+  >
+    <el-form
+        :model="echoTestPlan"
+        label-width="auto"
+        label-position="top"
+        require-asterisk-position="right"
+        size="large">
+      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
+        <div style="width: 73%;">
+          <el-form-item label="标题" required>
+            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable></el-input>
+          </el-form-item>
+          <el-tabs type="border-card" @tab-click="handleTabClick" v-model="activeName">
+            <el-tab-pane label="测试用例" name="caseList">
+              <el-table :data="testCaseTableData"
+                        style="width: 100%;"
+                        size="large"
+                        v-loading="loadTestCase"
+                        max-height="535px"
+                        stripe>
+                <el-table-column prop="caseName" label="用例名称"/>
+                <el-table-column prop="priorityLabel" label="优先级" sortable>
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.priority === 0" type="info">低</el-tag>
+                    <el-tag v-else-if="scope.row.priority === 1" type="warning">中</el-tag>
+                    <el-tag v-else-if="scope.row.priority === 2" type="danger">高</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" sortable>
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.status === false" type="info">未完成</el-tag>
+                    <el-tag v-else-if="scope.row.status === true" type="success">已完成</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                  <template #default="scope">
+                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)">编辑</el-button>
+                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)">删除
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
+            <el-tab-pane label="添加测试用例" name="addCase">
+              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top" style="max-height: 704px">
+                <el-form-item label="用例名称" required>
+                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable></el-input>
+                </el-form-item>
+                <el-form-item label="用例描述" required>
+                  <el-input v-model="addTestCaseForm.caseContent" placeholder="请输入用例描述" type="textarea"
+                            :rows="12" resize="none" clearable></el-input>
+                </el-form-item>
+                <el-form-item label="优先级" required>
+                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级" clearable>
+                    <el-option label="低" value="0"></el-option>
+                    <el-option label="中" value="1"></el-option>
+                    <el-option label="高" value="2"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div class="add-test-case-footer">
+                <el-button type="primary" @click="submitAddTestCase" :disabled="addTestCaseBtnDisable"
+                           :loading="loadingAddTestCase">
+                  {{ addTestCaseBtnText }}
+                </el-button>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="测试报告" name="testReport">
+              <el-upload
+                  class="upload-report"
+                  :show-file-list="false"
+                  :before-upload="beforeUpload"
+                  :http-request="handleUpload"
+                  drag>
+                <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
+                <div class="el-upload__text">
+                  将文件拖动到此或<em>点击上传</em>
+                </div>
+                <template #tip>
+                  <div class="el-upload__tip" style="font-size: 15px">
+                    仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
+                  </div>
+                </template>
+              </el-upload>
+              <div class="upload-progress">
+                <el-progress v-if="uploadProgress > 0"
+                             :percentage="uploadProgress"
+                             :color="colors"
+                             :stroke-width="15"
+                             type="line"/>
+              </div>
+              <div class="test-report-card">
+                <el-card v-if="testReport !== null" class="test-report">
+                  <div class="test-report-top">
+                    <div class="test-report-title">{{ testReport.testReportName }}</div>
+                    <div class="approval">
+                      <el-select v-model="testReport.approvalStatus" @change="updateTestReportApprovalStatus">
+                        <el-option label="待审批" :value="0"/>
+                        <el-option label="已通过" :value="1"/>
+                        <el-option label="未通过" :value="2"/>
+                      </el-select>
+                    </div>
+                  </div>
+                  <div class="test-report-footer">
+                    <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
+                    <el-button type="danger" text size="default" @click="deleteTestReport">删除</el-button>
+                  </div>
+                </el-card>
+                <el-empty description="暂未上传测试报告" v-else/>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="留言" name="message">
+              <el-scrollbar height="37vh">
+                <div v-if="firstLevelComment.length <= 0">
+                  <a-empty description="暂无评论"/>
+                </div>
+                <div style="width: 90%" v-else>
+                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
+                    <template #actions>
+                      <span @click="beforeReply(item, 'fromTest')">回复</span>
+                    </template>
+                    <template #author>
+                      <a>{{ item.nickName }}</a>
+                    </template>
+                    <template #avatar>
+                      <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                    </template>
+                    <template #content>
+                      <p>
+                        {{ item.content }}
+                      </p>
+                    </template>
+                    <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                      <a-comment v-if="r.toCommentId === item.commentId">
+                        <template #actions>
+                          <span @click="beforeReply(r,'fromTest')">回复</span>
+                        </template>
+                        <template #author>
+                          <a style="font-size: 14px">{{ r.nickName }}</a>
+                          <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                          <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                        </template>
+                        <template #avatar>
+                          <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                        </template>
+                        <template #content>
+                          <p>
+                            {{ r.content }}
+                          </p>
+                        </template>
+                      </a-comment>
+                    </div>
+                  </a-comment>
+
+                  <a-modal v-model:open="openTestRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                    <div class="rep-box">
+                      <a-textarea
+                          class="rep-con"
+                          v-model:value="replyContent"
+                          placeholder="友善发言，文明评论~"
+                          :auto-size="{ minRows: 3, maxRows: 5 }"
+                          id="repCommentInput"
+                          @keydown.enter.native="replyComment('fromTest')"
+                      />
+                    </div>
+                    <a-form-item>
+                      <a-button style="float: right" type="primary" @click="replyComment('fromTest')"
+                                :disabled="replyContent === ''">回复
+                      </a-button>
+                    </a-form-item>
+                  </a-modal>
+                </div>
+                <div style="width: 55vw; position: fixed; bottom: 15vh">
+                  <div class="post-comment-form"
+                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
+                    <a-textarea
+                        :auto-size="{ minRows: 3, maxRows: 6 }"
+                        placeholder="友善发言，文明评论~"
+                        v-model:value="postComment.content"
+                        id="postCommentInput"
+                        @keydown.enter.native="submitComment(echoTestPlan.testPlanId)"
+                    />
+
+                    <a-button style="margin-left: 30px" type="primary" @click="submitComment(echoTestPlan.testPlanId)"
+                              :disabled="postComment.content === ''">评论
+                    </a-button>
+                  </div>
+                </div>
+              </el-scrollbar>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+        <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
+          <el-form-item label="负责人" required v-loading="loadingTestMembers">
+            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
+              <el-option
+                  v-for="item in projectTestMember"
+                  :key="item.userId"
+                  :label="item.nickName"
+                  :value="item.userId"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="所属项目">
+            <el-input v-model="echoTestPlan.projectName" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="关联需求">
+            <el-input v-model="echoTestPlan.demandName" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="计划周期" required>
+            <el-date-picker
+                style="width: 155px;"
+                v-model="echoTestPlan.startTime"
+                type="date"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择开始日期">
+            </el-date-picker>
+            <span style="margin: 0 18px">-</span>
+            <el-date-picker
+                style="width: 155px;"
+                v-model="echoTestPlan.endTime"
+                type="date"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="创建人">
+            <el-input v-model="echoTestPlan.creatorName" disabled/>
+          </el-form-item>
+          <el-progress
+              style="margin-top: 10px"
+              :percentage="echoTestPlan.progress"
+              :color="colors"
+              stroke-width="15"
+              type="circle">
+            <template #default="{ percentage }">
+              <span class="percentage-value">{{ percentage }}%</span>
+              <span class="percentage-label">测试进度</span>
+            </template>
+          </el-progress>
+          <div class="dialog-footer">
+            <el-button @click="handleCloseEditTestPlan">取消</el-button>
+            <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable"
+                       :loading="loadingEditTestPlan">
+              {{ editTestPlanBtnText }}
+            </el-button>
+          </div>
+        </el-scrollbar>
+      </div>
+    </el-form>
+  </el-dialog>
+
+  <!--  编辑测试用例dialog-->
+  <el-dialog
+      v-model="editTestCaseDialogVisible"
+      title="编辑测试用例"
+      width="40%"
+      center
+      :show-close="false">
+    <el-form :model="echoTestCase" label-width="100px" label-position="top">
+      <el-form-item label="用例名称">
+        <el-input v-model="echoTestCase.caseName"
+                  placeholder="请输入用例名称"
+                  type="text"
+                  clearable
+                  size="large"/>
+      </el-form-item>
+      <el-form-item label="用例描述">
+        <el-input v-model="echoTestCase.caseContent"
+                  placeholder="请输入用例描述"
+                  type="textarea"
+                  :rows="12"
+                  resize="none"
+                  clearable/>
+      </el-form-item>
+      <el-form-item label="优先级">
+        <el-select v-model="echoTestCase.priority" placeholder="请选择优先级" size="large">
+          <el-option key="0" label="低" :value="0"/>
+          <el-option key="1" label="中" :value="1"/>
+          <el-option key="2" label="高" :value="2"/>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="echoTestCase.status" placeholder="请选择状态" size="large">
+          <el-option key="false" label="未完成" :value="false"/>
+          <el-option key="true" label="已完成" :value="true"/>
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
+      <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
+                 :disabled="editTestCaseBtnDisable" :loading="loadingEditTestCase">
+        {{ editTestCaseBtnText }}
+      </el-button>
+    </div>
+  </el-dialog>
+
+  <!--  新增测试计划dialog-->
+  <el-dialog
+      title="新建测试计划"
+      v-model="addTestPlanDialogVisible"
+      width="42%"
+      center
+      :show-close="false"
+  >
+    <el-form :model="form" label-width="100px" label-position="top">
+      <el-form-item label="测试计划名称">
+        <el-input v-model="form.planName"
+                  placeholder="请输入测试计划名称"
+                  maxlength="255"
+                  show-word-limit
+                  type="text"
+                  clearable
+                  size="large"/>
+      </el-form-item>
+      <el-form-item label="关联项目">
+        <el-input size="large" v-model="currentProInfo.proName" placeholder="请选择关联项目" disabled>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="关联需求">
+        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled no-data-text="暂无需求">
+        </el-input>
+      </el-form-item>
+      <el-form-item label="负责人">
+        <el-select size="large" v-model="form.head" placeholder="请选择负责人" no-data-text="暂无成员">
+          <el-option
+              v-for="item in projectTestMember"
+              :key="item.userId"
+              :label="item.nickName"
+              :value="item.userId"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="计划周期">
+        <el-date-picker
+            v-model="form.startTime"
+            type="date"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择开始日期">
+        </el-date-picker>
+        <span style="margin: 0 15px">-</span>
+        <el-date-picker
+            v-model="form.endTime"
+            type="date"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择结束日期">
+        </el-date-picker>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="handleCloseAddTestPlanDialog" size="large" style="width: 90px;">取 消</el-button>
+      <el-button type="primary" @click="submitForm" size="large" style="width: 90px;" :disabled="addTestPlanBtnDisable"
+                 :loading="loadingAddTestPlan">
+        {{ addTestPlanBtnText }}
+      </el-button>
+    </div>
+  </el-dialog>
+
 </template>
 
 
 <script setup lang="ts">
-import {nextTick, onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
+import {onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import {DomEditor} from '@wangeditor/editor'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
-  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList,
+  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList, getDemandById,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
@@ -1524,6 +1973,21 @@ import {
 } from "../../../api/demandApi.ts";
 import {recordVisit} from "../../../api/RecentVisitApi.ts";
 import {formatDate} from "@vueuse/shared";
+import {queryProjectTestMember} from "../../../api/userApi.ts";
+import {
+  addTestCase, addTestPlan,
+  deleteTestCaseById,
+  deleteTestReportById,
+  queryTestCaseById,
+  queryTestCaseByPlanId,
+  queryTestPlanByDemandId,
+  queryTestPlanById,
+  queryTestReportByPlanId,
+  updateTestCase,
+  updateTestPlan,
+  updateTestReportApprovalStatusById,
+  uploadTestReport
+} from "../../../api/TestPlanApi.ts";
 
 const proId = ref('')
 const currentProInfo = ref({})
@@ -1533,13 +1997,29 @@ const allDemands = ref([])
 const allFatherDemands = ref([])
 
 onMounted(() => {
-  proId.value = localStorage.getItem('proDetailId')
-
-  getCurrentProInfo()
-  getDemandTypes()
-  getDemandSource()
-  getDemandMembers()
-  getDemandsList()
+  let recent = localStorage.getItem("recentVisit");
+  if (recent) {
+    getDemandById(recent).then((res) => {
+      if (res.data.code === 2001) {
+        clickedDemand.value = res.data.data
+        clickValueHtmlReadOnly.value = clickedDemand.demandDesc
+        proId.value = clickedDemand.proId
+        getCurrentProInfo(res.data.data.proId)
+        getDemandTypes()
+        getDemandSource()
+        getDemandMembers(res.data.data.proId)
+        getDemandsList(res.data.data.proId)
+        clickRowDialogVisible.value = true
+      }
+    })
+  } else {
+    proId.value = localStorage.getItem('proDetailId')
+    getCurrentProInfo(proId.value)
+    getDemandTypes()
+    getDemandSource()
+    getDemandMembers(proId.value)
+    getDemandsList(proId.value)
+  }
 })
 
 const loadingWorkItems = ref(true)
@@ -1564,19 +2044,29 @@ const members = ref([])
 const demandTypes = ref([])
 const demandSource = ref([])
 
-const getCurrentProInfo = () => {
-  queryProByProId(proId.value).then((res) => {
+const getCurrentProInfo = (proId) => {
+  queryProByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       currentProInfo.value = res.data.data
       console.log(currentProInfo.value)
+
+
+
+      if (localStorage.getItem("recentVisit")) {
+        clickRow(clickedDemand.value)
+        localStorage.removeItem("recentVisit")
+      }
+
+
+
     } else {
 
     }
   })
 }
 
-const getDemandMembers = () => {
-  queryDemandMembers(proId.value).then((res) => {
+const getDemandMembers = (proId) => {
+  queryDemandMembers(proId).then((res) => {
     members.value = res.data.data
     console.log(res)
   })
@@ -1596,8 +2086,8 @@ const getDemandSource = () => {
   })
 }
 
-const getDemandsList = () => {
-  getAllDemandByProId(proId.value).then((res) => {
+const getDemandsList = (proId) => {
+  getAllDemandByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
       allDemands.value = res.data.data.allDemands.filter((item) => item.workItemType === 2)
@@ -1662,7 +2152,7 @@ const submitAddDemand = () => {
         type: 'success',
       })
       addDemandDialogVisible.value = false
-      getDemandsList()
+      getDemandsList(proId.value)
     } else {
       ElNotification({
         title: 'Error',
@@ -1722,6 +2212,7 @@ const handleCloseClickRow = () => {
   firstLevelComment.value = []
   notFirstLevelComment.value = []
   childrenWorkItem.value = []
+  testTableData.value = []
 }
 
 const clickIcon = ref(false)
@@ -1873,10 +2364,13 @@ const clickRow = (row) => {
   getComments(clickedDemand.value.demandId)
   getChildrenWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
+  loadTestPlanList(clickedDemand.value.demandId)
+
+  getProjectTestMember(currentProInfo.value.proId)
+
   firstTagName.value = 'baseInfo'
   secondTagName.value = 'comment'
   recordVisit(row.demandId, 2)
-
 }
 
 const demandActive = ref([])
@@ -1938,7 +2432,7 @@ const submitClickEditor = (demandId) => {
         message: res.data.message,
         type: 'success',
       })
-      getDemandsList()
+      getDemandsList(proId.value)
       showDesc.value = true
       clickValueHtmlReadOnly.value = clickValueHtml.value
       clickedDemand.value.demandDesc = clickValueHtml.value
@@ -1956,6 +2450,7 @@ const firstTagName = ref('baseInfo')
 const secondTagName = ref('comment')
 
 const openRep = ref(false)
+const openTestRep = ref(false)
 const replyContent = ref('')
 const postComment = ref({
   toCommentId: '',
@@ -1984,7 +2479,7 @@ const getComments = (workItemId) => {
   })
 }
 
-const submitComment = () => {
+const submitComment = (workItemId) => {
   if (postComment.value.content === '') {
     ElNotification({
       title: 'Error',
@@ -1996,7 +2491,7 @@ const submitComment = () => {
 
   let userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
-  postComment.value.workItemId = clickedDemand.value.demandId;
+  postComment.value.workItemId = workItemId;
   postComment.value.toCommentId = '0';
   postComment.value.toUserId = '0';
   postComment.value.toUserNickName = '';
@@ -2011,7 +2506,7 @@ const submitComment = () => {
         message: res.data.message,
         type: 'success',
       })
-      getComments(clickedDemand.value.demandId)
+      getComments(workItemId)
     } else {
       ElNotification({
         title: 'Error',
@@ -2023,11 +2518,20 @@ const submitComment = () => {
 
 }
 
-const beforeReply = (comment) => {
+const beforeReply = (comment, flag) => {
   let userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
-  openRep.value = true;
-  postComment.value.workItemId = clickedDemand.value.demandId;
+  console.log("打开回复框")
+  console.log(clickedDemand.value)
+
+  if (flag === 'fromDemand') {
+    openRep.value = true;
+  } else if (flag === 'fromTest') {
+    openTestRep.value = true;
+  }
+
+  postComment.value.workItemId = comment.workItemId
+  // postComment.value.workItemId = clickedDemand.value.demandId;
   if (comment.toCommentId === '0') {
     postComment.value.toCommentId = comment.commentId;
   } else {
@@ -2038,7 +2542,7 @@ const beforeReply = (comment) => {
   postComment.value.avatar = userInfo.avatar
   postComment.value.nickName = userInfo.nickName
 }
-const replyComment = () => {
+const replyComment = (flag) => {
   if (replyContent.value === '') {
     ElNotification({
       title: 'Error',
@@ -2059,7 +2563,17 @@ const replyComment = () => {
         type: 'success',
       })
       openRep.value = false;
-      getComments(clickedDemand.value.demandId)
+      openTestRep.value = false;
+      if (flag === 'fromDemand'){
+        console.log("从需求")
+        console.log(clickedDemand.value)
+        getComments(clickedDemand.value.demandId)
+      } else if (flag === 'fromTest') {
+        console.log("从测试")
+        console.log(echoTestPlan.value)
+        getComments(echoTestPlan.value.testPlanId)
+      }
+
     } else {
       ElNotification({
         title: 'Error',
@@ -2072,6 +2586,700 @@ const replyComment = () => {
 
 const firstLevelComment = ref([]);
 const notFirstLevelComment = ref([]);
+
+const testTableData = ref([])
+const openTestPlanDialog = ref(false)
+const loadingTestMembers = ref(false)
+const projectTestMember = ref([])
+const echoTestPlan = ref({})
+const loadTestCase = ref(true)
+const testCaseTableData = ref([])
+const loading = ref(false)
+const testReport = ref(null)
+const uploadProgress = ref(0)
+const activeName = ref('caseList')
+const editTestCaseDialogVisible = ref(false)
+const echoTestCase = ref({})
+const addTestCaseForm = ref({
+  caseName: '',
+  caseContent: '',
+  priority: ''
+})
+const addTestCaseBtnText = ref('提交')
+const addTestCaseBtnDisable = ref(false)
+const loadingAddTestCase = ref(false)
+const colors = [
+  {color: '#f56c6c', percentage: 25},
+  {color: '#ff9400', percentage: 50},
+  {color: '#ffb310', percentage: 75},
+  {color: '#67c23a', percentage: 100},
+]
+const editTestPlanBtnText = ref('确定')
+const editTestPlanBtnDisable = ref(false)
+const loadingEditTestPlan = ref(false)
+const editTestCaseBtnText = ref('确定')
+const editTestCaseBtnDisable = ref(false)
+const loadingEditTestCase = ref(false)
+const addTestPlanDialogVisible = ref(false)
+const form = ref({
+  planName: '',
+  projectId: '',
+  demandId: '',
+  head: '',
+  startTime: '',
+  endTime: '',
+})
+const addTestPlanBtnText = ref('提交')
+const addTestPlanBtnDisable = ref(false)
+const loadingAddTestPlan = ref(false)
+
+
+const openAddTestPlanDialog = () => {
+  form.value.projectId = currentProInfo.value.proId
+  form.value.demandId = clickedDemand.value.demandId
+  // projectTestMember.value = []
+  addTestPlanDialogVisible.value = true
+}
+
+const handleCloseAddTestPlanDialog = () => {
+  form.value = {
+    planName: '',
+    projectId: '',
+    demandId: '',
+    head: '',
+    startTime: '',
+    endTime: '',
+  }
+  addTestPlanDialogVisible.value = false
+}
+
+const submitForm = () => {
+  addTestPlanBtnText.value = '提交中...'
+  addTestPlanBtnDisable.value = true
+  loadingAddTestPlan.value = true
+
+  if (form.value.planName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入测试计划名称',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.projectId === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择关联项目',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.demandId === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择关联需求',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.head === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择负责人',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.startTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划开始时间',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  if (form.value.endTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划结束时间',
+      type: 'warning'
+    })
+    addTestPlanBtnText.value = '提交'
+    addTestPlanBtnDisable.value = false
+    loadingAddTestPlan.value = false
+    return;
+  }
+
+  let formData = {
+    planName: form.value.planName,
+    projectId: form.value.projectId,
+    demandId: form.value.demandId,
+    head: form.value.head,
+    startTime: form.value.startTime,
+    endTime: form.value.endTime,
+  }
+
+  addTestPlan(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          handleCloseAddTestPlanDialog()
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          loadTestPlanList(clickedDemand.value.demandId)
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        addTestPlanBtnText.value = '提交'
+        addTestPlanBtnDisable.value = false
+        loadingAddTestPlan.value = false
+      })
+}
+
+const hasTestPlan = ref(false)
+const loadTestPlanList = (demandId) => {
+  loading.value = true
+  queryTestPlanByDemandId(demandId)
+      .then(res => {
+        if (res.data.code === 200) {
+          testTableData.value = res.data.data
+          hasTestPlan.value = testTableData.value !== null && testTableData.value.length > 0
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+          testTableData.value = []
+        }
+      })
+      .finally(() => {
+        loading.value = false
+      })
+}
+
+const clickTest = (row) => {
+  openTestPlanDialog.value = true
+  getProjectTestMember(currentProInfo.value.proId)
+  getTestPlanDetailById(row.testPlanId)
+}
+
+const getProjectTestMember = (projectId) => {
+  loadingTestMembers.value = true
+  console.log("获取项目成员：" + projectId)
+  queryProjectTestMember(projectId)
+      .then(res => {
+        if (res.data.code === 200) {
+          projectTestMember.value = res.data.data
+          loadingTestMembers.value = false
+          console.log(projectTestMember.value)
+        }
+      })
+}
+
+const getTestPlanDetailById = (planId) => {
+  queryTestPlanById(planId)
+      .then(res => {
+        if (res.data.code === 200) {
+          echoTestPlan.value = res.data.data
+          console.log("res.data.data")
+          console.log(res.data.data)
+          getTestCaseData()
+          getProjectTestMember(currentProInfo.value.proId)
+        }
+      })
+}
+
+const getTestCaseData = () => {
+  loadTestCase.value = true
+  queryTestCaseByPlanId(echoTestPlan.value.testPlanId)
+      .then(res => {
+        if (res.data.code === 200) {
+          testCaseTableData.value = res.data.data
+          loadTestCase.value = false
+        }
+      })
+}
+
+const handleTabClick = (tab) => {
+  if (tab.props.name === 'caseList') {
+    getTestCaseData()
+  } else if (tab.props.name === 'testReport') {
+    queryTestReport()
+  } else if (tab.props.name === 'message') {
+    getComments(echoTestPlan.value.testPlanId)
+  }
+}
+
+const queryTestReport = () => {
+  queryTestReportByPlanId(echoTestPlan.value.testPlanId)
+      .then(res => {
+        if (res.data.code === 200) {
+          testReport.value = res.data.data
+          testReport.value.oldStatus = res.data.data.approvalStatus
+        } else {
+          testReport.value = null
+        }
+      })
+}
+
+const editTestCase = (row) => {
+  editTestCaseDialogVisible.value = true
+  queryTestCaseById(row.testCaseId)
+      .then(res => {
+        if (res.data.code === 200) {
+          echoTestCase.value = res.data.data
+        }
+      })
+}
+
+const deleteTestCase = (row) => {
+  ElMessageBox.confirm('此操作将永久删除该测试用例, 是否继续?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deleteTestCaseById(row.testCaseId)
+        .then(res => {
+          if (res.data.code === 200) {
+            ElNotification({
+              title: '成功',
+              message: res.data.message,
+              type: 'success'
+            })
+            getTestCaseData()
+          } else {
+            ElNotification({
+              title: '提示',
+              message: res.data.message,
+              type: 'warning'
+            })
+          }
+        })
+  }).catch(() => {
+    ElNotification({
+      title: '提示',
+      message: '已取消删除',
+      type: 'info'
+    })
+  })
+}
+
+const submitAddTestCase = () => {
+  addTestCaseBtnText.value = '提交中'
+  addTestCaseBtnDisable.value = true
+  loadingAddTestCase.value = true
+
+  if (addTestCaseForm.value.caseName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例名称',
+      type: 'warning'
+    })
+    addTestCaseBtnText.value = '提交'
+    addTestCaseBtnDisable.value = false
+    loadingAddTestCase.value = false
+    return;
+  }
+
+  if (addTestCaseForm.value.caseContent === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例描述',
+      type: 'warning'
+    })
+    addTestCaseBtnText.value = '提交'
+    addTestCaseBtnDisable.value = false
+    loadingAddTestCase.value = false
+    return;
+  }
+
+  if (addTestCaseForm.value.priority === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择优先级',
+      type: 'warning'
+    })
+    addTestCaseBtnText.value = '提交'
+    addTestCaseBtnDisable.value = false
+    loadingAddTestCase.value = false
+    return;
+  }
+
+  let formData = {
+    caseName: addTestCaseForm.value.caseName,
+    caseContent: addTestCaseForm.value.caseContent,
+    priority: addTestCaseForm.value.priority,
+    testPlanId: echoTestPlan.value.testPlanId
+  }
+  addTestCase(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          addTestCaseForm.value = {
+            caseName: '',
+            caseContent: '',
+            priority: ''
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        addTestCaseBtnText.value = '提交'
+        addTestCaseBtnDisable.value = false
+        loadingAddTestCase.value = false
+      })
+}
+
+const beforeUpload = (file) => {
+  const isLt5M = file.size / 1024 / 1024 < 5;
+  if (!isLt5M) {
+    ElNotification({
+      title: '警告',
+      message: '上传文件大小不能超过 5MB!',
+      type: 'warning'
+    })
+  }
+
+  const isDoc = file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/pdf';
+  if (!isDoc) {
+    ElNotification({
+      title: '警告',
+      message: '上传文件只能是doc、docx、pdf格式!',
+      type: 'warning'
+    })
+  }
+  return isLt5M && isDoc;
+}
+
+const handleUpload = (file) => {
+  uploadProgress.value = 0
+
+  let formData = new FormData();
+  formData.append('file', file.file);
+  formData.append('testPlanId', echoTestPlan.value.testPlanId);
+
+  const config = {
+    onUploadProgress: (progressEvent) => {
+      console.log(progressEvent.loaded * 100)
+      console.log(progressEvent.total)
+      uploadProgress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    },
+  };
+
+  uploadTestReport(formData, config)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          queryTestReport()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+
+}
+
+const updateTestReportApprovalStatus = () => {
+  ElMessageBox.confirm('是否确认修改测试报告审批状态?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+      .then(() => {
+        updateTestReportApprovalStatusById(testReport.value.testReportId, testReport.value.approvalStatus)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+              } else {
+                testReport.value.approvalStatus = testReport.value.oldStatus
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        testReport.value.approvalStatus = testReport.value.oldStatus
+        ElNotification({
+          title: '提示',
+          message: '已取消修改',
+          type: 'info'
+        })
+      })
+}
+
+const downloadTestReport = () => {
+  window.open(testReport.value.reportFile)
+}
+
+const deleteTestReport = () => {
+  ElMessageBox.confirm('此操作将永久删除该测试报告, 是否继续?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deleteTestReportById(testReport.value.testReportId)
+        .then(res => {
+          if (res.data.code === 200) {
+            ElNotification({
+              title: '成功',
+              message: res.data.message,
+              type: 'success'
+            })
+            queryTestReport()
+          } else {
+            ElNotification({
+              title: '提示',
+              message: res.data.message,
+              type: 'warning'
+            })
+          }
+        })
+  }).catch(() => {
+    ElNotification({
+      title: '提示',
+      message: '已取消删除',
+      type: 'info'
+    })
+  })
+}
+
+const handleCloseEditTestPlan = () => {
+  openTestPlanDialog.value = false
+  echoTestPlan.value = {}
+  testCaseTableData.value = []
+  activeName.value = 'caseList'
+  testReport.value = null
+  uploadProgress.value = 0
+  postComment.value = {
+    toCommentId: '',
+    content: '',
+    workItemId: '',
+    userId: '',
+    avatar: '',
+    nickName: '',
+    toUserId: '',
+    toUserNickName: '',
+  }
+  replyContent.value = ''
+  getComments(clickedDemand.value.demandId)
+}
+
+const handleSubmitEditTestPlan = () => {
+  editTestPlanBtnText.value = '提交中'
+  editTestPlanBtnDisable.value = true
+  loadingEditTestPlan.value = true
+
+  if (echoTestPlan.value.planName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入测试计划名称',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  if (echoTestPlan.value.head === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择负责人',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  if (echoTestPlan.value.startTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划开始时间',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  if (echoTestPlan.value.endTime === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择计划结束时间',
+      type: 'warning'
+    })
+    editTestPlanBtnText.value = '提交'
+    editTestPlanBtnDisable.value = false
+    loadingEditTestPlan.value = false
+    return;
+  }
+
+  let fromData = {
+    testPlanId: echoTestPlan.value.testPlanId,
+    planName: echoTestPlan.value.planName,
+    head: echoTestPlan.value.head,
+    startTime: echoTestPlan.value.startTime.replace('T', ' '),
+    endTime: echoTestPlan.value.endTime.replace('T', ' ')
+  }
+
+  updateTestPlan(fromData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          handleCloseEditTestPlan()
+          loadTestPlanList(clickedDemand.value.demandId)
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        editTestPlanBtnText.value = '提交'
+        editTestPlanBtnDisable.value = false
+        loadingEditTestPlan.value = false
+      })
+}
+
+const submitEditTestCase = () => {
+  editTestCaseBtnText.value = '提交中'
+  editTestCaseBtnDisable.value = true
+  loadingEditTestCase.value = true
+
+  if (echoTestCase.value.caseName === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例名称',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  if (echoTestCase.value.caseContent === '') {
+    ElNotification({
+      title: '提示',
+      message: '请输入用例描述',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  if (echoTestCase.value.priority === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择优先级',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  if (echoTestCase.value.status === '') {
+    ElNotification({
+      title: '提示',
+      message: '请选择状态',
+      type: 'warning'
+    })
+    editTestCaseBtnText.value = '提交'
+    editTestCaseBtnDisable.value = false
+    loadingEditTestCase.value = false
+    return;
+  }
+
+  let formData = {
+    testCaseId: echoTestCase.value.testCaseId,
+    caseName: echoTestCase.value.caseName,
+    caseContent: echoTestCase.value.caseContent,
+    priority: echoTestCase.value.priority,
+    status: echoTestCase.value.status,
+    testPlanId: echoTestPlan.value.testPlanId
+  }
+  updateTestCase(formData)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          editTestCaseDialogVisible.value = false
+          getTestCaseData()
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+        editTestCaseBtnText.value = '提交'
+        editTestCaseBtnDisable.value = false
+        loadingEditTestCase.value = false
+      })
+}
+
 
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
@@ -2127,15 +3335,70 @@ onBeforeUnmount(() => {
 
 .table-title-cell {
   display: inline-block;
+  padding: 0 10px;
   text-align: right;
   position: absolute;
   right: 0;
   opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .el-table__row .is-left:hover .table-title-cell {
   opacity: 1;
 }
 
+.line-throw {
+  text-decoration: line-through;
+  text-decoration-style: double;
+  color: rgba(51, 51, 51, 0.38);
+}
+
+.epic-default-icon {
+  color: #ff877b;
+  width: 18px;
+  margin-right: 5px
+}
+
+.epic-throw-icon {
+  color: rgba(255, 135, 123, 0.5);
+  width: 18px;
+  margin-right: 5px
+}
+
+.special-default-icon {
+  color: #9191f9;
+  width: 18px;
+  margin-right: 5px
+}
+
+.special-throw-icon {
+  color: rgba(145, 145, 249, 0.5);
+  width: 18px;
+  margin-right: 5px
+}
+
+.story-default-icon {
+  color: #30d1fc;
+  width: 18px;
+  margin-right: 5px
+}
+
+.story-throw-icon {
+  color: rgba(48, 209, 252, 0.5);
+  width: 18px;
+  margin-right: 5px
+}
+
+.task-default-icon {
+  color: #73d897;
+  width: 18px;
+  margin-right: 5px
+}
+
+.task-throw-icon {
+  color: rgba(115, 216, 151, 0.5);
+  width: 18px;
+  margin-right: 5px
+}
 
 </style>

@@ -27,6 +27,11 @@ a {
     background-color: rgba(0, 0, 0, 0);
 }
 
+.defect-status-select .el-select__wrapper {
+    box-shadow: none !important;
+    background-color: rgba(0, 0, 0, 0);
+}
+
 .demand-headId-select .el-select__wrapper {
     box-shadow: none !important;
     background-color: rgba(0, 0, 0, 0);

@@ -79,18 +79,6 @@
         </el-table>
       </div>
     </div>
-    <div class="pagination">
-      <el-pagination
-          :current-page="tablePage.pageNum"
-          @current-change="changePageNum"
-          :total="tablePage.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          background
-          :pager-count="11"
-          :page-sizes="pageSizes"
-          @size-change="handleSizeChange"
-      />
-    </div>
   </div>
 
   <!--  新增测试计划dialog-->
@@ -486,7 +474,7 @@ import {
   queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, queryTestReportByPlanId,
+  queryTestPlanList, queryTestPlanListByProId, queryTestReportByPlanId,
   updateTestCase,
   updateTestPlan, updateTestReportApprovalStatusById, uploadTestReport,
 } from "../../api/TestPlanApi.ts";
@@ -590,29 +578,11 @@ const changeStatus = (status) => {
 
 const loadTestPlanList = () => {
   loading.value = true
-  let queryCondition = {
-    planName: searchContent.value
-  }
-  let formData = {
-    page: tablePage.pageNum,
-    size: tablePage.pageSize,
-    status: currentTestPlanStatus.value
-  }
-  queryTestPlanList(formData, queryCondition, 0)
-      .then(res => {
-        if (res.data.code === 200) {
-          let pageInfo = res.data.data;
-          tablePage.total = parseInt(pageInfo.total)
 
-          for (let i = 0; i < pageInfo.records.length; i++) {
-            if (pageInfo.records[i].startTime) {
-              pageInfo.records[i].startTime = pageInfo.records[i].startTime.split('T')[0]
-            }
-            if (pageInfo.records[i].endTime) {
-              pageInfo.records[i].endTime = pageInfo.records[i].endTime.split('T')[0]
-            }
-          }
-          tableData.value = pageInfo.records
+  queryTestPlanListByProId(proId.value)
+      .then(res => {
+        if (res.data.code === 2001) {
+          tableData.value = res.data.data
         } else {
           ElNotification({
             title: '提示',
@@ -759,16 +729,6 @@ const submitForm = () => {
         addTestPlanBtnDisable.value = false
         loadingAddTestPlan.value = false
       })
-}
-
-const changePageNum = (currentPage) => {
-  tablePage.pageNum = currentPage
-  loadTestPlanList()
-}
-
-const handleSizeChange = (pageSize) => {
-  tablePage.pageSize = pageSize
-  loadTestPlanList()
 }
 
 const getProject = () => {
