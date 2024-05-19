@@ -8,6 +8,7 @@ import {far} from '@fortawesome/free-regular-svg-icons'
 import { createPinia } from 'pinia'
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/reset.css';
+import 'element-plus/dist/index.css'
 
 library.add(fas,far)
 const pinia = createPinia()

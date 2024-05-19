@@ -1,6 +1,6 @@
 <template>
   <div class="overView-title">
-    待完成的项目
+    我提交的项目
   </div>
 
   <div v-if="tableData.data.length <= 0" style="width: 100%; padding: 0 40px" v-loading="loadingPro">
@@ -14,7 +14,6 @@
         :row-style="{height: '56px'}"
         stripe
         highlight-current-row
-        @row-click="rowClick"
     >
       <el-table-column label="项目" prop="proName" sortable>
         <template #default="scope">
@@ -35,6 +34,34 @@
       <el-table-column align="center" label="创建时间" prop="updateTime">
         <template #default="scope">
           <span>{{ formatDate(new Date(scope.row.createTime), 'YYYY年MM月DD日') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="left" label="状态" prop="proStatus">
+        <template #default="scope">
+          <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.proStatus===-1">等待审批</div>
+          <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.proStatus!==-1 && scope.row.proStatus!==-2">审核通过</div>
+          <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.proStatus===-2">已拒绝</div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" prop="proStatus">
+        <template #default="scope">
+          <el-button size="small"
+                     type="primary"
+                     round
+                     @click="handleEdit(scope.row)"
+                     :disabled="scope.row.proStatus !== -1 && scope.row.proStatus !== -2"
+          >
+            编辑
+          </el-button>
+          <el-button
+              size="small"
+              type="danger"
+              round
+              @click="handleDelete(scope.row)"
+              :disabled="scope.row.proStatus !== -1 && scope.row.proStatus !== -2"
+          >
+            撤回
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -176,7 +203,14 @@
 import {ElTable, FormInstance, FormRules} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, reactive, ref} from "vue";
-import {addPro, getAddMembers, getNeedCompleteProList, getProList} from "../../api/allProApi.ts";
+import {
+  addPro, deletePro,
+  getAddMembers,
+  getMySubmitProList,
+  getNeedCompleteProList,
+  getProList,
+  updatePro
+} from "../../api/allProApi.ts";
 import {useRouter} from "vue-router";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
 import {formatDate} from "@vueuse/shared";
@@ -196,13 +230,16 @@ onMounted(() => {
 })
 
 const loadingPro = ref(true)
+const proDate = ref('')
+
 
 const beLong = ref('默认组织')
 
-const proData = reactive({
+let proData = reactive({
+  proId: '',
   proName: '',
   proDesc: '',
-  proStatus: 1,
+  proStatus: -1,
   proFlag: '',
   proType: '0',
   proCustomer: '',
@@ -211,7 +248,6 @@ const proData = reactive({
   expectedEndTime: '',
 })
 
-const proDate = ref('')
 
 const dateChange = () => {
   console.log(proDate.value)
@@ -248,12 +284,8 @@ const submitForm = (formEl: FormInstance | undefined) => {
   })
 }
 
-
-const searchInput = ref('')
-
-
 const getPros = () => {
-  getNeedCompleteProList().then((res) => {
+  getMySubmitProList().then((res) => {
     tableData.data = res.data.data
     console.log(tableData.data)
     loadingPro.value = false
@@ -290,8 +322,6 @@ const handleSelectionChange = (val: User[]) => {
 }
 
 const submitAddPro = () => {
-  console.log('提交表单')
-
   proData.proMembersIds = []
   for (let i = 0; i < selectionMembers.value.length; i++) {
     proData.proMembersIds.push(selectionMembers.value[i].userId)
@@ -301,7 +331,7 @@ const submitAddPro = () => {
 
   console.log(proData)
 
-  addPro(proData).then((res) => {
+  updatePro(proData).then((res) => {
     if (res.data.code === 3001) {
       ElNotification({
         title: '成功',
@@ -309,6 +339,7 @@ const submitAddPro = () => {
         type: 'success',
       })
       dialogVisible.value = false
+      theFirst.value = true
       getPros()
     } else {
       ElNotification({
@@ -320,12 +351,43 @@ const submitAddPro = () => {
   })
 }
 
-
 const router = useRouter()
-const rowClick = (row) => {
-  recordVisit(row.proId, 1)
-  localStorage.setItem('proDetailId', row.proId)
-  router.push('/proDetail')
+const handleEdit = (row) => {
+  dialogVisible.value = true
+  proData = row
+  console.log(row)
+  console.log(proData)
+}
+
+const handleDelete = (row) => {
+  ElMessageBox.confirm('此操作将撤回项目，是否继续？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deletePro(row.proId).then((res) => {
+      if (res.data.code === 5001) {
+        ElNotification({
+          title: '成功',
+          message: res.data.message,
+          type: 'success',
+        })
+        getPros()
+      } else {
+        ElNotification({
+          title: '失败',
+          message: res.data.message,
+          type: 'error',
+        })
+      }
+    })
+  }).catch(() => {
+    ElNotification({
+      title: '提示',
+      message: '已取消撤回',
+      type: 'info',
+    })
+  })
 }
 </script>
 
@@ -348,5 +410,13 @@ const rowClick = (row) => {
   margin-bottom: 24px;
 }
 
-
+.table-statue {
+  width: 60px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 20px;
+  text-align: center;
+  color: white;
+  font-size: 12px
+}
 </style>

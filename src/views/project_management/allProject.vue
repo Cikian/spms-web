@@ -13,22 +13,25 @@
         style="width: 300px; height: 100%;"
         placeholder="搜索..."
         clearable
+        @change="searchPro"
+        @clear="searchInput = ''; searchPro()"
     >
       <template #prefix>
         <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
       </template>
     </el-input>
   </div>
+  <div v-if="tableData.data.length <= 0" style="width: 100%; padding: 0 40px" v-loading="loadingPro">
+    <el-empty description="暂无数据"/>
+  </div>
 
-  <div style="width: 100%; padding: 0 40px" v-loading="loadingPro">
+  <div v-else style="width: 100%; padding: 0 40px" v-loading="loadingPro">
     <el-table
         :data="tableData.data"
-        :default-sort="{ prop: 'date', order: 'descending' }"
         style="width: 100%"
         :row-style="{height: '56px'}"
         stripe
         highlight-current-row
-        :header-cell-style="{fontWeight: 'normal', fontSize: '14px'}"
         @row-click="rowClick"
     >
       <el-table-column label="项目" prop="proName" sortable>
@@ -47,10 +50,13 @@
         </template>
       </el-table-column>
       <el-table-column label="所属" prop="from"/>
-      <el-table-column label="更新时间" prop="proUpdateTime"/>
+      <el-table-column align="center" label="创建时间" prop="updateTime">
+        <template #default="scope">
+          <span>{{ formatDate(new Date(scope.row.createTime), 'YYYY年MM月DD日') }}</span>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
-
 
   <!-- 新增项目弹出框 -->
   <el-dialog
@@ -187,13 +193,28 @@
 import {ElTable, FormInstance, FormRules} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, reactive, ref} from "vue";
-import {addPro, getAddMembers, getProList} from "../../api/allProApi.ts";
+import {addPro, getAddMembers, getProList, searchProList} from "../../api/allProApi.ts";
 import {useRouter} from "vue-router";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
+import {formatDate} from "@vueuse/shared";
 
 let tableData = reactive({
   data: []
 })
+
+let tableDataTemp = reactive({
+  data: []
+})
+
+const searchPro = () => {
+  if (searchInput.value === '') {
+    tableData.data = tableDataTemp.data
+  } else {
+    searchProList(searchInput.value).then((res) => {
+      tableData.data = res.data.data
+    })
+  }
+}
 
 
 const dialogVisible = ref(false)
@@ -212,7 +233,7 @@ const beLong = ref('默认组织')
 const proData = reactive({
   proName: '',
   proDesc: '',
-  proStatus: 1,
+  proStatus: -1,
   proFlag: '',
   proType: '0',
   proCustomer: '',
@@ -228,7 +249,6 @@ const dateChange = () => {
 }
 
 const ruleFormRef = ref<FormInstance>()
-
 
 const rules = reactive<FormRules<typeof proData>>({
   proName: [
@@ -266,7 +286,7 @@ const getPros = () => {
   console.log('获取项目列表')
   getProList().then((res) => {
     tableData.data = res.data.data
-    console.log(tableData.data)
+    tableDataTemp.data = res.data.data
     loadingPro.value = false
   })
 }

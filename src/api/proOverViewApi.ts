@@ -36,6 +36,19 @@ export function getDefectProgressCount(proId) {
     })
 }
 
+export function getMyDemandByHeadId() {
+    return request({
+        url: '/demand/myDemand',
+        method: 'get',
+    })
+}
+export function getMyHeaderDemandByHeadId() {
+    return request({
+        url: '/demand/myHeaderDemand',
+        method: 'get',
+    })
+}
+
 export function updateProStatus(proId, status) {
     return request({
         url: '/pro/changeStatus/' + proId + '/' + status,

@@ -7,7 +7,7 @@
           style="height: 52px; padding: 0 20px"
           :router="true"
       >
-        <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px" icon="fa-solid fa-house" />工作台<el-divider style="margin: 0 16px" direction="vertical" /></span>
+        <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px" icon="fa-solid fa-house" />项目管理<el-divider style="margin: 0 16px" direction="vertical" /></span>
         <Notification/>
         <AvatarMenu />
       </el-menu>
@@ -31,6 +31,14 @@
           <el-menu-item style="margin:0 0 12px 0;" index="/proman/tbcom">
             <font-awesome-icon class="list-icons" :icon="['fas', 'terminal']"/>
             <template #title>待完成项目</template>
+          </el-menu-item>
+          <el-menu-item style="margin:0 0 12px 0;" index="/proman/mySubmit">
+            <font-awesome-icon class="list-icons" :icon="['far', 'file-code']" />
+            <template #title>我提交的项目</template>
+          </el-menu-item>
+          <el-menu-item style="margin:0 0 12px 0;" index="/proman/audit">
+            <font-awesome-icon class="list-icons" :icon="['far', 'hourglass-half']" />
+            <template #title>待审批</template>
           </el-menu-item>
 
         </el-menu>

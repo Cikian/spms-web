@@ -8,9 +8,59 @@ export function addPro(data) {
     })
 }
 
+export function updatePro(data) {
+    return request({
+        url: '/pro',
+        method: 'put',
+        data
+    })
+}
+
+export function deletePro(data) {
+    return request({
+        url: '/pro?id=' + data,
+        method: 'delete',
+    })
+}
+
 export function getProList() {
     return request({
         url: '/pro',
+        method: 'get',
+    })
+}
+
+export function getNeedCompleteProList() {
+    return request({
+        url: '/pro/needComplete',
+        method: 'get',
+    })
+}
+
+export function getMyProList() {
+    return request({
+        url: '/pro/myPro',
+        method: 'get',
+    })
+}
+
+export function getMySubmitProList() {
+    return request({
+        url: '/pro/mySubmit',
+        method: 'get',
+    })
+}
+
+export function getAuditProList() {
+    return request({
+        url: '/pro/audit',
+        method: 'get',
+    })
+}
+
+export function searchProList(data) {
+    return request({
+        url: '/pro/search/' + data,
         method: 'get',
     })
 }
@@ -28,7 +78,6 @@ export function getAddMembers() {
         method: 'get',
     })
 }
-
 
 
 export function getProAddMembers(data) {

@@ -159,12 +159,6 @@
             <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>
           </template>
         </el-select>
-
-
-        <!--        <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>-->
-        <!--        <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中</div>-->
-        <!--        <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成</div>-->
-        <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
       </template>
     </el-table-column>
     <el-table-column min-width="150px" align="center" prop="headId" label="负责人">
@@ -2068,7 +2062,6 @@ const getCurrentProInfo = (proId) => {
 const getDemandMembers = (proId) => {
   queryDemandMembers(proId).then((res) => {
     members.value = res.data.data
-    console.log(res)
   })
 }
 

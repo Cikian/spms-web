@@ -89,6 +89,16 @@ const router = createRouter({
                             path: '/proman/tbcom',
                             name: 'tbcom',
                             component: () => import('../views/project_management/toBeComplete.vue')
+                        },
+                        {
+                            path: '/proman/mySubmit',
+                            name: '我提交的项目',
+                            component: () => import('../views/project_management/mySubmit.vue')
+                        },
+                        {
+                            path: '/proman/audit',
+                            name: '审核',
+                            component: () => import('../views/project_management/audit.vue')
                         }
                     ]
                 },
