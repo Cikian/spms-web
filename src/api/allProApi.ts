@@ -28,3 +28,28 @@ export function getAddMembers() {
         method: 'get',
     })
 }
+
+
+
+export function getProAddMembers(data) {
+    return request({
+        url: '/user/queryCanAddToProjectMember/' + data,
+        method: 'get',
+    })
+}
+
+export function addMember(data) {
+    return request({
+        url: '/pro/addMember',
+        method: 'post',
+        data
+    })
+}
+
+export function deleteMember(data) {
+    return request({
+        url: '/pro/deleteMember',
+        method: 'post',
+        data
+    })
+}
