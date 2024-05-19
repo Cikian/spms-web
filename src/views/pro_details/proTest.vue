@@ -40,6 +40,7 @@
                   stripe
                   v-loading="loading"
                   @row-click="rowClick"
+                  empty-text="暂无数据"
         >
           <el-table-column prop="planName" label="测试计划名称">
             <template #default="scope">
@@ -88,6 +89,8 @@
       width="42%"
       center
       :show-close="false"
+      :close-on-press-escape="false"
+      :close-on-click-modal="false"
   >
     <el-form :model="form" label-width="100px" label-position="top">
       <el-form-item label="测试计划名称">
@@ -423,7 +426,9 @@
       title="编辑测试用例"
       width="40%"
       center
-      :show-close="false">
+      :show-close="false"
+      :close-on-press-escape="false"
+      :close-on-click-modal="false">
     <el-form :model="echoTestCase" label-width="100px" label-position="top">
       <el-form-item label="用例名称">
         <el-input v-model="echoTestCase.caseName"

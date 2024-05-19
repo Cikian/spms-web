@@ -167,6 +167,7 @@
 import {ref} from 'vue'
 import {deleteUsers, queryById, queryUserList, updateStatus} from '../../api/userApi.ts'
 import {assignRole, queryRoleList, queryUserHasRole} from "../../api/roleApi.ts";
+import {message} from "ant-design-vue";
 
 const loading = ref(false)
 const form = ref({
@@ -252,6 +253,7 @@ const queryUserListByCondition = () => {
 }
 
 const handleEdit = (row) => {
+  message.loading('加载中...', 0)
   let userId = row.userId
 
   queryById(userId)
@@ -273,6 +275,9 @@ const handleEdit = (row) => {
                     type: 'warning'
                   })
                 }
+              })
+              .finally(() => {
+                message.destroy()
               })
         } else {
           ElNotification({
@@ -358,6 +363,7 @@ const handleDelete = (row) => {
         type: 'warning',
       })
       .then(() => {
+        message.loading('删除中...', 0)
         let userIds = []
         userIds.push(row.userId)
         deleteUsers(userIds)
@@ -376,6 +382,9 @@ const handleDelete = (row) => {
                   type: 'warning'
                 })
               }
+            })
+            .finally(() => {
+              message.destroy()
             })
       })
       .catch(() => {
@@ -399,6 +408,7 @@ const handleStatus = (row) => {
         type: 'warning',
       })
       .then(() => {
+        message.loading('操作中...', 0)
         let formData = {
           userId: row.userId,
           status: row.status === '启用' ? 0 : 1
@@ -420,6 +430,9 @@ const handleStatus = (row) => {
                   type: 'warning'
                 })
               }
+            })
+            .finally(() => {
+              message.destroy()
             })
       })
       .catch(() => {

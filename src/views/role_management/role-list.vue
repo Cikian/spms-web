@@ -468,7 +468,7 @@ const handleStatus = (row) => {
   let willStatus = row.status === '启用' ? '禁用' : '启用'
 
   ElMessageBox.confirm(
-      '此操作将' + willStatus + '此用户，确定执行吗？',
+      '此操作将' + willStatus + '此角色，确定执行吗？',
       '警告',
       {
         confirmButtonText: '确定',
@@ -512,7 +512,7 @@ const handleStatus = (row) => {
 //删除和批量删除
 const handleDelete = (row) => {
   ElMessageBox.confirm(
-      '此操作将删除此用户，确定执行吗？',
+      '此操作将删除此角色，确定执行吗？',
       '警告',
       {
         confirmButtonText: '确定',
@@ -556,7 +556,7 @@ const handleBatchDelete = () => {
   }
 
   ElMessageBox.confirm(
-      '此操作将批量删除选中的用户，确定执行吗？',
+      '此操作将批量删除选中的角色，确定执行吗？',
       '警告',
       {
         confirmButtonText: '确定',

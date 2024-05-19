@@ -185,6 +185,7 @@
 import {ref, onMounted} from 'vue'
 import {addUser, deleteUsers, queryById, queryUserList, updateStatus} from "../../api/userApi.ts";
 import {assignRole, queryRoleList, queryUserHasRole} from "../../api/roleApi.ts";
+import {message} from "ant-design-vue";
 
 const loading = ref(true)
 const userList = ref([])
@@ -308,6 +309,7 @@ const loadUserList = () => {
 }
 
 const handleEdit = (row) => {
+  message.loading('加载中...', 0)
   let userId = row.userId
   queryById(userId)
       .then(res => {
@@ -328,6 +330,9 @@ const handleEdit = (row) => {
                   })
                 }
                 userDetailDialogVisible.value = true
+              })
+              .finally(() => {
+                message.destroy()
               })
         } else {
           ElNotification({
@@ -350,6 +355,7 @@ const handleDelete = (row) => {
         type: 'warning',
       })
       .then(() => {
+        message.loading('删除中...', 0)
         let userIds = []
         userIds.push(row.userId)
         deleteUsers(userIds)
@@ -368,6 +374,9 @@ const handleDelete = (row) => {
                   type: 'warning'
                 })
               }
+            })
+            .finally(() => {
+              message.destroy()
             })
       })
       .catch(() => {
@@ -391,11 +400,11 @@ const handleStatus = (row) => {
         type: 'warning',
       })
       .then(() => {
+        message.loading('操作中...', 0)
         let formData = {
           userId: row.userId,
           status: row.status === '启用' ? 0 : 1
         }
-
         updateStatus(formData)
             .then(res => {
               if (res.data.code === 200) {
@@ -412,6 +421,9 @@ const handleStatus = (row) => {
                   type: 'warning'
                 })
               }
+            })
+            .finally(() => {
+              message.destroy()
             })
       })
       .catch(() => {
