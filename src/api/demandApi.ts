@@ -50,6 +50,20 @@ export function getAllDemandByProId(proId) {
     })
 }
 
+export function getAllDemandByHeadId(proId) {
+    return request({
+        url: '/demand/byHead/' + proId,
+        method: 'get'
+    })
+}
+
+export function getAllDemandByCreateId(proId) {
+    return request({
+        url: '/demand/byCreat/' + proId,
+        method: 'get'
+    })
+}
+
 export function updateDemandStatus(demandId, status) {
     return request({
         url: '/demand/changeStatus/' + demandId + '/' + status,

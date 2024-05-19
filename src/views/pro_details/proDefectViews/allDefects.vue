@@ -1554,15 +1554,10 @@ const getCurrentProInfo = (proId) => {
   queryProByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       currentProInfo.value = res.data.data
-      console.log(currentProInfo.value)
-
-
       if (localStorage.getItem("recentVisit")) {
         clickRow(clickedDemand.value)
         localStorage.removeItem("recentVisit")
       }
-
-
     } else {
 
     }

@@ -50,6 +50,20 @@ export function getAllDefectsByProId(proId) {
     })
 }
 
+export function getAllDefectsByHeadId(proId) {
+    return request({
+        url: '/defect/byHead/' + proId,
+        method: 'get'
+    })
+}
+
+export function getAllDefectsByCreateId(proId) {
+    return request({
+        url: '/defect/byCreat/' + proId,
+        method: 'get'
+    })
+}
+
 export function updateDefectStatus(demandId, status) {
     return request({
         url: '/defect/changeStatus/' + demandId + '/' + status,

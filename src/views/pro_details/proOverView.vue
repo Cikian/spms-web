@@ -10,22 +10,74 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <div style="padding-bottom: 10px;" class="basic-info-title">状态</div>
-              <el-button type="success" round size="small">正常</el-button>
+              <div style="padding-bottom: 10px" class="basic-info-title">状态</div>
+              <el-select
+                  v-model="currentProInfo.proStatus"
+                  class="demand-status-select"
+                  @change="proStatusChange(currentProInfo)"
+                  style="width: 80%"
+              >
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="0"
+                    label="正常"
+                    :value="0"
+                >
+                  <div class="table-statue" style="background-color: #73d897;">正常</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="1"
+                    label="预警"
+                    :value="1"
+                >
+                  <div class="table-statue" style="background-color: #f6c659;">预警</div>
+                </el-option>
+                <el-option
+                    class="demand-table-select-options-menu"
+                    :key="2"
+                    label="延期"
+                    :value="2"
+                >
+                  <div class="table-statue" style="background-color: #ff7575;">延期</div>
+                </el-option>
+
+                <template #prefix>
+                  <div class="table-statue" style="background-color: #73d897;" v-show="currentProInfo.proStatus===0">
+                    正常
+                  </div>
+                  <div class="table-statue" style="background-color: #f6c659;" v-show="currentProInfo.proStatus===1">
+                    预警
+                  </div>
+                  <div class="table-statue" style="background-color: #ff7575;" v-show="currentProInfo.proStatus===2">
+                    延期
+                  </div>
+                </template>
+              </el-select>
             </el-col>
             <el-col :span="12">
               <div style="padding-bottom: 10px" class="basic-info-title">负责人</div>
-              <div>张三</div>
+              <div style="padding-bottom: 10px" class="basic-info-title">
+                <div v-for="member in members"
+                     v-show="member.userId === currentProInfo.createBy"
+                     style="display: flex; align-items: center"
+                >
+                  <el-avatar :size="'small'" :src="member.avatar"/>
+                  <span style="margin-left: 10px">{{ member.nickName }}</span>
+                </div>
+              </div>
             </el-col>
           </el-row>
           <el-row>
             <el-col :span="12" style="margin-top: 50px">
               <div style="padding-bottom: 10px" class="basic-info-title">开始时间</div>
-              <div style="padding-bottom: 10px">2022-04-23</div>
+              <div v-if="currentProInfo.expectedStartTime === null" style="padding-bottom: 10px">——</div>
+              <div v-else style="padding-bottom: 10px">{{ formatDate(new Date(currentProInfo.expectedStartTime), 'YYYY年MM月DD日') }}</div>
             </el-col>
             <el-col :span="12" style="margin-top: 50px">
               <div style="padding-bottom: 10px" class="basic-info-title">结束时间</div>
-              <div style="padding-bottom: 10px">2022-04-23</div>
+              <div v-if="currentProInfo.expectedEndTime === null" style="padding-bottom: 10px">——</div>
+              <div v-else style="padding-bottom: 10px">{{ formatDate(new Date(currentProInfo.expectedEndTime), 'YYYY年MM月DD日') }}</div>
             </el-col>
           </el-row>
           <el-row>
@@ -34,7 +86,7 @@
               <el-progress
                   :text-inside="true"
                   :stroke-width="24"
-                  :percentage="50"
+                  :percentage="allProgress"
                   status="success"
               />
             </el-col>
@@ -50,13 +102,13 @@
           </el-row>
           <el-row>
             <el-col :span="24" style="padding-bottom: 18px; display: flex; justify-content: space-around">
-              <el-progress type="circle" :percentage="25" :width="200">
+              <el-progress type="circle" :percentage="workItemProgress" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">任务</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="100" status="success" :width="200">
+              <el-progress type="circle" :percentage="defectProgress" status="success" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">缺陷</span>
@@ -68,7 +120,7 @@
                   <span class="percentage-label">缺陷</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="50" status="exception" :width="200">
+              <el-progress type="circle" :percentage="proTestProgress" status="exception" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">测试</span>
@@ -89,36 +141,14 @@
               项目属性
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="12">
-              <div style="padding-bottom: 10px;" class="basic-info-title">状态</div>
-              <el-button type="success" round size="small">正常</el-button>
-            </el-col>
-            <el-col :span="12">
-              <div style="padding-bottom: 10px" class="basic-info-title">负责人</div>
-              <div>张三</div>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12" style="margin-top: 50px">
-              <div style="padding-bottom: 10px" class="basic-info-title">开始时间</div>
-              <div style="padding-bottom: 10px">2022-04-23</div>
-            </el-col>
-            <el-col :span="12" style="margin-top: 50px">
-              <div style="padding-bottom: 10px" class="basic-info-title">结束时间</div>
-              <div style="padding-bottom: 10px">2022-04-23</div>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24" style="margin-top: 50px">
-              <div style="padding-bottom: 10px" class="basic-info-title">进度</div>
-              <el-progress
-                  :text-inside="true"
-                  :stroke-width="24"
-                  :percentage="50"
-                  status="success"
-              />
-            </el-col>
+          <el-row style="padding: 46px 0">
+            <el-descriptions column="2" size="large">
+              <el-descriptions-item label="项目名称" width="400px">{{ currentProInfo.proName }}</el-descriptions-item>
+              <el-descriptions-item label="项目标识">{{ currentProInfo.proFlag }}</el-descriptions-item>
+              <el-descriptions-item label="客户名称">{{ currentProInfo.proCustomer }}</el-descriptions-item>
+              <el-descriptions-item label="创建时间">{{ formatDate(new Date(currentProInfo.createTime), 'YYYY年MM月DD日 HH:mm:ss') }}</el-descriptions-item>
+              <el-descriptions-item label="项目描述">{{ currentProInfo.proDesc }}</el-descriptions-item>
+            </el-descriptions>
           </el-row>
         </div>
       </el-col>
@@ -198,7 +228,16 @@ import {IToolbarConfig} from '@wangeditor/editor'
 import {onBeforeUnmount, ref, shallowRef, onMounted} from 'vue'
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {addAnno, getCalcProTestProgress, selectByProId} from "../../api/proOverViewApi.ts";
+import {
+  addAnno,
+  getCalcProTestProgress,
+  getDefectProgressCount,
+  getWorkItemProgressCount,
+  selectByProId, updateProStatus
+} from "../../api/proOverViewApi.ts";
+import {queryProByProId, updateDefectStatus} from "../../api/defectApi.ts";
+import {queryDemandMembers} from "../../api/demandApi.ts";
+import {formatDate} from "@vueuse/shared";
 
 
 const mode = 'default' // 或 'simple'
@@ -241,23 +280,101 @@ const handleCreatedIssueEditor = (editorIssue) => {
 
 const proId = ref('')
 
+const currentProInfo = ref({})
+
+const members = ref([])
+
+const getDemandMembers = (proId) => {
+  queryDemandMembers(proId).then((res) => {
+    members.value = res.data.data
+    console.log(res)
+  })
+}
+
+const getCurrentProInfo = (proId) => {
+  queryProByProId(proId).then((res) => {
+    if (res.data.code === 2001) {
+      currentProInfo.value = res.data.data
+      if (localStorage.getItem("recentVisit")) {
+        clickRow(clickedDemand.value)
+        localStorage.removeItem("recentVisit")
+      }
+    } else {
+
+    }
+  })
+}
+
 onMounted(() => {
   let currentProId = localStorage.getItem('proDetailId')
   if (currentProId) {
     proId.value = currentProId
-    getTestProgress(currentProId)
+    getWorkItemProgress(currentProId)
+    getCurrentProInfo(currentProId)
+    getDemandMembers(currentProId)
   }
+
   getAnno()
 })
 
 const proTestProgress = ref(0)
+const workItemProgress = ref(0)
+const defectProgress = ref(0)
+const allProgress = ref(0)
+const all = ref(0)
+const allComplete = ref(0)
 
 const getTestProgress = (currentProId) =>{
   getCalcProTestProgress(currentProId).then(res => {
     if (res.data.code === 200) {
-      proTestProgress.value = res.data.data
+      if (res.data.data.all !== 0){
+        proTestProgress.value = res.data.data.completed / res.data.data.all * 100
+        proTestProgress.value = toFixTwo(proTestProgress.value)
+      } else {
+        proTestProgress.value = 0
+      }
+      allComplete.value += res.data.data.completed
+      all.value += res.data.data.all
     }
+    allProgress.value = allComplete.value / all.value * 100
+    allProgress.value = toFixTwo(allProgress.value)
   })
+}
+
+const getWorkItemProgress = (currentProId) =>{
+  getWorkItemProgressCount(currentProId).then(res => {
+    if (res.data.code === 200) {
+      if (res.data.data.all !== 0){
+        workItemProgress.value = res.data.data.completed / res.data.data.all * 100
+        workItemProgress.value = toFixTwo(workItemProgress.value)
+      } else {
+        workItemProgress.value = 0
+      }
+      allComplete.value += res.data.data.completed
+      all.value += res.data.data.all
+    }
+    getDefectProgress(currentProId)
+  })
+}
+
+const getDefectProgress = (currentProId) =>{
+  getDefectProgressCount(currentProId).then(res => {
+    if (res.data.code === 200) {
+      if (res.data.data.all !== 0){
+        defectProgress.value = res.data.data.completed / res.data.data.all * 100
+        defectProgress.value = toFixTwo(defectProgress.value)
+      } else {
+        defectProgress.value = 0
+      }
+      allComplete.value += res.data.data.completed
+      all.value += res.data.data.all
+    }
+    getTestProgress(currentProId)
+  })
+}
+
+const toFixTwo = (value) => {
+  return value.toFixed(2)
 }
 
 const issueAnnouncementDialog = ref(false)
@@ -303,6 +420,24 @@ const getAnno = () => {
     }
   })
 }
+
+const proStatusChange = (row) => {
+  updateProStatus(row.proId, row.proStatus).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -321,5 +456,21 @@ const getAnno = () => {
   display: block;
   margin-top: 10px;
   font-size: 12px;
+}
+
+.demand-table-select-options-menu {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.table-statue {
+  width: 60px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 20px;
+  text-align: center;
+  color: white;
+  font-size: 12px
 }
 </style>

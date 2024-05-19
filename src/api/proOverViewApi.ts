@@ -21,3 +21,24 @@ export function getCalcProTestProgress(proId) {
         method: 'get',
     })
 }
+
+export function getWorkItemProgressCount(proId) {
+    return request({
+        url: '/demand/counts/' + proId,
+        method: 'get',
+    })
+}
+
+export function getDefectProgressCount(proId) {
+    return request({
+        url: '/defect/counts/' + proId,
+        method: 'get',
+    })
+}
+
+export function updateProStatus(proId, status) {
+    return request({
+        url: '/pro/changeStatus/' + proId + '/' + status,
+        method: 'put',
+    })
+}
