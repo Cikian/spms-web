@@ -1,7 +1,16 @@
 <template>
   <el-container>
     <el-header  style="margin: 0; padding: 0; height: 52px; box-shadow: 0 4px 8px #00000008; z-index: 99">
-      <span style="line-height: 52px; padding: 0 20px"><font-awesome-icon style="color: #ffb77d; margin-right: 5px" icon="fa-solid fa-house" />项目管理</span>
+      <el-menu
+          class="el-menu-demo"
+          mode="horizontal"
+          style="height: 52px; padding: 0 20px"
+          :router="true"
+      >
+        <span style="line-height: 52px;"><font-awesome-icon style="color: #ffb77d; margin-right: 5px" icon="fa-solid fa-house" />工作台<el-divider style="margin: 0 16px" direction="vertical" /></span>
+        <Notification/>
+        <AvatarMenu />
+      </el-menu>
     </el-header>
     <el-container>
       <el-aside width=" ">
@@ -39,6 +48,8 @@
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted} from "vue";
 import router from "../../router";
+import Notification from "../../compoment/Notification.vue";
+import AvatarMenu from "../../compoment/AvatarMenu.vue";
 
 onMounted(() => {
   router.push('/proman/allpro')

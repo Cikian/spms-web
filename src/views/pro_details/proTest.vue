@@ -29,9 +29,6 @@
             <el-button type="success" size="large" round @click="changeStatus(3)">已完成</el-button>
           </div>
         </div>
-        <div class="total">
-          共有 <span>{{ tablePage.total }}</span> 个测试
-        </div>
       </div>
       <div class="table">
         <el-table :data="tableData"
@@ -479,7 +476,7 @@ import {
   queryTestCaseById,
   queryTestCaseByPlanId,
   queryTestPlanById,
-  queryTestPlanList, queryTestPlanListByProId, queryTestReportByPlanId,
+  queryTestPlanListByProId, queryTestReportByPlanId,
   updateTestCase,
   updateTestPlan, updateTestReportApprovalStatusById, uploadTestReport,
 } from "../../api/TestPlanApi.ts";
@@ -500,7 +497,6 @@ const tablePage = {
   pageSize: 10,
   total: 0
 }
-const pageSizes = [10, 15, 30, 50, 100]
 const currentTestPlanStatus = ref(0)
 
 //新增测试计划
@@ -1452,12 +1448,6 @@ onMounted(() => {
 
 .table {
   margin-top: 20px;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
 }
 
 .dialog-footer {

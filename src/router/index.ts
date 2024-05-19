@@ -327,7 +327,20 @@ const router = createRouter({
                         {
                             path: '/proDetail/proResources',
                             name: '项目资源',
-                            component: () => import('../views/pro_details/proResources.vue')
+                            component: () => import('../views/pro_details/proResources.vue'),
+                            redirect: '/proDetail/proResources/employee',
+                            children: [
+                                {
+                                    path: '/proDetail/proResources/employee',
+                                    name: '人力资源',
+                                    component: () => import('../views/pro_details/proResourcesViews/employee.vue')
+                                },
+                                {
+                                    path: '/proDetail/proResources/device',
+                                    name: '物力资源',
+                                    component: () => import('../views/pro_details/proResourcesViews/device.vue')
+                                }
+                            ]
                         },
                     ]
                 },
