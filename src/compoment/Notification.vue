@@ -98,18 +98,18 @@ const getNotificationList = () => {
           if (res.data.data !== null) {
             notificationList.value = res.data.data;
 
-            for (let i = 0; i < notificationOldList.value.length; i++) {
-              let time = new Date().getTime() - new Date(notificationOldList.value[i].createTime).getTime();
+            for (let i = 0; i < notificationList.value.length; i++) {
+              let time = new Date().getTime() - new Date(notificationList.value[i].createTime).getTime();
               if (time < 60000) {
-                notificationOldList.value[i].createTime = '刚刚';
+                notificationList.value[i].createTime = '刚刚';
               } else if (time < 3600000) {
-                notificationOldList.value[i].createTime = Math.floor(time / 60000) + '分钟前';
+                notificationList.value[i].createTime = Math.floor(time / 60000) + '分钟前';
               } else if (time < 86400000) {
-                notificationOldList.value[i].createTime = Math.floor(time / 3600000) + '小时前';
+                notificationList.value[i].createTime = Math.floor(time / 3600000) + '小时前';
               } else if (time < 604800000) {
-                notificationOldList.value[i].createTime = Math.floor(time / 86400000) + '天前';
+                notificationList.value[i].createTime = Math.floor(time / 86400000) + '天前';
               } else {
-                notificationOldList.value[i].createTime = new Date(notificationOldList.value[i].createTime).toLocaleDateString();
+                notificationList.value[i].createTime = new Date(notificationList.value[i].createTime).toLocaleDateString();
               }
             }
           } else {
