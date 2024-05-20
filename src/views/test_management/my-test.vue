@@ -488,6 +488,20 @@
       </el-button>
     </div>
   </el-dialog>
+
+  <a-float-button
+      type="default"
+      :style="{
+      right: '40px',
+    }"
+  >
+    <template #icon>
+      <font-awesome-icon icon="fa-regular fa-circle-question" />
+    </template>
+    <template #tooltip>
+      <div>Documents</div>
+    </template>
+  </a-float-button>
 </template>
 
 <script setup lang="ts">

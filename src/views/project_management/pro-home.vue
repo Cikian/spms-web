@@ -15,7 +15,7 @@
     <el-container>
       <el-aside width=" ">
         <el-menu
-            default-active="/workTable/overView"
+            default-active="/proman/allpro"
             class="el-menu-vertical-demo"
             background-color="#fbfbfb"
             active-text-color="#6698ff"

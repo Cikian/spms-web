@@ -29,7 +29,7 @@
     <el-table
         :data="tableData.data"
         style="width: 100%"
-        :row-style="{height: '56px'}"
+        :row-style="{height: '56px', cursor: 'pointer'}"
         stripe
         highlight-current-row
         @row-click="rowClick"
