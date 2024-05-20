@@ -114,18 +114,19 @@
                   <span class="percentage-label">缺陷</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="70" status="warning" :width="200">
-                <template #default="{ percentage }">
-                  <span class="percentage-value">{{ percentage }}%</span>
-                  <span class="percentage-label">缺陷</span>
-                </template>
-              </el-progress>
               <el-progress type="circle" :percentage="proTestProgress" status="exception" :width="200">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">测试</span>
                 </template>
               </el-progress>
+              <el-progress type="circle" :percentage="dayProgress" status="warning" :width="200">
+                <template #default="{ percentage }">
+                  <span class="percentage-value">{{ percentage }}%</span>
+                  <span class="percentage-label">工期剩余</span>
+                </template>
+              </el-progress>
+
             </el-col>
           </el-row>
         </div>
@@ -290,15 +291,39 @@ const getDemandMembers = (proId) => {
     console.log(res)
   })
 }
-
+const dayProgress = ref(0)
 const getCurrentProInfo = (proId) => {
   queryProByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       currentProInfo.value = res.data.data
-      if (localStorage.getItem("recentVisit")) {
-        clickRow(clickedDemand.value)
-        localStorage.removeItem("recentVisit")
+
+      // 计算项目天数
+      let startTime = new Date(currentProInfo.value.expectedStartTime)
+      let endTime = new Date(currentProInfo.value.expectedEndTime)
+      let days = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60 * 24)
+      // 计算剩余天数
+      let now = new Date()
+      let leftDays = (endTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      dayProgress.value =  leftDays / days * 100
+      if (dayProgress.value < 0) {
+        dayProgress.value = 0
+        if (currentProInfo.value.proStatus !== 2) {
+          currentProInfo.value.proStatus = 2
+          proStatusChange(currentProInfo.value)
+        }
       }
+      dayProgress.value = dayProgress.value.toFixed(2)
+
+      console.log("总天数：" + days)
+      console.log("剩余天数：" + leftDays)
+
+      if (dayProgress.value < 10) {
+        if (currentProInfo.value.proStatus === 0) {
+          currentProInfo.value.proStatus = 1
+          proStatusChange(currentProInfo.value)
+        }
+      }
+
     } else {
 
     }

@@ -44,6 +44,7 @@
                       placeholder="请输入密码"
                       type="password"
                       show-password
+                      @keydown.enter="userLogin()"
                   />
                 </div>
               </div>

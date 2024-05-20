@@ -2,15 +2,12 @@
   <div
       style="
       display: flex;
-      justify-content: space-between;
+      justify-content: right;
       align-items: center;
       height: 60px;
       padding: 0 30px;
 "
   >
-    <el-input placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable>
-
-    </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
   </div>
 
@@ -174,6 +171,7 @@
             placeholder="—"
             class="demand-headId-select"
             @change="demandHeadIdChange(scope.row)"
+            v-loading="members.length <= 0"
         >
           <el-option
               class="member-select-options-menu"

@@ -1,7 +1,7 @@
 <template>
   <div class="overView-title">
     全部项目
-    <el-button type="primary" style="width: 120px; height:36px" @click="dialogVisible = true">
+    <el-button type="primary" style="width: 120px; height:36px" @click="dialogVisible = true" v-if="isROLE_project_admin">
       <font-awesome-icon :icon="['fas', 'plus']"/>&nbsp;&nbsp;新建项目
     </el-button>
 
@@ -220,7 +220,17 @@ const searchPro = () => {
 const dialogVisible = ref(false)
 const theFirst = ref(true)
 let currentUser = reactive<any>({})
+
+const isROLE_project_admin = ref(false)
 onMounted(() => {
+  let roles = JSON.parse(localStorage.getItem('hasRole'))
+  for (let i = 0; i < roles.length; i++) {
+    if (roles[i].authority === 'ROLE_project_admin') {
+      isROLE_project_admin.value = true
+      break
+    }
+  }
+
   currentUser = localStorage.getItem('userInfo')
   memberData[0] = currentUser
   getPros()

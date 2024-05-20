@@ -50,6 +50,13 @@ export function getAllDemandByProId(proId) {
     })
 }
 
+export function getAuditByProId(proId) {
+    return request({
+        url: '/demand/audit/' + proId,
+        method: 'get'
+    })
+}
+
 export function getAllDemandByHeadId(proId) {
     return request({
         url: '/demand/byHead/' + proId,
@@ -156,6 +163,27 @@ export function getDemandById(workItemId) {
 export function getDemandActiveList(workItemId) {
     return request({
         url: '/demandActive?demandId=' + workItemId,
+        method: 'get',
+    })
+}
+
+export function deleteDemandById(data) {
+    return request({
+        url: '/demand/' + data,
+        method: 'delete',
+    })
+}
+
+export function judgeProjectHeader(data) {
+    return request({
+        url: '/pro/judgeIsProHeader?proId=' + data,
+        method: 'get',
+    })
+}
+
+export function searchDemandList(proId, data) {
+    return request({
+        url: '/demand/search?proId=' + proId + '&keyword=' + data,
         method: 'get',
     })
 }

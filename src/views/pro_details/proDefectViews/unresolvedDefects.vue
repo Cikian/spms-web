@@ -396,6 +396,7 @@
                 placeholder="请选择负责人"
                 size="large"
                 clearable
+                v-loading="members.length <= 0"
             >
               <el-option
                   class="member-select-options-menu"

@@ -17,6 +17,8 @@
           <el-menu-item class="h-menu-item" index="/proDetail/proWorkItem">工作项</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proTest">测试</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proResources">资源</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/proDetail/meeting">会议</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/proDetail/audit" v-if="isProHeader">审批</el-menu-item>
 
           <Notification/>
           <AvatarMenu/>
@@ -35,16 +37,19 @@
 import {onMounted, ref} from "vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
-import {queryProByProId} from "../../api/demandApi.ts";
+import {judgeProjectHeader, queryProByProId} from "../../api/demandApi.ts";
 import Notification from "../../compoment/Notification.vue";
 
 const currentProId = ref('')
 const currentProInfo = ref({})
 
+const isProHeader = ref(false)
+
 onMounted(() => {
   // router.push("/proDetail/overView")
   currentProId.value = localStorage.getItem('proDetailId')
   getCurrentProInfo()
+  judgeProHeader()
 })
 
 const getCurrentProInfo = () => {
@@ -58,6 +63,15 @@ const getCurrentProInfo = () => {
   })
 }
 
+const judgeProHeader = () => {
+  judgeProjectHeader(currentProId.value).then((res) => {
+    if (res.data.code === 200) {
+      isProHeader.value = res.data.data
+    } else {
+
+    }
+  })
+}
 
 </script>
 

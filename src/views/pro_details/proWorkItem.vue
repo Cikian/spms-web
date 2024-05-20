@@ -174,6 +174,7 @@
             placeholder="—"
             class="demand-headId-select"
             @change="demandHeadIdChange(scope.row)"
+            v-loading="members.length <= 0"
         >
           <el-option
               class="member-select-options-menu"

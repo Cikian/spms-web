@@ -8,11 +8,20 @@
       padding: 0 30px;
 "
   >
-    <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
+
+    <el-button type="danger" size="large" @click="handleDeleteAll()" v-if="!selections.length <= 0">
+      <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'xmark']"/>
+      拒绝选中
+    </el-button>
+    <el-button type="success" size="large" @click="handleEditAll()" v-if="!selections.length <= 0">
+      <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'check']"/>
+      同意选中
+    </el-button>
+
   </div>
 
   <div style="width: 100%; height: 70vh; display: flex; justify-content: center; align-items: center"
-       v-if="demandsByLevel.length <= 0">
+       v-if="allDemands.length <= 0">
     <a-spin v-if="loadingWorkItems" size="large" style="margin: 0 auto"/>
     <el-empty v-else description="暂无需求"/>
   </div>
@@ -69,135 +78,19 @@
               :icon="['fas', 'square-check']"/>
           {{ scope.row.title }}
         </span>
-        <div class="table-title-cell" style="background-color: #f5f7fa">
-          <el-tooltip
-              class="box-item"
-              effect="dark"
-              :content="scope.row.workItemType===0?'新建特性':scope.row.workItemType===1?'新建用户故事':scope.row.workItemType===2?'新建任务':'任务'"
-              placement="top" ,
-              v-if="scope.row.workItemType!==3"
-          >
-            <el-button @click="addWorkItem(scope.row)" style="font-size: 20px; margin-right: 20px; color: #79bbff" link>
-              <font-awesome-icon :icon="['fas', 'plus']"/>
-            </el-button>
-          </el-tooltip>
-          <el-tooltip
-              class="box-item"
-              effect="dark"
-              content="编辑"
-              placement="top"
-          >
-            <el-button style="font-size: 18px; margin-right: 30px; color: #79bbff" link>
-              <font-awesome-icon :icon="['far', 'pen-to-square']"/>
-            </el-button>
-          </el-tooltip>
-        </div>
       </template>
     </el-table-column>
-    <el-table-column min-width="150px" align="center" prop="demandStatus" label="状态" class-name="table-statue-column">
+    <el-table-column min-width="150px" align="center" prop="headId" label="创建人">
       <template #default="scope">
-        <el-select
-            v-model="scope.row.demandStatus"
-            placeholder="请选择优先级"
-            class="demand-status-select"
-            @change="demandStatusChange(scope.row)"
-        >
-          <el-option
-              class="demand-table-select-options-menu"
-              :key="0"
-              label="打开"
-              :value="0"
-              :disabled="scope.row.demandStatus === 0"
-          >
-            <div v-if="scope.row.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">打开</div>
-            <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
-          </el-option>
-          <el-option
-              class="demand-table-select-options-menu"
-              :key="1"
-              label="进行中"
-              :value="1"
-              :disabled="scope.row.demandStatus === 1 || scope.row.demandStatus === -1"
-          >
-            <div v-if="scope.row.demandStatus === 1 || scope.row.demandStatus === -1" class="table-statue"
-                 style="background-color: #fae3b2;">进行中
-            </div>
-            <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
-          </el-option>
-          <el-option
-              class="demand-table-select-options-menu"
-              :key="2"
-              label="已完成"
-              :value="2"
-              :disabled="scope.row.demandStatus === 2 || scope.row.demandStatus === -1"
-          >
-            <div v-if="scope.row.demandStatus === 2 || scope.row.demandStatus === -1" class="table-statue"
-                 style="background-color: #c0fad5;">已完成
-            </div>
-            <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
-          </el-option>
-          <el-option
-              class="demand-table-select-options-menu"
-              :key="-1"
-              label="关闭"
-              :value="-1"
-              :disabled="scope.row.demandStatus === -1"
-          >
-            <div v-if="scope.row.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">关闭</div>
-            <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
-          </el-option>
 
-          <template #prefix>
-            <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>
-            <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中
-            </div>
-            <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成
-            </div>
-            <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>
-          </template>
-        </el-select>
-
-
-        <!--        <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>-->
-        <!--        <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中</div>-->
-        <!--        <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成</div>-->
-        <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
-      </template>
-    </el-table-column>
-    <el-table-column min-width="150px" align="center" prop="headId" label="负责人">
-      <template #default="scope">
-        <el-select
-            v-model="scope.row.headId"
-            placeholder="—"
-            class="demand-headId-select"
-            @change="demandHeadIdChange(scope.row)"
-            v-loading="members.length <= 0"
-        >
-          <el-option
-              class="member-select-options-menu"
-              v-for="item in members"
-              :key="item.userId"
-              :label="item.nickName"
-              :value="item.userId"
-          >
-            <div style="display: flex; align-items: center; text-align: center">
-              <div style="display: flex; align-items: center;">
-                <el-avatar :size="'small'" :src="item.avatar" style="position: relative; top: 0.2vh;"/>
-              </div>
-
-              <span style="margin-left: 10px">{{ item.nickName }}</span>
-            </div>
-          </el-option>
-
-          <template #prefix>
             <div v-for="member in members"
-                 v-show="member.userId === scope.row.headId"
-                 style="display: flex; align-items: center"
+                 v-show="member.userId === scope.row.createBy"
+                 style="display: flex; align-items: center; margin: 0 auto"
             >
-              <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+              <el-avatar :size="'small'" :src="member.avatar" style="margin-right: 10px"/>
+              {{ member.nickName }}
             </div>
-          </template>
-        </el-select>
+
       </template>
     </el-table-column>
     <el-table-column min-width="150px" align="center" prop="priority" label="优先级">
@@ -276,9 +169,23 @@
       </template>
     </el-table-column>
     <el-table-column min-width="80px" align="center" prop="storyPoint" label="故事点"/>
-    <el-table-column min-width="180px" align="center" prop="updateTime" label="更新时间">
+    <el-table-column min-width="180px" align="center" label="操作">
       <template #default="scope">
-        {{ formatDate(new Date(scope.row.updateTime), 'YYYY-MM-DD HH:mm:ss') }}
+        <el-button
+            size="small"
+            type="info"
+            round
+            @click="clickButton=true;handleDelete(scope.row)"
+        >
+          拒绝
+        </el-button>
+        <el-button size="small"
+                   type="success"
+                   round
+                   @click="clickButton=true;handleEdit(scope.row)"
+        >
+          通过
+        </el-button>
       </template>
     </el-table-column>
 
@@ -621,7 +528,7 @@
         <div style="width: 100%; padding: 20px 20px;">
           <el-descriptions
               direction="vertical"
-              :column="4"
+              :column="3"
           >
             <el-descriptions-item width="25%" label="负责人">
               <el-select
@@ -653,79 +560,6 @@
                        style="display: flex; align-items: center"
                   >
                     <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
-                  </div>
-                </template>
-              </el-select>
-            </el-descriptions-item>
-            <el-descriptions-item width="25%" label="状态">
-              <el-select
-                  v-model="clickedDemand.demandStatus"
-                  placeholder="请选择优先级"
-                  class="demand-status-select"
-                  @change="demandStatusChange(clickedDemand)"
-                  style="width: 80%"
-              >
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="0"
-                    label="打开"
-                    :value="0"
-                    :disabled="clickedDemand.demandStatus === 0"
-                >
-                  <div v-if="clickedDemand.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">
-                    打开
-                  </div>
-                  <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
-                </el-option>
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="1"
-                    label="进行中"
-                    :value="1"
-                    :disabled="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1"
-                >
-                  <div v-if="clickedDemand.demandStatus === 1 || clickedDemand.demandStatus === -1" class="table-statue"
-                       style="background-color: #fae3b2;">进行中
-                  </div>
-                  <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
-                </el-option>
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="2"
-                    label="已完成"
-                    :value="2"
-                    :disabled="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1"
-                >
-                  <div v-if="clickedDemand.demandStatus === 2 || clickedDemand.demandStatus === -1" class="table-statue"
-                       style="background-color: #c0fad5;">已完成
-                  </div>
-                  <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
-                </el-option>
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="-1"
-                    label="关闭"
-                    :value="-1"
-                    :disabled="clickedDemand.demandStatus === -1"
-                >
-                  <div v-if="clickedDemand.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">
-                    关闭
-                  </div>
-                  <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
-                </el-option>
-
-                <template #prefix>
-                  <div class="table-statue" style="background-color: #56abfb;" v-show="clickedDemand.demandStatus===0">
-                    打开
-                  </div>
-                  <div class="table-statue" style="background-color: #f6c659;" v-show="clickedDemand.demandStatus===1">
-                    进行中
-                  </div>
-                  <div class="table-statue" style="background-color: #9de4b6;" v-show="clickedDemand.demandStatus===2">
-                    已完成
-                  </div>
-                  <div class="table-statue" style="background-color: #c3c3c3;" v-show="clickedDemand.demandStatus===-1">
-                    关闭
                   </div>
                 </template>
               </el-select>
@@ -762,7 +596,7 @@
           <el-tab-pane label="基本信息" name="baseInfo">
             <div style="display: flex; justify-content: space-between; padding-right: 50px; align-items: center">
               <span>描述</span>
-              <el-button @click="openClickEditor" text round style="font-size: 18px;">
+              <el-button disabled @click="openClickEditor" text round style="font-size: 18px;">
                 <font-awesome-icon :icon="['fas', 'pencil']"/>
               </el-button>
             </div>
@@ -871,22 +705,6 @@
                       </a-button>
                     </a-form-item>
                   </a-modal>
-                </div>
-                <div style="width: 55vw; position: fixed; bottom: 10vh">
-                  <div class="post-comment-form"
-                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
-                    <a-textarea
-                        :auto-size="{ minRows: 3, maxRows: 6 }"
-                        placeholder="友善发言，文明评论~"
-                        v-model:value="postComment.content"
-                        id="postCommentInput"
-                        @keydown.enter.native="submitComment(clickedDemand.demandId)"
-                    />
-
-                    <a-button style="margin-left: 30px" type="primary" @click="submitComment(clickedDemand.demandId)"
-                              :disabled="postComment.content === ''">评论
-                    </a-button>
-                  </div>
                 </div>
               </el-tab-pane>
               <el-tab-pane label="活动" name="active">
@@ -1326,9 +1144,7 @@
           </el-tab-pane>
           <el-tab-pane label="测试" name="tests">
             <div style="display: flex; justify-content: right; padding: 0 50px"  class="addTest" v-show="!hasTestPlan">
-              <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
-                  style="font-size: 20px; margin-right: 5px;">+</span>新建测试
-              </el-button>
+
             </div>
             <div v-if="hasTestPlan" class="table">
               <el-table :data="testTableData"
@@ -1571,7 +1387,14 @@
       {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
     </template>
     <template #footer>
-
+      <el-button type="success" size="large" @click="handleEdit(clickedDemand)">
+        <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'check']"/>
+        同 意
+      </el-button>
+      <el-button type="danger" size="large" @click="handleDelete(clickedDemand)">
+        <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'xmark']"/>
+        拒 绝
+      </el-button>
     </template>
   </el-dialog>
 
@@ -1956,7 +1779,7 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
-  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList, getDemandById,
+  getAllDemandByProId, getAuditByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList, getDemandById,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
@@ -1968,10 +1791,10 @@ import {
   updateDemandSource, updateDemandStartTime,
   updateDemandStatus,
   updateDemandType
-} from "../../../api/demandApi.ts";
-import {recordVisit} from "../../../api/RecentVisitApi.ts";
+} from "../../api/demandApi.ts";
+import {recordVisit} from "../../api/RecentVisitApi.ts";
 import {formatDate} from "@vueuse/shared";
-import {queryProjectTestMember} from "../../../api/userApi.ts";
+import {queryProjectTestMember} from "../../api/userApi.ts";
 import {
   addTestCase, addTestPlan,
   deleteTestCaseById,
@@ -1985,7 +1808,7 @@ import {
   updateTestPlan,
   updateTestReportApprovalStatusById,
   uploadTestReport
-} from "../../../api/TestPlanApi.ts";
+} from "../../api/TestPlanApi.ts";
 
 const proId = ref('')
 const currentProInfo = ref({})
@@ -2066,7 +1889,6 @@ const getCurrentProInfo = (proId) => {
 const getDemandMembers = (proId) => {
   queryDemandMembers(proId).then((res) => {
     members.value = res.data.data
-    console.log(res)
   })
 }
 
@@ -2085,12 +1907,14 @@ const getDemandSource = () => {
 }
 
 const getDemandsList = (proId) => {
-  getAllDemandByProId(proId).then((res) => {
+  getAuditByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
-      allDemands.value = res.data.data.allDemands.filter((item) => item.demandStatus === 1)
+      allDemands.value = res.data.data.allDemands
       allFatherDemands.value = allDemands.value.filter(item => item.workItemType !== 3)
       loadingWorkItems.value = false
+      console.log("审批")
+      console.log(res.data.data)
     } else {
       ElNotification({
         title: '通知',
@@ -2213,14 +2037,6 @@ const handleCloseClickRow = () => {
   testTableData.value = []
 }
 
-const clickIcon = ref(false)
-const addWorkItem = (row) => {
-  clickIcon.value = true
-  newDemandFormData.value.proId = currentProInfo.value.proId
-  newDemandFormData.value.fatherDemandId = row.demandId
-  newDemandFormData.value.workItemType = row.workItemType + 1
-  addDemandDialogVisible.value = true
-}
 
 const demandStatusChange = (row) => {
   updateDemandStatus(row.demandId, row.demandStatus).then((res) => {
@@ -2351,24 +2167,21 @@ const demandEndTimeChange = (row) => {
 }
 
 const clickedDemand = ref({})
+
+const clickButton = ref(false)
 const clickRow = (row) => {
-  if (clickIcon.value) {
-    clickIcon.value = false
+  if (clickButton.value) {
+    clickButton.value = false
     return
   }
   clickValueHtmlReadOnly.value = row.demandDesc
   clickRowDialogVisible.value = true
   clickedDemand.value = row
-  getComments(clickedDemand.value.demandId)
-  getChildrenWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
-  loadTestPlanList(clickedDemand.value.demandId)
 
-  getProjectTestMember(currentProInfo.value.proId)
 
   firstTagName.value = 'baseInfo'
   secondTagName.value = 'comment'
-  recordVisit(row.demandId, 2)
 }
 
 const demandActive = ref([])
@@ -2567,8 +2380,6 @@ const replyComment = (flag) => {
         console.log(clickedDemand.value)
         getComments(clickedDemand.value.demandId)
       } else if (flag === 'fromTest') {
-        console.log("从测试")
-        console.log(echoTestPlan.value)
         getComments(echoTestPlan.value.testPlanId)
       }
 
@@ -3108,6 +2919,7 @@ const handleCloseEditTestPlan = () => {
   }
   replyContent.value = ''
   getComments(clickedDemand.value.demandId)
+  loadTestPlanList(clickedDemand.value.demandId)
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -3265,6 +3077,7 @@ const submitEditTestCase = () => {
           })
           editTestCaseDialogVisible.value = false
           getTestCaseData()
+          getTestPlanDetailById(formData.testPlanId)
         } else {
           ElNotification({
             title: '提示',
@@ -3276,6 +3089,55 @@ const submitEditTestCase = () => {
         editTestCaseBtnDisable.value = false
         loadingEditTestCase.value = false
       })
+}
+
+const handleDelete = (row) => {
+  updateDemandStatus(row.demandId, -3).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        message: "已拒绝",
+        type: 'info',
+      })
+      getDemandsList(proId.value)
+      clickRowDialogVisible.value = false
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+const handleEdit = (row) => {
+  updateDemandStatus(row.demandId, 0).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: "审核通过",
+        type: 'success',
+      })
+      getDemandsList(proId.value)
+      clickRowDialogVisible.value = false
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
+}
+
+const handleDeleteAll = () => {
+  for (let i = 0; i < selections.value.length; i++) {
+    handleDelete(selections.value[i])
+  }
+}
+const handleEditAll = () => {
+  for (let i = 0; i < selections.value.length; i++) {
+    handleEdit(selections.value[i])
+  }
 }
 
 

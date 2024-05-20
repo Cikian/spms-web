@@ -2,15 +2,12 @@
   <div
       style="
       display: flex;
-      justify-content: space-between;
+      justify-content: right;
       align-items: center;
       height: 60px;
       padding: 0 30px;
 "
   >
-    <el-input placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable>
-
-    </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
   </div>
 
@@ -104,6 +101,7 @@
             placeholder="请选择优先级"
             class="demand-status-select"
             @change="demandStatusChange(scope.row)"
+            :disabled="scope.row.demandStatus===-2 || scope.row.demandStatus===-3"
         >
           <el-option
               class="demand-table-select-options-menu"
@@ -157,14 +155,10 @@
             <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成
             </div>
             <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>
+            <div class="table-statue" style="background-color: #ff7b98;" v-show="scope.row.demandStatus===-2">待审核</div>
+            <div class="table-statue" style="background-color: #ff3838;" v-show="scope.row.demandStatus===-3">被驳回</div>
           </template>
         </el-select>
-
-
-        <!--        <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>-->
-        <!--        <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中</div>-->
-        <!--        <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成</div>-->
-        <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
       </template>
     </el-table-column>
     <el-table-column min-width="150px" align="center" prop="headId" label="负责人">
@@ -174,6 +168,7 @@
             placeholder="—"
             class="demand-headId-select"
             @change="demandHeadIdChange(scope.row)"
+            v-loading="members.length <= 0"
         >
           <el-option
               class="member-select-options-menu"
@@ -1957,7 +1952,7 @@ import {IToolbarConfig} from "@wangeditor/editor";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
-  addComment, getAllDemandByCreateId, getAllDemandByHeadId,
+  addComment, deleteDemandById, getAllDemandByCreateId, getAllDemandByHeadId,
   getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList, getDemandById,
   insertNewDemand,
   queryDemandMembers,
@@ -2356,6 +2351,41 @@ const clickedDemand = ref({})
 const clickRow = (row) => {
   if (clickIcon.value) {
     clickIcon.value = false
+    return
+  }
+
+  if (row.demandStatus===-2){
+    ElNotification({
+      title: '提示',
+      message: '正在审核中，暂时无法查看详情',
+      type: 'info',
+    })
+    return
+  }
+
+  if (row.demandStatus===-3){
+    ElMessageBox.confirm('审核未通过，是否删除该需求？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'info'
+    }).then(() => {
+      deleteDemandById(row.demandId, -1).then((res) => {
+        if (res.data.code === 5001) {
+          ElNotification({
+            title: 'Success',
+            message: res.data.message,
+            type: 'success',
+          })
+          getDemandsList(proId.value)
+        } else {
+          ElNotification({
+            title: 'Error',
+            message: res.data.message,
+            type: 'error',
+          })
+        }
+      })
+    })
     return
   }
   clickValueHtmlReadOnly.value = row.demandDesc

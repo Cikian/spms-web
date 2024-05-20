@@ -8,8 +8,10 @@
       padding: 0 30px;
 "
   >
-    <el-input placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable>
-
+    <el-input v-model="searchInput" placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable @change="searchDemands" @clear="clearSearchInput">
+      <template #prefix>
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
+      </template>
     </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
   </div>
@@ -168,6 +170,7 @@
             placeholder="—"
             class="demand-headId-select"
             @change="demandHeadIdChange(scope.row)"
+            v-loading="members.length <= 0"
         >
           <el-option
               class="member-select-options-menu"
@@ -1564,7 +1567,7 @@
       <span v-show="clickedDemand.workItemType===3"><font-awesome-icon
           style="color: #73d897;width: 18px; margin-right: 5px"
           :icon="['fas', 'square-check']"/></span>
-      {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
+      <span>{{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}</span>
     </template>
     <template #footer>
 
@@ -1957,12 +1960,12 @@ import {
   queryDemandMembers,
   queryDemandSource,
   queryDemandTypes,
-  queryProByProId,
+  queryProByProId, searchDemandList,
   updateDemandDesc, updateDemandEndTime,
   updateDemandHeadId,
   updateDemandPriority,
   updateDemandSource, updateDemandStartTime,
-  updateDemandStatus,
+  updateDemandStatus, updateDemandTitle,
   updateDemandType
 } from "../../../api/demandApi.ts";
 import {recordVisit} from "../../../api/RecentVisitApi.ts";
@@ -1982,6 +1985,35 @@ import {
   updateTestReportApprovalStatusById,
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
+const searchInput = ref('')
+const searchDemands = () => {
+  loadingWorkItems.value = true
+  demandsByLevel.value = []
+
+  if (searchInput.value === ''){
+    getDemandsList(proId.value)
+  }
+
+  searchDemandList(proId.value, searchInput.value).then((res) => {
+    console.log(res)
+    if (res.data.code === 2001) {
+      demandsByLevel.value = res.data.data.allDemands
+    } else {
+      ElNotification({
+        title: '通知',
+        message: res.data.message,
+        duration: 2000,
+      })
+    }
+    loadingWorkItems.value = false
+  })
+}
+
+const clearSearchInput = () => {
+  demandsByLevel.value = []
+  searchInput.value = ''
+  getDemandsList(proId.value)
+}
 
 const proId = ref('')
 const currentProInfo = ref({})
@@ -2022,7 +2054,7 @@ const newDemandFormData = ref({
   proId: '',
   title: '',
   demandDesc: '',
-  demandStatus: 0,
+  demandStatus: -2,
   headId: '',
   priority: 2, // 默认普通优先级
   fatherDemandId: '',
@@ -2080,6 +2112,7 @@ const getDemandSource = () => {
 }
 
 const getDemandsList = (proId) => {
+  loadingWorkItems.value = true
   getAllDemandByProId(proId).then((res) => {
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
@@ -2141,7 +2174,7 @@ const submitAddDemand = () => {
     if (res.data.code === 3001) {
       ElNotification({
         title: 'Success',
-        message: res.data.message,
+        message: res.data.message + '，请等待项目负责人审核',
         type: 'success',
       })
       addDemandDialogVisible.value = false

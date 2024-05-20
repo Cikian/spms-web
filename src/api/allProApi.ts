@@ -118,3 +118,10 @@ export function deleteDevice(data) {
         data
     })
 }
+
+export function queryMemberCost(data) {
+    return request({
+        url: '/projectResource/getMemberCostByProId?proId=' + data,
+        method: 'get',
+    })
+}

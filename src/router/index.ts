@@ -97,7 +97,7 @@ const router = createRouter({
                         },
                         {
                             path: '/proman/audit',
-                            name: '审核',
+                            name: '审核项目',
                             component: () => import('../views/project_management/audit.vue')
                         }
                     ]
@@ -351,6 +351,16 @@ const router = createRouter({
                                     component: () => import('../views/pro_details/proResourcesViews/device.vue')
                                 }
                             ]
+                        },
+                        {
+                            path: '/proDetail/audit',
+                            name: '审核',
+                            component: () => import('../views/pro_details/audit.vue')
+                        },
+                        {
+                            path: '/proDetail/meeting',
+                            name: '会议',
+                            component: () => import('../views/pro_details/meeting.vue')
                         },
                     ]
                 },

@@ -46,7 +46,7 @@
         </el-menu>
       </el-header>
       <el-main style="margin: 0; padding: 0">
-        <el-scrollbar max-height="calc(100vh - 98px)">
+        <el-scrollbar max-height="calc(100vh - 130px)">
           <router-view></router-view>
         </el-scrollbar>
       </el-main>

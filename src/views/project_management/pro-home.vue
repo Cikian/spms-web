@@ -36,7 +36,7 @@
             <font-awesome-icon class="list-icons" :icon="['far', 'file-code']" />
             <template #title>我提交的项目</template>
           </el-menu-item>
-          <el-menu-item style="margin:0 0 12px 0;" index="/proman/audit">
+          <el-menu-item style="margin:0 0 12px 0;" index="/proman/audit" v-show="isROLE_project_director">
             <font-awesome-icon class="list-icons" :icon="['far', 'hourglass-half']" />
             <template #title>待审批</template>
           </el-menu-item>
@@ -54,12 +54,22 @@
 
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import router from "../../router";
 import Notification from "../../compoment/Notification.vue";
 import AvatarMenu from "../../compoment/AvatarMenu.vue";
 
+const isROLE_project_director = ref(false)
+
 onMounted(() => {
+  let roles = JSON.parse(localStorage.getItem('hasRole'))
+  for (let i = 0; i < roles.length; i++) {
+    if (roles[i].authority === 'ROLE_project_director') {
+      isROLE_project_director.value = true
+      break
+    }
+  }
+
   router.push('/proman/allpro')
 })
 </script>

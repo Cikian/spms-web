@@ -47,13 +47,13 @@
           <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.proStatus===-2">已拒绝</div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="状态" prop="proStatus">
+      <el-table-column align="center" label="操作" prop="proStatus">
         <template #default="scope">
           <el-button
               size="small"
-              type="info"
+              type="danger"
               round
-              @click="handleDelete(scope.row)"
+              @click="clickButton=true;handleDelete(scope.row)"
               :disabled="scope.row.proStatus !== -1 && scope.row.status !== -2"
           >
             拒绝
@@ -61,7 +61,7 @@
           <el-button size="small"
                      type="success"
                      round
-                     @click="handleEdit(scope.row)"
+                     @click="clickButton=true;handleEdit(scope.row)"
                      :disabled="scope.row.proStatus !== -1 && scope.row.status !== -2"
           >
             通过
@@ -78,7 +78,8 @@
       :before-close="handleClose"
       top="7vh"
   >
-    <div style="width: 100%; height: 75vh; margin: 0 auto; display: flex; justify-content: space-between; overflow: hidden">
+    <div
+        style="width: 100%; height: 75vh; margin: 0 auto; display: flex; justify-content: space-between; overflow: hidden">
       <el-scrollbar style="width: 65%;">
         <el-input class="click-dialog-input"
                   v-model="proInfo.proName"
@@ -114,8 +115,9 @@
           <span style="font-size: 18px">{{ proInfo.proDesc }}</span>
         </div>
         <div style="font-size: 20px; padding: 50px 20px;">
-          <div style="margin-bottom: 38px">预估成本</div>
-          <span style="font-size: 18px">{{ proInfo.proDesc }}</span>
+          <div style="margin-bottom: 38px">人力成本预估</div>
+          <span style="font-size: 26px; color: #ff1f42">￥{{ toFixTwo(memberCost) }}  <span
+              style="color: #333333; font-size: 16px">元</span></span>
         </div>
 
 
@@ -123,7 +125,8 @@
       <el-scrollbar style="width: 35%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
         <div style="padding: 20px 10px;">
           <div style="margin-bottom: 38px; font-size: 20px;">成员列表</div>
-          <div v-for="member in members" :key="member.userId" style="display: flex; align-items: center; margin: 30px 0;">
+          <div v-for="member in members" :key="member.userId"
+               style="display: flex; align-items: center; margin: 30px 0;">
             <el-avatar :src="member.avatar" style="margin-right: 10px"></el-avatar>
             <span style="font-size: 18px; width: 90px;">{{ member.nickName }}</span>
             <span style="font-size: 12px">{{ member.email }}</span>
@@ -137,7 +140,14 @@
       {{ proInfo.proFlag }} - {{ proInfo.proName }}
     </template>
     <template #footer>
-
+      <el-button type="success" size="large" @click="handleEdit(proInfo)">
+        <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'check']"/>
+        同 意
+      </el-button>
+      <el-button type="danger" size="large" @click="handleDelete(proInfo)">
+        <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'xmark']"/>
+        拒 绝
+      </el-button>
     </template>
   </el-dialog>
 
@@ -147,7 +157,7 @@
 import {ElTable} from "element-plus";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, ref} from "vue";
-import {deletePro, getAuditProList} from "../../api/allProApi.ts";
+import {getAuditProList, queryMemberCost} from "../../api/allProApi.ts";
 import {formatDate} from "@vueuse/shared";
 import {queryDemandMembers} from "../../api/demandApi.ts";
 import {updateProStatus} from "../../api/proOverViewApi.ts";
@@ -176,27 +186,47 @@ const getDemandMembers = (proId) => {
 }
 
 const clickRow = (row) => {
+  if (clickButton.value) {
+    clickButton.value = false
+    return
+  }
   proInfo.value = row
   getDemandMembers(row.proId)
+  getMemberCost(row.proId)
   dialogVisible.value = true
 }
+
+const memberCost = ref(0)
+
+const getMemberCost = (proId) => {
+  queryMemberCost(proId).then((res) => {
+    memberCost.value = res.data.data
+  })
+}
+
+const toFixTwo = (value) => {
+  return value.toFixed(2)
+}
+
+const clickButton = ref(false)
+
 const handleEdit = (row) => {
-    updateProStatus(row.proId, 0).then((res) => {
-      if (res.data.code === 4001) {
-        ElNotification({
-          title: 'Success',
-          message: res.data.message,
-          type: 'success',
-        })
-        getPros()
-      } else {
-        ElNotification({
-          title: 'Error',
-          message: res.data.message,
-          type: 'error',
-        })
-      }
-    })
+  updateProStatus(row.proId, 0).then((res) => {
+    if (res.data.code === 4001) {
+      ElNotification({
+        title: 'Success',
+        message: res.data.message,
+        type: 'success',
+      })
+      getPros()
+    } else {
+      ElNotification({
+        title: 'Error',
+        message: res.data.message,
+        type: 'error',
+      })
+    }
+  })
 }
 
 const handleDelete = (row) => {
