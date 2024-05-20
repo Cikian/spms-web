@@ -92,7 +92,13 @@
               :column="3"
           >
             <el-descriptions-item width="25%" label="创建人">
-
+              <div v-for="member in members"
+                   v-show="member.userId === proInfo.createBy"
+                   style="display: flex; align-items: center"
+              >
+                <el-avatar :size="'small'" :src="member.avatar"/>
+                <span style="margin-left: 10px">{{ member.nickName }}</span>
+              </div>
             </el-descriptions-item>
             <el-descriptions-item width="25%" label="预计开始时间">
               {{ formatDate(new Date(proInfo.expectedStartTime), 'YYYY年MM月DD日') }}
