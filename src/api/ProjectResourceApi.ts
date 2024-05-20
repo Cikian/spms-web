@@ -7,3 +7,11 @@ export function getProjectMembers(data) {
         params: data
     })
 }
+
+export function getProjectDevices(data) {
+    return request({
+        url: '/projectResource/getDevicesByProId',
+        method: 'get',
+        params: data
+    })
+}

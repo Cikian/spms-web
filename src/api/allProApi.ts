@@ -95,9 +95,25 @@ export function addMember(data) {
     })
 }
 
+export function addDeviceToPro(data) {
+    return request({
+        url: '/pro/addDevice',
+        method: 'post',
+        data
+    })
+}
+
 export function deleteMember(data) {
     return request({
         url: '/pro/deleteMember',
+        method: 'post',
+        data
+    })
+}
+
+export function deleteDevice(data) {
+    return request({
+        url: '/pro/deleteDevice',
         method: 'post',
         data
     })

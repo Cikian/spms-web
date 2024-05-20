@@ -46,3 +46,10 @@ export function deleteDevice(data) {
         data: data
     })
 }
+
+export function getProAddDevice(data) {
+    return request({
+        url: '/device/queryCanAddToProjectDevice/' + data,
+        method: 'get',
+    })
+}

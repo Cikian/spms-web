@@ -30,7 +30,6 @@
                   size="large"
                   stripe
                   v-loading="loading"
-                  @row-click="rowClick"
                   empty-text="暂无数据"
         >
           <el-table-column prop="no" label="序号" width="120">

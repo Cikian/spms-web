@@ -271,7 +271,8 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <div style="height: 200px;display: flex; justify-content: center; align-items: center" v-if="loadingMessage">
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingMessage">
                 <a-spin size="large"/>
               </div>
               <div v-else>
@@ -580,10 +581,21 @@ const changeStatus = (status) => {
 const loadTestPlanList = () => {
   loading.value = true
 
-  queryTestPlanListByProId(proId.value)
+  let formData = {
+    proId: proId.value,
+    testPlanName: searchContent.value,
+    status: currentTestPlanStatus.value
+  }
+
+  queryTestPlanListByProId(formData)
       .then(res => {
         if (res.data.code === 2001) {
           tableData.value = res.data.data
+
+          for (let i = 0; i < tableData.value.length; i++) {
+            tableData.value[i].startTime = tableData.value[i].startTime.split('T')[0]
+            tableData.value[i].endTime = tableData.value[i].endTime.split('T')[0]
+          }
         } else {
           ElNotification({
             title: '提示',
@@ -1283,7 +1295,7 @@ const getComments = (workItemId) => {
           firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
           notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
           loadingMessage.value = false
-        }else if(res.data.code === 2002){
+        } else if (res.data.code === 2002) {
           firstLevelComment.value = []
           notFirstLevelComment.value = []
           loadingMessage.value = false

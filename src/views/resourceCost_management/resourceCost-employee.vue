@@ -25,23 +25,23 @@
             </el-form-item>
           </template>
         </el-popover>
-        <el-popover
-            placement="bottom"
-            width="280"
-            trigger="hover"
-            title="提示"
-            content="实际查询价格范围会在目标价格±100元"
-        >
-          <template #reference>
-            <el-form-item label="月费用（元）">
-              <el-input
-                  type="number"
-                  v-model="queryResourceCostConditionForm.monthlyCost"
-                  placeholder="请输入目标费用"
-                  clearable/>
-            </el-form-item>
-          </template>
-        </el-popover>
+<!--        <el-popover-->
+<!--            placement="bottom"-->
+<!--            width="280"-->
+<!--            trigger="hover"-->
+<!--            title="提示"-->
+<!--            content="实际查询价格范围会在目标价格±100元"-->
+<!--        >-->
+<!--          <template #reference>-->
+<!--            <el-form-item label="月费用（元）">-->
+<!--              <el-input-->
+<!--                  type="number"-->
+<!--                  v-model="queryResourceCostConditionForm.monthlyCost"-->
+<!--                  placeholder="请输入目标费用"-->
+<!--                  clearable/>-->
+<!--            </el-form-item>-->
+<!--          </template>-->
+<!--        </el-popover>-->
         <el-form-item>
           <el-button type="primary" @click="queryResourceCostListByCondition">查询</el-button>
         </el-form-item>
@@ -163,7 +163,6 @@ const resourceCostDetails = ref()
 const queryResourceCostConditionForm = ref({
   resourceName: '',
   dailyCost: '',
-  monthlyCost: '',
   resourceType: 1
 })
 
@@ -180,7 +179,6 @@ const loadResourceList = () => {
   let deviceQueryCondition = {
     resourceName: queryResourceCostConditionForm.value.resourceName,
     dailyCost: queryResourceCostConditionForm.value.dailyCost,
-    monthlyCost: queryResourceCostConditionForm.value.monthlyCost,
     resourceType: queryResourceCostConditionForm.value.resourceType
   }
 
@@ -199,7 +197,6 @@ const loadResourceList = () => {
             pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
             pageInfo.records[i].updateTime = new Date(pageInfo.records[i].updateTime).toLocaleString()
             pageInfo.records[i].dailyCost = pageInfo.records[i].dailyCost.toFixed(2)
-            pageInfo.records[i].monthlyCost = pageInfo.records[i].monthlyCost.toFixed(2)
           }
 
           employeeCostList.value = pageInfo.records

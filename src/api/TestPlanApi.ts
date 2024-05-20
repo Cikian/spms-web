@@ -8,9 +8,9 @@ export function queryTestPlanList(data, condition, type) {
     })
 }
 
-export function queryTestPlanListByProId(proId) {
+export function queryTestPlanListByProId(data) {
     return request({
-        url: '/testPlan/listByProId?proId=' + proId,
+        url: '/testPlan/listByProId?proId=' + data.proId + '&testPlanName=' + data.testPlanName + '&status=' + data.status,
         method: 'get',
     })
 }
