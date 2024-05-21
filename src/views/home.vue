@@ -15,7 +15,9 @@
             :router="true"
             @select="changeMenuItem"
         >
-          <div style="width: 100%; height: 72px">1</div>
+          <div style="width: 100%; height: 72px; display: flex; align-items: center; justify-content: center">
+            <el-image src="https://img-upyun.cikian.cn/develop/simida/static/logo.png"></el-image>
+          </div>
           <el-menu-item index="/workTable">
             <font-awesome-icon style="width: 18px" class="home-icon" icon="fa-solid fa-layer-group"/>
             <template #title>工作台</template>
