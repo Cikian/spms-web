@@ -2212,6 +2212,15 @@ const handleCloseClickRow = () => {
 
 const clickIcon = ref(false)
 const addWorkItem = (row) => {
+  if (row.demandStatus===-2){
+    ElNotification({
+      title: '提示',
+      message: '正在审核中，暂时无法查看详情',
+      type: 'info',
+    })
+    return
+  }
+
   clickIcon.value = true
   newDemandFormData.value.proId = currentProInfo.value.proId
   newDemandFormData.value.fatherDemandId = row.demandId

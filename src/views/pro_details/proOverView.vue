@@ -11,38 +11,6 @@
           <el-row>
             <el-col :span="12">
               <div style="padding-bottom: 10px" class="basic-info-title">状态</div>
-              <el-select
-                  v-model="currentProInfo.proStatus"
-                  class="demand-status-select"
-                  @change="proStatusChange(currentProInfo)"
-                  style="width: 80%"
-              >
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="0"
-                    label="正常"
-                    :value="0"
-                >
-                  <div class="table-statue" style="background-color: #73d897;">正常</div>
-                </el-option>
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="1"
-                    label="预警"
-                    :value="1"
-                >
-                  <div class="table-statue" style="background-color: #f6c659;">预警</div>
-                </el-option>
-                <el-option
-                    class="demand-table-select-options-menu"
-                    :key="2"
-                    label="延期"
-                    :value="2"
-                >
-                  <div class="table-statue" style="background-color: #ff7575;">延期</div>
-                </el-option>
-
-                <template #prefix>
                   <div class="table-statue" style="background-color: #73d897;" v-show="currentProInfo.proStatus===0">
                     正常
                   </div>
@@ -52,8 +20,7 @@
                   <div class="table-statue" style="background-color: #ff7575;" v-show="currentProInfo.proStatus===2">
                     延期
                   </div>
-                </template>
-              </el-select>
+
             </el-col>
             <el-col :span="12">
               <div style="padding-bottom: 10px" class="basic-info-title">负责人</div>
@@ -102,25 +69,25 @@
           </el-row>
           <el-row>
             <el-col :span="24" style="padding-bottom: 18px; display: flex; justify-content: space-around">
-              <el-progress type="circle" :percentage="workItemProgress" :width="200">
+              <el-progress type="circle" :percentage="workItemProgress" :width="200" :color="customColors">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">任务</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="defectProgress" status="success" :width="200">
+              <el-progress type="circle" :percentage="defectProgress" :width="200" :color="customColors">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">缺陷</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="proTestProgress" status="exception" :width="200">
+              <el-progress type="circle" :percentage="proTestProgress" :width="200" :color="customColors">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">测试</span>
                 </template>
               </el-progress>
-              <el-progress type="circle" :percentage="dayProgress" status="warning" :width="200">
+              <el-progress type="circle" :percentage="dayProgress" :width="200" :color="customColors">
                 <template #default="{ percentage }">
                   <span class="percentage-value">{{ percentage }}%</span>
                   <span class="percentage-label">工期剩余</span>
@@ -160,7 +127,7 @@
               项目公告
             </el-col>
             <el-col :span="4" style="padding-bottom: 10px">
-              <el-button @click="openIssueAnnouncementDialog" style="font-size: 18px" size="large" type="primary" text>
+              <el-button @click="openIssueAnnouncementDialog" style="font-size: 18px" size="large" type="primary" text :disabled="!isProHeader">
                 <font-awesome-icon :icon="['fas', 'pen-to-square']"/>
               </el-button>
             </el-col>
@@ -237,7 +204,7 @@ import {
   selectByProId, updateProStatus
 } from "../../api/proOverViewApi.ts";
 import {queryProByProId, updateDefectStatus} from "../../api/defectApi.ts";
-import {queryDemandMembers} from "../../api/demandApi.ts";
+import {judgeProjectHeader, queryDemandMembers} from "../../api/demandApi.ts";
 import {formatDate} from "@vueuse/shared";
 
 
@@ -338,9 +305,20 @@ onMounted(() => {
     getCurrentProInfo(currentProId)
     getDemandMembers(currentProId)
   }
-
+  judgeProHeader(currentProId)
   getAnno()
 })
+
+const isProHeader = ref(false)
+const judgeProHeader = (proId) => {
+  judgeProjectHeader(proId).then((res) => {
+    if (res.data.code === 200) {
+      isProHeader.value = res.data.data
+    } else {
+
+    }
+  })
+}
 
 const proTestProgress = ref(0)
 const workItemProgress = ref(0)
@@ -463,6 +441,19 @@ const proStatusChange = (row) => {
     }
   })
 }
+
+const customColors = [
+  { color: '#ff2424', percentage: 10 },
+  { color: '#ff322e', percentage: 20 },
+  { color: '#cf3a33', percentage: 30 },
+  { color: '#ff7116', percentage: 40 },
+  { color: '#f6c659', percentage: 50 },
+  { color: '#dcb907', percentage: 60 },
+  { color: '#bdd20a', percentage: 70 },
+  { color: '#b7c722', percentage: 80 },
+  { color: '#a0cc5e', percentage: 90 },
+  { color: '#67c23a', percentage: 100 },
+]
 </script>
 
 <style scoped>
