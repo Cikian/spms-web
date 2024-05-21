@@ -57,6 +57,7 @@
                 class="upload-report"
                 :show-file-list="false"
                 :before-upload="beforeUpload"
+                :on-success="uploadSuccess"
                 :http-request="handleUpload"
                 drag>
               <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
@@ -118,8 +119,16 @@
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, ref} from "vue";
+import {uploadMeetingReport} from "../../api/meetingApi.ts";
+import {UploadProps} from "element-plus";
+
+const proId = ref('')
 
 onMounted(() => {
+  let currentProId = localStorage.getItem('proDetailId')
+  if (currentProId) {
+    proId.value = currentProId
+  }
 })
 
 const addDialogVisible = ref(false)
@@ -172,8 +181,57 @@ const formData = ref({
   file: '',
 })
 
+const beforeUpload = (file) => {
+  const isLt5M = file.size / 1024 / 1024 < 5;
+  if (!isLt5M) {
+    ElNotification({
+      title: '警告',
+      message: '上传文件大小不能超过 5MB!',
+      type: 'warning'
+    })
+  }
+
+  const isDoc = file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/pdf';
+  if (!isDoc) {
+    ElNotification({
+      title: '警告',
+      message: '上传文件只能是doc、docx、pdf格式!',
+      type: 'warning'
+    })
+  }
+  return isLt5M && isDoc;
+}
+
+const handleUpload = (file) =>{
+  let formData1 = new FormData();
+  formData1.append('file', file.file);
+  formData1.append('proId', proId.value);
+
+  uploadMeetingReport(formData1)
+      .then(res => {
+        if (res.data.code === 200) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          formData.value.file = res.data.data
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+}
+
+const uploadSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
+  console.log(response)
+}
+
 const submitAdd = () => {
-  console.log('submitAdd')
+
 }
 
 

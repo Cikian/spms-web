@@ -111,18 +111,3 @@ export function uploadTestReport(data, config) {
         ...config
     })
 }
-
-export function queryTestPlanMessage(data) {
-    return request({
-        url: '/comment?id=' + data,
-        method: 'get',
-    })
-}
-
-export function addTestPlanMessage(data) {
-    return request({
-        url: '/comment',
-        method: 'post',
-        data
-    })
-}

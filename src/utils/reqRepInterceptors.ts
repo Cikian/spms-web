@@ -16,7 +16,7 @@ service.interceptors.request.use(function (config) {
         return
     }
 
-    if (config.url === "/file/upload" || config.url === "/common/upload/avatar" || config.url === "/common/upload/testReport") {
+    if (config.url === "/file/upload" || config.url === "/common/upload/avatar" || config.url === "/common/upload/testReport" || config.url === '/common/upload/meetingReport') {
         config.headers["Content-Type"] = "multipart/form-data"
     }
 

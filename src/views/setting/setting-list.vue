@@ -23,10 +23,6 @@
           <font-awesome-icon class="list-icons" :icon="['fas', 'database']"/>
           <template #title>数据备份</template>
         </el-menu-item>
-        <el-menu-item style="margin:0 0 12px 0;" index="/setting/list/log">
-          <font-awesome-icon class="list-icons" icon="fa-solid fa-file-pen" />
-          <template #title>日志</template>
-        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-main style="padding: 0">
