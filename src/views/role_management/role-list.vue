@@ -37,7 +37,7 @@
             label="状态"
         >
           <template #default="{row}">
-            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success" :disabled="!row.isSystem">
+            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success" :disabled="row.isSystem">
               {{ row.status }}
             </el-button>
             <el-button size="small" plain @click="handleStatus(row)" v-else type="danger">{{ row.status }}</el-button>
@@ -57,7 +57,7 @@
                 text
                 size="default"
                 @click="handleEdit(row)"
-                :disabled="!row.isSystem"
+                :disabled="row.isSystem"
             >
               编辑
             </el-button>
@@ -66,7 +66,7 @@
                 text
                 size="default"
                 @click="handleDelete(row)"
-                :disabled="!row.isSystem"
+                :disabled="row.isSystem"
             >
               删除
             </el-button>
