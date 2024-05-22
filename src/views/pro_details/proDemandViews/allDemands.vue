@@ -2166,6 +2166,15 @@ const addDemandFatherDemandIdChange = (val) => {
 }
 
 const submitAddDemand = () => {
+  if (newDemandFormData.value.title === '') {
+    ElNotification({
+      title: 'Error',
+      message: '需求标题不能为空',
+      type: 'error',
+    })
+    return
+  }
+
   if (newDemandFormData.value.fatherDemandId === "") {
     newDemandFormData.value.fatherDemandId = "0"
   }
@@ -3321,6 +3330,10 @@ onBeforeUnmount(() => {
   clickEditor.destroy()
   clickReadOnlyEditor.destroy()
 })
+
+window.addEventListener('beforeunload', (e) => {
+  console.log('页面刷新')
+});
 </script>
 
 <style scoped>

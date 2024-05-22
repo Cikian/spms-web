@@ -14,7 +14,7 @@
             <el-avatar style="width: 44px; height: 44px; float: left; margin-right: 12px"
                        :src="userInfo.avatar"/>
             <div class="user-desc">
-              <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ userInfo.userName }}, 上午好</div>
+              <div class="user-name" style="margin-bottom: 4px; font-size: 14px">{{ userInfo.nickName }}, 上午好</div>
               <div class="user-role" style="font-size: 12px">今天是{{ currentDate }}, 星期{{ week }}</div>
             </div>
           </div>
@@ -66,7 +66,8 @@ onMounted(() => {
 let userInfo = ref(
     {
       userName: '',
-      avatar: ''
+      avatar: '',
+      nickName: '',
     }
 )
 let currentDate: string = ref("")
@@ -104,6 +105,7 @@ const getUserInfo = () => {
   let userDetail = localStorage.getItem("userInfo")
   userInfo.value.avatar = JSON.parse(userDetail).avatar
   userInfo.value.userName = JSON.parse(userDetail).userName
+  userInfo.value.nickName = JSON.parse(userDetail).nickName
 }
 
 onMounted(() => {
