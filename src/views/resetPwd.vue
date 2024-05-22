@@ -22,31 +22,6 @@
               </div>
             </div>
             <div class="form-container-body">
-              <div class="form-username form-group">
-                <label class="form-label">邮箱</label>
-                <div class="form-control">
-                  <el-input
-                      class="form-control-input"
-                      v-model="emailInput"
-                      placeholder="请输入邮箱"
-                      clearable
-                  />
-                </div>
-              </div>
-              <div class="form-password form-group">
-                <label class="form-label">验证码</label>
-                <div class="form-control">
-                  <el-input
-                      class="form-control-input from-control-input-code"
-                      v-model="emailCode"
-                      placeholder="请输入验证码"
-                      clearable
-                  />
-                  <el-button :disabled="getCodeBtn" type="primary" @click="getEmailCode" class="getCodeBtn"
-                             size="large">{{ getCodeBtnText }}
-                  </el-button>
-                </div>
-              </div>
               <div class="form-password form-group">
                 <label class="form-label">原密码</label>
                 <div class="form-control">
@@ -120,68 +95,9 @@ watch(emailInput, (val) => {
   getCodeBtn.value = !val;
 })
 
-const getEmailCode = () => {
-  getCodeBtn.value = true
-  getCodeBtnText.value = '发送中...'
-
-  let emailRegex = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-  if (!emailRegex.test(emailInput.value)) {
-    ElNotification({
-      title: '提示',
-      message: '请输入正确的邮箱',
-      type: 'warning',
-    })
-    getCodeBtn.value = false
-    getCodeBtnText.value = '获取验证码'
-    return
-  }
-
-  let emailFormData = {
-    email: emailInput.value,
-  }
-
-  sendEmailCode(emailFormData).then(res => {
-    if (res.data.code === 200) {
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-    } else {
-      ElNotification({
-        title: '警告',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
-    getCodeBtnText.value = '获取验证码'
-    getCodeBtn.value = false
-  })
-
-}
 
 const resetPassword = () => {
   isDisabled.value = true
-
-  if (emailInput.value === '') {
-    ElNotification({
-      title: '警告',
-      message: '请输入邮箱',
-      type: 'warning',
-    })
-    isDisabled.value = false
-    return
-  }
-
-  if (emailCode.value === '') {
-    ElNotification({
-      title: '警告',
-      message: '请输入验证码',
-      type: 'warning',
-    })
-    isDisabled.value = false
-    return
-  }
 
   if (oldPasswordInput.value === '') {
     ElNotification({
@@ -223,46 +139,30 @@ const resetPassword = () => {
     return
   }
 
-  let emailFormData = {
-    email: emailInput.value,
-    code: emailCode.value,
-  }
-
   let passwordFormData = {
     oldPassword: oldPasswordInput.value,
     newPassword: newPasswordInput.value,
     confirmPassword: confirmPasswordInput.value
   }
 
-  verifyEmail(emailFormData).then(res => {
+  updatePassword(passwordFormData).then(res => {
     if (res.data.code === 200) {
-      updatePassword(passwordFormData).then(res => {
-        if (res.data.code === 200) {
-          ElNotification({
-            title: '成功',
-            message: res.data.message,
-            type: 'success',
-          })
-          localStorage.removeItem('token')
-          localStorage.removeItem('isFirstLogin')
-          router.push('/login')
-        } else {
-          ElNotification({
-            title: '提示',
-            message: res.data.message,
-            type: 'warning',
-          })
-        }
-        isDisabled.value = false
+      ElNotification({
+        title: '成功',
+        message: res.data.message,
+        type: 'success',
       })
+      localStorage.removeItem('token')
+      localStorage.removeItem('isFirstLogin')
+      router.push('/login')
     } else {
       ElNotification({
         title: '提示',
         message: res.data.message,
         type: 'warning',
       })
-      isDisabled.value = false
     }
+    isDisabled.value = false
   })
 
 }
