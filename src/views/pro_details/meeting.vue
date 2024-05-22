@@ -226,10 +226,6 @@ const handleUpload = (file) =>{
       })
 }
 
-const uploadSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-  console.log(response)
-}
-
 const submitAdd = () => {
 
 }
