@@ -37,7 +37,7 @@
             label="状态"
         >
           <template #default="{row}">
-            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success">
+            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success" :disabled="row.isSystem">
               {{ row.status }}
             </el-button>
             <el-button size="small" plain @click="handleStatus(row)" v-else type="danger">{{ row.status }}</el-button>
@@ -57,6 +57,7 @@
                 text
                 size="default"
                 @click="handleEdit(row)"
+                :disabled="row.isSystem"
             >
               编辑
             </el-button>
@@ -65,6 +66,7 @@
                 text
                 size="default"
                 @click="handleDelete(row)"
+                :disabled="row.isSystem"
             >
               删除
             </el-button>
@@ -176,6 +178,19 @@
     </div>
   </el-dialog>
 
+  <a-float-button
+      type="default"
+      :style="{
+      right: '40px',
+    }"
+  >
+    <template #icon>
+      <font-awesome-icon icon="fa-regular fa-circle-question" />
+    </template>
+    <template #tooltip>
+      <div>所有系统角色均不可进行操作</div>
+    </template>
+  </a-float-button>
 </template>
 
 <script setup lang="ts">
@@ -553,6 +568,18 @@ const handleBatchDelete = () => {
   let roleIds = []
   for (let i = 0; i < selectedRows.value.length; i++) {
     roleIds.push(selectedRows.value[i].roleId)
+  }
+
+  //判断选择的角色是否是系统角色
+  for (let i = 0; i < selectedRows.value.length; i++) {
+    if (!selectedRows.value[i].isSystem) {
+      ElNotification({
+        title: '提示',
+        message: '选择的角色中包含系统角色，不允许删除',
+        type: 'warning'
+      })
+      return
+    }
   }
 
   ElMessageBox.confirm(

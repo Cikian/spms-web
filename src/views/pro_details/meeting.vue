@@ -115,6 +115,7 @@
     </div>
 
 
+
   </el-dialog>
 </template>
 
@@ -211,6 +212,7 @@ const handleUpload = (file) => {
         }
       })
 }
+
 const submitAdd = () => {
   console.log(formData.value)
   formData.value.proId = proId.value

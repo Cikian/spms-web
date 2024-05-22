@@ -8,9 +8,10 @@
       padding: 0 30px;
 "
   >
-    <el-input v-model="searchInput" placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable @change="searchDemands" @clear="clearSearchInput">
+    <el-input v-model="searchInput" placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px"
+              clearable @change="searchDemands" @clear="clearSearchInput">
       <template #prefix>
-        <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
       </template>
     </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
@@ -816,6 +817,7 @@
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0"
                              style="background-color: rgba(234,234,234,0.12); border-radius: 10px; margin-bottom: 10px; padding: 10px 10px">
                     <template #actions>
+                      <span>{{ item.createTime }}</span>
                       <span @click="beforeReply(item, 'fromDemand')">回复</span>
                     </template>
                     <template #author>
@@ -832,6 +834,7 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId" style="margin: -20px 0">
                         <template #actions>
+                          <span>{{ item.createTime }}</span>
                           <span @click="beforeReply(r, 'fromDemand')">回复</span>
                         </template>
                         <template #author>
@@ -1324,7 +1327,7 @@
             </el-table>
           </el-tab-pane>
           <el-tab-pane label="测试" name="tests">
-            <div style="display: flex; justify-content: right; padding: 0 50px"  class="addTest" v-show="!hasTestPlan">
+            <div style="display: flex; justify-content: right; padding: 0 50px" class="addTest" v-show="!hasTestPlan">
               <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
                   style="font-size: 20px; margin-right: 5px;">+</span>新建测试
               </el-button>
@@ -1701,7 +1704,8 @@
                 <div style="width: 90%" v-else>
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
                     <template #actions>
-                      <span @click="beforeReply(item, 'fromTest')">回复</span>
+                      <span>{{item.createTime}}</span>
+                      <span @click="beforeReply(item,'fromTest')">回复</span>
                     </template>
                     <template #author>
                       <a>{{ item.nickName }}</a>
@@ -1717,6 +1721,7 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId">
                         <template #actions>
+                          <span>{{item.createTime}}</span>
                           <span @click="beforeReply(r,'fromTest')">回复</span>
                         </template>
                         <template #author>
@@ -1905,7 +1910,8 @@
         </el-input>
       </el-form-item>
       <el-form-item label="关联需求">
-        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled no-data-text="暂无需求">
+        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled
+                  no-data-text="暂无需求">
         </el-input>
       </el-form-item>
       <el-form-item label="负责人">
@@ -1985,12 +1991,13 @@ import {
   updateTestReportApprovalStatusById,
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
+
 const searchInput = ref('')
 const searchDemands = () => {
   loadingWorkItems.value = true
   demandsByLevel.value = []
 
-  if (searchInput.value === ''){
+  if (searchInput.value === '') {
     getDemandsList(proId.value)
   }
 
@@ -2077,12 +2084,10 @@ const getCurrentProInfo = (proId) => {
       console.log(currentProInfo.value)
 
 
-
       if (localStorage.getItem("recentVisit")) {
         clickRow(clickedDemand.value)
         localStorage.removeItem("recentVisit")
       }
-
 
 
     } else {
@@ -2503,6 +2508,27 @@ const getComments = (workItemId) => {
   getCommentList(workItemId).then((res) => {
     if (res.data.code === 2001) {
       let comments = res.data.data
+
+      for (let i = 0; i < comments.length; i++) {
+        comments[i].createTime = comments[i].createTime.replace('T', ' ')
+      }
+
+      for (let i = 0; i < comments.length; i++) {
+        let now = new Date().getTime()
+        let createTime = new Date(comments[i].createTime).getTime()
+        let diff = now - createTime
+        if (diff < 86400000) {
+          if (diff < 60000) {
+            comments[i].createTime = '刚刚'
+          } else if (diff < 3600000) {
+            console.log(diff / 60000)
+            comments[i].createTime = Math.floor(diff / 60000) + '分钟前'
+          } else {
+            comments[i].createTime = Math.floor(diff / 3600000) + '小时前'
+          }
+        }
+      }
+
       firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
       notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
       loadingComments.value = false
@@ -2599,7 +2625,7 @@ const replyComment = (flag) => {
       })
       openRep.value = false;
       openTestRep.value = false;
-      if (flag === 'fromDemand'){
+      if (flag === 'fromDemand') {
         console.log("从需求")
         console.log(clickedDemand.value)
         getComments(clickedDemand.value.demandId)
@@ -2804,6 +2830,18 @@ const loadTestPlanList = (demandId) => {
       .then(res => {
         if (res.data.code === 200) {
           testTableData.value = res.data.data
+
+          if (testTableData.value !== null) {
+            testTableData.value[0].startTime = testTableData.value[0].startTime.replace('T', ' ').substring(0, 10)
+            testTableData.value[0].endTime = testTableData.value[0].endTime.replace('T', ' ').substring(0, 10)
+
+            for (let i = 0; i < members.value.length; i++) {
+              if (testTableData.value[0].head === members.value[i].userId) {
+                testTableData.value[0].headName = members.value[i].nickName
+                break
+              }
+            }
+          }
           hasTestPlan.value = testTableData.value !== null && testTableData.value.length > 0
         } else {
           ElNotification({
