@@ -431,12 +431,12 @@ const queryTargetAttribute = () => {
       .then(res => {
         if (res.data.code === 200) {
           qualityAttributeList.value = res.data.data
+          loadTargetList()
         }
       })
 }
 
 onMounted(() => {
-  loadTargetList()
   queryTargetAttribute()
 })
 </script>

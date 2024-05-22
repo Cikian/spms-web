@@ -8,9 +8,10 @@
       padding: 0 30px;
 "
   >
-    <el-input v-model="searchInput" placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px" clearable @change="searchDemands" @clear="clearSearchInput">
+    <el-input v-model="searchInput" placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px"
+              clearable @change="searchDemands" @clear="clearSearchInput">
       <template #prefix>
-        <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
       </template>
     </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
@@ -1324,7 +1325,7 @@
             </el-table>
           </el-tab-pane>
           <el-tab-pane label="测试" name="tests">
-            <div style="display: flex; justify-content: right; padding: 0 50px"  class="addTest" v-show="!hasTestPlan">
+            <div style="display: flex; justify-content: right; padding: 0 50px" class="addTest" v-show="!hasTestPlan">
               <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
                   style="font-size: 20px; margin-right: 5px;">+</span>新建测试
               </el-button>
@@ -1905,7 +1906,8 @@
         </el-input>
       </el-form-item>
       <el-form-item label="关联需求">
-        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled no-data-text="暂无需求">
+        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled
+                  no-data-text="暂无需求">
         </el-input>
       </el-form-item>
       <el-form-item label="负责人">
@@ -1985,12 +1987,13 @@ import {
   updateTestReportApprovalStatusById,
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
+
 const searchInput = ref('')
 const searchDemands = () => {
   loadingWorkItems.value = true
   demandsByLevel.value = []
 
-  if (searchInput.value === ''){
+  if (searchInput.value === '') {
     getDemandsList(proId.value)
   }
 
@@ -2077,12 +2080,10 @@ const getCurrentProInfo = (proId) => {
       console.log(currentProInfo.value)
 
 
-
       if (localStorage.getItem("recentVisit")) {
         clickRow(clickedDemand.value)
         localStorage.removeItem("recentVisit")
       }
-
 
 
     } else {
@@ -2590,7 +2591,7 @@ const replyComment = (flag) => {
       })
       openRep.value = false;
       openTestRep.value = false;
-      if (flag === 'fromDemand'){
+      if (flag === 'fromDemand') {
         console.log("从需求")
         console.log(clickedDemand.value)
         getComments(clickedDemand.value.demandId)
@@ -2795,6 +2796,16 @@ const loadTestPlanList = (demandId) => {
       .then(res => {
         if (res.data.code === 200) {
           testTableData.value = res.data.data
+
+          testTableData.value[0].startTime = testTableData.value[0].startTime.replace('T', ' ').substring(0, 10)
+          testTableData.value[0].endTime = testTableData.value[0].endTime.replace('T', ' ').substring(0, 10)
+
+          for (let i = 0; i < members.value.length; i++) {
+            if(testTableData.value[0].head === members.value[i].userId){
+              testTableData.value[0].headName = members.value[i].nickName
+              break
+            }
+          }
           hasTestPlan.value = testTableData.value !== null && testTableData.value.length > 0
         } else {
           ElNotification({

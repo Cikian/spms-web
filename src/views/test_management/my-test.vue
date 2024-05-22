@@ -299,23 +299,23 @@
                 <a-spin size="large"/>
               </div>
               <div v-else>
+                <div class="post-comment-form"
+                     style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end; flex-direction: column">
+                  <a-textarea
+                      :auto-size="{ minRows: 4, maxRows: 4 }"
+                      placeholder="友善发言，文明评论~"
+                      v-model:value="postComment.content"
+                      id="postCommentInput"
+                      @keydown.enter.native="submitComment"
+                  />
+                  <a-button style="margin: 10px 0" type="primary" @click="submitComment"
+                            :disabled="postComment.content === ''">评论
+                  </a-button>
+                </div>
                 <div v-if="firstLevelComment.length <= 0">
                   <a-empty description="暂无评论"/>
                 </div>
                 <div style="width: 100%" v-else>
-                  <div class="post-comment-form"
-                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end; flex-direction: column">
-                    <a-textarea
-                        :auto-size="{ minRows: 4, maxRows: 4 }"
-                        placeholder="友善发言，文明评论~"
-                        v-model:value="postComment.content"
-                        id="postCommentInput"
-                        @keydown.enter.native="submitComment"
-                    />
-                    <a-button style="margin: 10px 0" type="primary" @click="submitComment"
-                              :disabled="postComment.content === ''">评论
-                    </a-button>
-                  </div>
                   <el-scrollbar max-height="38vh">
                     <a-comment v-for="(item,index) in firstLevelComment" :key="index"
                                v-if="firstLevelComment.length > 0">
@@ -324,7 +324,7 @@
                         <span @click="beforeReply(item)">回复</span>
                       </template>
                       <template #author>
-                        <a>{{ item.nickName }}</a>
+                        <a style="font-size: 14px">{{ item.nickName }}</a>
                       </template>
                       <template #avatar>
                         <a-avatar :src="item.avatar" :alt="item.nickName"/>
