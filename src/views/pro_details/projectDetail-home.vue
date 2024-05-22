@@ -43,7 +43,7 @@ import Notification from "../../compoment/Notification.vue";
 const currentProId = ref('')
 const currentProInfo = ref({})
 
-const isProHeader = ref(false)
+
 
 onMounted(() => {
   // router.push("/proDetail/overView")
@@ -63,6 +63,7 @@ const getCurrentProInfo = () => {
   })
 }
 
+const isProHeader = ref(false)
 const judgeProHeader = () => {
   judgeProjectHeader(currentProId.value).then((res) => {
     if (res.data.code === 200) {
