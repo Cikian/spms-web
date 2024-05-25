@@ -1,8 +1,9 @@
 <template>
-  <div class="overView-title" style="display: flex; align-items: center; justify-content: space-between; padding-right: 220px">
+  <div class="overView-title"
+       style="display: flex; align-items: center; justify-content: space-between; padding-right: 220px">
     会议列表
     <el-button type="primary" @click="openAddDialog" size="large">
-      <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'plus']" />
+      <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'plus']"/>
       新增会议
     </el-button>
   </div>
@@ -10,17 +11,17 @@
   <div style="width: 100%; padding: 0 40px">
     <el-empty v-if="false" description="暂无数据"/>
     <div v-else>
-        <el-table
-            :data="tableData"
-            stripe
-            style="width: 90%"
-            size="large"
-            @row-click="clickRow"
-        >
-          <el-table-column type="index"/>
-          <el-table-column prop="title" label="会议名称" width="180" />
-          <el-table-column align="center" prop="createTime" label="日期" />
-        </el-table>
+      <el-table
+          :data="tableData"
+          stripe
+          style="width: 90%"
+          size="large"
+          @row-click="clickRow"
+      >
+        <el-table-column type="index"/>
+        <el-table-column prop="title" label="会议名称" width="180"/>
+        <el-table-column align="center" prop="createTime" label="日期"/>
+      </el-table>
 
     </div>
   </div>
@@ -46,7 +47,7 @@
           </el-form-item>
           <el-form-item label="描述">
             <el-input
-                v-model="formData.desc"
+                v-model="formData.meetingAbstract"
                 type="textarea"
                 placeholder="请输入会议描述"
                 :autosize="{ minRows: 5, maxRows: 8 }"
@@ -57,7 +58,6 @@
                 class="upload-report"
                 :show-file-list="false"
                 :before-upload="beforeUpload"
-                :on-success="uploadSuccess"
                 :http-request="handleUpload"
                 drag>
               <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
@@ -99,14 +99,17 @@
 
     <div>
       <div style="margin: 20px 20px; font-size: 20px; font-weight: bold; ">摘要</div>
-      <div style="margin: 20px 20px; font-size: 18px; ">{{ clickedMeeting.desc }}</div>
+      <div style="margin: 20px 20px; font-size: 18px; ">{{ clickedMeeting.meetingAbstract }}</div>
     </div>
 
     <div style="margin-top: 100px">
-      <div style="margin: 20px 20px; font-size: 20px; font-weight: bold; ">会议记录</div>
+      <div style="margin: 20px 20px; font-size: 20px; font-weight: bold; ">会议记录文件</div>
       <div style="margin: 20px 20px; font-size: 18px; ">
-        <el-link href="http://localhost:8080/api/file/download?fileName=asdasdasfasdabnajcnjahndkjs.pdf" target="_blank">
-          {{ clickedMeeting.file }}
+        <el-link :href="clickedMeeting.reportFile"
+                 target="_blank">
+          <font-awesome-icon v-if="getFileName(clickedMeeting.reportFile) === '.pdf'" style="width: 18px; color: #ff0000" :icon="['fas', 'file-pdf']" />
+          <font-awesome-icon v-else style="width: 18px; color: #0084ff" :icon="['fas', 'file-word']" />
+          “{{ clickedMeeting.title }}”-会议记录{{ getFileName(clickedMeeting.reportFile)}}
         </el-link>
       </div>
     </div>
@@ -119,16 +122,29 @@
 <script setup lang="ts">
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {onMounted, ref} from "vue";
-import {uploadMeetingReport} from "../../api/meetingApi.ts";
+import {addMeeting, getMeetingByProId, uploadMeetingReport} from "../../api/meetingApi.ts";
 import {UploadProps} from "element-plus";
 
 const proId = ref('')
+
+const getFileName = (url: string) => {
+  // 获取文件拓展名
+  let index1 = url.lastIndexOf(".");
+  let index2 = url.length;
+  return url.substring(index1, index2);//后缀名
+}
+
+const lastIndexOf = (str, target) => {
+  return str.lastIndexOf(target)
+}
 
 onMounted(() => {
   let currentProId = localStorage.getItem('proDetailId')
   if (currentProId) {
     proId.value = currentProId
+    getMeetingList(proId.value)
   }
+
 })
 
 const addDialogVisible = ref(false)
@@ -143,42 +159,13 @@ const openAddDialog = () => {
   addDialogVisible.value = true
 }
 
-const tableData = [
-  {
-    meetId: '2016-05-03',
-    proId: '2016-05-03',
-    title: '关于xxxxx的会议',
-    desc: 'No. 189, Grove St, Los Angeles',
-    file: 'asdasdasfasdabnajcnjahndkjs.pdf',
-    createTime: '2021-09-01 12:00:00',
-  },{
-    meetId: '2016-05-03',
-    proId: '2016-05-03',
-    title: '关于xxxxx的会议',
-    desc: 'No. 189, Grove St, Los Angeles',
-    file: 'asdasdasfasdabnajcnjahndkjs.pdf',
-    createTime: '2021-09-01 12:00:00',
-  },{
-    meetId: '2016-05-03',
-    proId: '2016-05-03',
-    title: '关于xxxxx的会议',
-    desc: 'No. 189, Grove St, Los Angeles',
-    file: 'asdasdasfasdabnajcnjahndkjs.pdf',
-    createTime: '2021-09-01 12:00:00',
-  },{
-    meetId: '2016-05-03',
-    proId: '2016-05-03',
-    title: '关于xxxxx的会议',
-    desc: 'No. 189, Grove St, Los Angeles',
-    file: 'asdasdasfasdabnajcnjahndkjs.pdf',
-    createTime: '2021-09-01 12:00:00',
-  },
-]
+const tableData = ref([])
 
 const formData = ref({
   title: '',
-  desc: '',
-  file: '',
+  proId: '',
+  meetingAbstract: '',
+  reportFile: '',
 })
 
 const beforeUpload = (file) => {
@@ -202,7 +189,7 @@ const beforeUpload = (file) => {
   return isLt5M && isDoc;
 }
 
-const handleUpload = (file) =>{
+const handleUpload = (file) => {
   let formData1 = new FormData();
   formData1.append('file', file.file);
   formData1.append('proId', proId.value);
@@ -215,7 +202,7 @@ const handleUpload = (file) =>{
             message: res.data.message,
             type: 'success'
           })
-          formData.value.file = res.data.data
+          formData.value.reportFile = res.data.data
         } else {
           ElNotification({
             title: '提示',
@@ -227,9 +214,57 @@ const handleUpload = (file) =>{
 }
 
 const submitAdd = () => {
-
+  console.log(formData.value)
+  formData.value.proId = proId.value
+  addMeeting(formData.value)
+      .then(res => {
+        if (res.data.code === 3001) {
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          addDialogVisible.value = false
+          formData.value = {
+            title: '',
+            proId: '',
+            meetingAbstract: '',
+            reportFile: '',
+          }
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+}
+const getMeetingList = (selectedProId) => {
+  getMeetingByProId(selectedProId)
+      .then(res => {
+        console.log(res)
+        if (res.data.code === 2001) {
+          tableData.value = res.data.data
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
 }
 
+const handleClose = (done) => {
+  formData.value = {
+    title: '',
+    proId: '',
+    meetingAbstract: '',
+    reportFile: '',
+  }
+  done()
+}
 
 </script>
 

@@ -2140,6 +2140,14 @@ const addDemandFatherDemandIdChange = (val) => {
 }
 
 const submitAddDemand = () => {
+  if (newDemandFormData.value.title === '') {
+    ElNotification({
+      title: 'Error',
+      message: '需求标题不能为空',
+      type: 'error',
+    })
+    return
+  }
   if (newDemandFormData.value.fatherDemandId === "") {
     newDemandFormData.value.fatherDemandId = "0"
   }

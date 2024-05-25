@@ -3,7 +3,7 @@
     <div class="login-body">
       <div class="login-body-info">
         <div class="info-logo">
-          <img src="https://cdn-aliyun.pingcode.com/static/pc-charm/assets/images/pingcode-logo.svg?v=5.85.0" alt=""/>
+          <img src="https://img-upyun.cikian.cn/develop/simida/static/spms-logo-round.png" alt=""/>
         </div>
         <div class="info-image">
           <img src="https://cdn-aliyun.pingcode.com/static/pc-charm/assets/images/pingcode-intro-01.png?v=5.85.0"
