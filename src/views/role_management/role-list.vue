@@ -57,7 +57,7 @@
                 text
                 size="default"
                 @click="handleEdit(row)"
-                :disabled="row.isSystem"
+                :disabled="!row.isSystem"
             >
               编辑
             </el-button>

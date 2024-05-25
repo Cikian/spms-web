@@ -348,9 +348,22 @@ const router = createRouter({
                             ]
                         },
                         {
-                            path: '/proDetail/audit',
-                            name: '审核',
-                            component: () => import('../views/pro_details/audit.vue')
+                            path: '/proDetail/proAudit',
+                            name: '项目审核',
+                            redirect: '/proDetail/proAudit/demand',
+                            component: () => import('../views/pro_details/proAudit.vue'),
+                            children: [
+                                {
+                                    path: '/proDetail/proAudit/demand',
+                                    name: '需求审核',
+                                    component: () => import('../views/pro_details/proAuditViews/auditDemand.vue')
+                                },
+                                {
+                                    path: '/proDetail/proAudit/test',
+                                    name: '测试计划审核',
+                                    component: () => import('../views/pro_details/proAuditViews/auditTest.vue')
+                                }
+                            ]
                         },
                         {
                             path: '/proDetail/meeting',
@@ -396,6 +409,11 @@ const router = createRouter({
                                     path: '/test/list/myTest',
                                     name: 'myTest',
                                     component: () => import('../views/test_management/my-test.vue')
+                                },
+                                {
+                                    path: '/test/list/mySubmit',
+                                    name: 'mySubmitTest',
+                                    component: () => import('../views/test_management/mySubmitTestPlan.vue')
                                 },
                                 {
                                     path: '/test/list/qualityTarget',

@@ -1704,7 +1704,7 @@
                 <div style="width: 90%" v-else>
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
                     <template #actions>
-                      <span>{{item.createTime}}</span>
+                      <span>{{ item.createTime }}</span>
                       <span @click="beforeReply(item,'fromTest')">回复</span>
                     </template>
                     <template #author>
@@ -1721,7 +1721,7 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId">
                         <template #actions>
-                          <span>{{item.createTime}}</span>
+                          <span>{{ item.createTime }}</span>
                           <span @click="beforeReply(r,'fromTest')">回复</span>
                         </template>
                         <template #author>

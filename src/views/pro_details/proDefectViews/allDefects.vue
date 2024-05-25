@@ -220,7 +220,7 @@
       <template #default="scope">
         <el-select
             v-model="scope.row.severity"
-            placeholder="请选择优先级"
+            placeholder="请选择严重程度"
             class="demand-status-select"
             @change="defectSeverityChange(scope.row)"
         >
@@ -283,11 +283,11 @@
         </el-select>
       </template>
     </el-table-column>
-    <el-table-column min-width="150px" align="center" prop="probability" label="复现概率">
+    <el-table-column min-width="170px" align="center" prop="probability" label="复现概率">
       <template #default="scope">
         <el-select
             v-model="scope.row.probability"
-            placeholder="请选择优先级"
+            placeholder="请选择复现概率"
             class="defect-status-select"
             @change="defectProbabilityChange(scope.row)"
         >

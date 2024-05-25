@@ -207,7 +207,6 @@ import {ref, onMounted} from 'vue'
 import {addTarget, deleteTarget, queryTarget, queryTargetList, updateTarget} from "../../api/qualityTargetApi.ts";
 import {queryDictionaryDataByTypeId} from "../../api/dictionaryApi.ts";
 import {message} from 'ant-design-vue';
-import {deleteDevice} from "../../api/DeviceApi.ts";
 
 const targetList = ref([])
 const loadingTable = ref(false)

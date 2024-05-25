@@ -111,3 +111,26 @@ export function uploadTestReport(data, config) {
         ...config
     })
 }
+
+
+export function queryAllPendingByProId(data) {
+    return request({
+        url: '/testPlan/listAllPendingByProId?proId=' + data,
+        method: 'get',
+    })
+}
+
+export function updateReviewStatus(data) {
+    return request({
+        url: '/testPlan/updateReviewStatus/' + data.testPlanId + '/' + data.reviewResult,
+        method: 'post',
+    })
+}
+
+export function listMySubmit(data, condition) {
+    return request({
+        url: '/testPlan/listMySubmit?page=' + data.page + '&size=' + data.size + '&reviewStatus=' + data.reviewStatus,
+        method: 'post',
+        data: condition
+    })
+}

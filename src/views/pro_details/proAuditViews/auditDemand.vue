@@ -8,7 +8,6 @@
       padding: 0 30px;
 "
   >
-
     <el-button type="danger" size="large" @click="handleDeleteAll()" v-if="!selections.length <= 0">
       <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'xmark']"/>
       拒绝选中
@@ -87,7 +86,7 @@
                  v-show="member.userId === scope.row.createBy"
                  style="display: flex; align-items: center; margin: 0 auto"
             >
-              <el-avatar :size="'small'" :src="member.avatar" style="margin-right: 10px"/>
+              <el-avatar :size="'normal'" :src="member.avatar" style="margin-right: 10px"/>
               {{ member.nickName }}
             </div>
 
@@ -173,7 +172,7 @@
       <template #default="scope">
         <el-button
             size="small"
-            type="info"
+            type="danger"
             round
             @click="clickButton=true;handleDelete(scope.row)"
         >
@@ -1791,10 +1790,10 @@ import {
   updateDemandSource, updateDemandStartTime,
   updateDemandStatus,
   updateDemandType
-} from "../../api/demandApi.ts";
-import {recordVisit} from "../../api/RecentVisitApi.ts";
+} from "../../../api/demandApi.ts";
+import {recordVisit} from "../../../api/RecentVisitApi.ts";
 import {formatDate} from "@vueuse/shared";
-import {queryProjectTestMember} from "../../api/userApi.ts";
+import {queryProjectTestMember} from "../../../api/userApi.ts";
 import {
   addTestCase, addTestPlan,
   deleteTestCaseById,
@@ -1808,7 +1807,7 @@ import {
   updateTestPlan,
   updateTestReportApprovalStatusById,
   uploadTestReport
-} from "../../api/TestPlanApi.ts";
+} from "../../../api/TestPlanApi.ts";
 
 const proId = ref('')
 const currentProInfo = ref({})

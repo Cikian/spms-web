@@ -1,6 +1,6 @@
 <template>
   <div class="overView-title">
-    待完成的项目
+    我参与的项目
   </div>
 
   <div v-if="tableData.data.length <= 0" style="width: 100%; padding: 0 40px" v-loading="loadingPro">
@@ -334,6 +334,7 @@ const rowClick = (row) => {
   height: 100px;
   line-height: 100px;
   font-size: 20px;
+  font-weight: bold;
   padding: 0 40px;
   display: flex;
   justify-content: space-between;

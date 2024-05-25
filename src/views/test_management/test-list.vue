@@ -13,6 +13,10 @@
           <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
           <template #title>我负责的</template>
         </el-menu-item>
+        <el-menu-item style="margin:0 0 12px 0;" index="/test/list/mySubmit">
+          <font-awesome-icon class="list-icons" :icon="['far', 'user']"/>
+          <template #title>我提交的</template>
+        </el-menu-item>
         <el-divider/>
         <div class="group-title">项目质量</div>
         <el-menu-item style="margin:0 0 12px 0;" index="/test/list/qualityTarget">

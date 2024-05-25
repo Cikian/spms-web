@@ -62,6 +62,12 @@
             </template>
           </el-table-column>
           <el-table-column prop="headName" label="负责人">
+            <template #default="scope">
+              <div style="display: flex; align-items: center">
+                <a-avatar :src="scope.row.headAvatar" :alt="scope.row.headName"/>
+                <span style="margin-left: 10px">{{ scope.row.headName }}</span>
+              </div>
+            </template>
           </el-table-column>
           <el-table-column prop="progress" label="计划进度">
             <template #default="scope">
@@ -496,10 +502,10 @@
     }"
   >
     <template #icon>
-      <font-awesome-icon icon="fa-regular fa-circle-question" />
+      <font-awesome-icon icon="fa-regular fa-circle-question"/>
     </template>
     <template #tooltip>
-      <div>Documents</div>
+      <div>测试报告只能由该测试计划的创建人审核</div>
     </template>
   </a-float-button>
 </template>
