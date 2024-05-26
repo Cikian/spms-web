@@ -82,6 +82,18 @@
           <el-table-column prop="startTime" label="计划开始时间" align="center">
           </el-table-column>
           <el-table-column prop="endTime" label="计划结束时间" align="center">
+            <template #default="scope">
+              <span>{{ scope.row.endTime }}</span>
+              <el-tag style="margin-left: 5px" v-if="new Date().getTime() > new Date(scope.row.endTime).getTime()"
+                      type="danger" round size="default"
+                      effect="dark">超时
+              </el-tag>
+              <el-tag style="margin-left: 5px"
+                      v-else-if="new Date(scope.row.endTime).getTime() - new Date().getTime() < 259200000"
+                      type="warning" round size="default"
+                      effect="dark">临期
+              </el-tag>
+            </template>
           </el-table-column>
         </el-table>
       </div>
@@ -284,7 +296,7 @@
                   <div class="test-report-top">
                     <div class="test-report-title">{{ testReport.testReportName }}</div>
                     <div class="approval">
-                      <el-select v-model="testReport.approvalStatus" @change="updateTestReportApprovalStatus">
+                      <el-select v-model="testReport.reviewStatus" @change="updateTestReportApprovalStatus">
                         <el-option label="待审批" :value="0"/>
                         <el-option label="已通过" :value="1"/>
                         <el-option label="未通过" :value="2"/>
@@ -1070,6 +1082,7 @@ const deleteTestCase = (row) => {
               type: 'success'
             })
             getTestCaseData()
+            getTestPlanDetailById(echoTestPlan.value.testPlanId)
           } else {
             ElNotification({
               title: '提示',

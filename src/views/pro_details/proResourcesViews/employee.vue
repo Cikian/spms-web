@@ -23,6 +23,9 @@
             </template>
           </el-input>
         </div>
+<!--        预计成本展示-->
+        <span>预计成本: {{ estimateTotalCost }}￥</span>
+
       </div>
       <div class="table">
         <el-table :data="tableData"
@@ -150,6 +153,7 @@ const searchContent = ref('')
 const tableData = ref([])
 const loading = ref(false)
 const memberData = ref([])
+const estimateTotalCost = ref(0)
 
 //添加项目成员
 const addProMemberDialogVisible = ref(false)
@@ -176,7 +180,8 @@ const loadTableData = () => {
   getProjectMembers(formData)
       .then(res => {
         if (res.data.code === 200) {
-          tableData.value = res.data.data
+          tableData.value = res.data.data.members
+          estimateTotalCost.value = res.data.data.totalCost.toFixed(2)
 
           for (let i = 0; i < tableData.value.length; i++) {
             tableData.value[i].no = i + 1

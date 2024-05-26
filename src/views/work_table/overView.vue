@@ -35,7 +35,6 @@
   <div class="overView-title">
     最近访问
   </div>
-
   <div style="width: 100%; padding: 0 40px">
     <el-skeleton v-if="loadingVisit" :rows="10" :throttle="500" animated/>
     <el-empty v-else-if="emptyVisit" description="暂无数据"/>
