@@ -621,8 +621,7 @@
         <div style="width: 100%; padding: 20px 20px;">
           <el-descriptions
               direction="vertical"
-              :column="4"
-          >
+              :column="4">
             <el-descriptions-item width="25%" label="负责人">
               <el-select
                   v-model="clickedDemand.headId"
@@ -754,7 +753,6 @@
                   @change="demandEndTimeChange(clickedDemand)"
               />
             </el-descriptions-item>
-
           </el-descriptions>
         </div>
 
@@ -1334,13 +1332,11 @@
             </div>
             <div v-if="hasTestPlan" class="table">
               <el-table :data="testTableData"
-                        style="width: 100%"
                         size="large"
                         stripe
                         v-loading="loading"
-                        @row-click="clickTest"
-              >
-                <el-table-column prop="planName" label="测试计划名称">
+                        @row-click="clickTest">
+                <el-table-column prop="planName" show-overflow-tooltip label="测试计划名称">
                   <template #default="scope">
                     <div style="display: flex; align-items: center">
                       <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']"/>
@@ -1368,7 +1364,7 @@
                         status="success"
                         :text-inside="true"
                         :stroke-width="24"
-                        color="green"/>
+                        :color="colors"/>
                   </template>
                 </el-table-column>
                 <el-table-column prop="startTime" label="计划开始时间" align="center">
@@ -1585,17 +1581,27 @@
       top="8vh"
       :show-close="false"
       @close="handleCloseEditTestPlan"
+      @closed="clearEchoPlan"
   >
+    <template #title>
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <div style="font-size: 18px;">测试计划详情</div>
+        <el-button type="info" text @click="openTestPlanDialog = false" size="large">
+          <font-awesome-icon :icon="['fas', 'xmark']" size="lg"/>
+        </el-button>
+      </div>
+    </template>
     <el-form
         :model="echoTestPlan"
         label-width="auto"
         label-position="top"
         require-asterisk-position="right"
         size="large">
-      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
+      <div style="width: 100%; margin: 0 auto; display: flex; justify-content: space-between">
         <div style="width: 73%;">
           <el-form-item label="标题" required>
-            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable></el-input>
+            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable
+                      :disabled="echoTestPlan.isArchive"/>
           </el-form-item>
           <el-tabs type="border-card" @tab-click="handleTabClick" v-model="activeName">
             <el-tab-pane label="测试用例" name="caseList">
@@ -1604,6 +1610,7 @@
                         size="large"
                         v-loading="loadTestCase"
                         max-height="535px"
+                        empty-text="暂无数据"
                         stripe>
                 <el-table-column prop="caseName" label="用例名称"/>
                 <el-table-column prop="priorityLabel" label="优先级" sortable>
@@ -1621,24 +1628,29 @@
                 </el-table-column>
                 <el-table-column label="操作">
                   <template #default="scope">
-                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)">编辑</el-button>
-                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)">删除
+                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)"
+                               :disabled="echoTestPlan.isArchive">编辑
+                    </el-button>
+                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)"
+                               :disabled="echoTestPlan.isArchive">删除
                     </el-button>
                   </template>
                 </el-table-column>
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="添加测试用例" name="addCase">
-              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top" style="max-height: 704px">
+              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top">
                 <el-form-item label="用例名称" required>
-                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable></el-input>
+                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable
+                            :disabled="echoTestPlan.isArchive"/>
                 </el-form-item>
                 <el-form-item label="用例描述" required>
                   <el-input v-model="addTestCaseForm.caseContent" placeholder="请输入用例描述" type="textarea"
-                            :rows="12" resize="none" clearable></el-input>
+                            :rows="12" resize="none" clearable :disabled="echoTestPlan.isArchive"/>
                 </el-form-item>
                 <el-form-item label="优先级" required>
-                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级" clearable>
+                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级"
+                             :disabled="echoTestPlan.isArchive" clearable>
                     <el-option label="低" value="0"></el-option>
                     <el-option label="中" value="1"></el-option>
                     <el-option label="高" value="2"></el-option>
@@ -1653,95 +1665,124 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="测试报告" name="testReport">
-              <el-upload
-                  class="upload-report"
-                  :show-file-list="false"
-                  :before-upload="beforeUpload"
-                  :http-request="handleUpload"
-                  drag>
-                <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
-                <div class="el-upload__text">
-                  将文件拖动到此或<em>点击上传</em>
-                </div>
-                <template #tip>
-                  <div class="el-upload__tip" style="font-size: 15px">
-                    仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
-                  </div>
-                </template>
-              </el-upload>
-              <div class="upload-progress">
-                <el-progress v-if="uploadProgress > 0"
-                             :percentage="uploadProgress"
-                             :color="colors"
-                             :stroke-width="15"
-                             type="line"/>
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingTestReport">
+                <a-spin size="large"/>
               </div>
-              <div class="test-report-card">
-                <el-card v-if="testReport !== null" class="test-report">
-                  <div class="test-report-top">
-                    <div class="test-report-title">{{ testReport.testReportName }}</div>
-                    <div class="approval">
-                      <el-select v-model="testReport.approvalStatus" @change="updateTestReportApprovalStatus">
-                        <el-option label="待审批" :value="0"/>
-                        <el-option label="已通过" :value="1"/>
-                        <el-option label="未通过" :value="2"/>
-                      </el-select>
+              <div v-else>
+                <el-upload
+                    class="upload-report"
+                    :show-file-list="false"
+                    :before-upload="beforeUpload"
+                    :http-request="handleUpload"
+                    :disabled="echoTestPlan.isArchive"
+                    drag>
+                  <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
+                  <div class="el-upload__text">
+                    将文件拖动到此或<em>点击上传</em>
+                  </div>
+                  <template #tip>
+                    <div class="el-upload__tip" style="font-size: 15px">
+                      仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
                     </div>
-                  </div>
-                  <div class="test-report-footer">
-                    <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
-                    <el-button type="danger" text size="default" @click="deleteTestReport">删除</el-button>
-                  </div>
-                </el-card>
-                <el-empty description="暂未上传测试报告" v-else/>
+                  </template>
+                </el-upload>
+                <div class="upload-progress">
+                  <el-progress v-if="uploadProgress > 0"
+                               :percentage="uploadProgress"
+                               :color="colors"
+                               :stroke-width="15"
+                               type="line"/>
+                </div>
+                <div class="test-report-card">
+                  <el-card v-if="testReport !== null" class="test-report">
+                    <div class="test-report-top">
+                      <div class="test-report-title">{{ testReport.testReportName }}</div>
+                      <div class="approval">
+                        <el-select v-model="testReport.reviewStatus" @change="updateTestReportApprovalStatus"
+                                   :disabled="echoTestPlan.isArchive">
+                          <el-option label="待审批" :value="0"/>
+                          <el-option label="已通过" :value="1"/>
+                          <el-option label="未通过" :value="2"/>
+                        </el-select>
+                      </div>
+                    </div>
+                    <div class="test-report-footer">
+                      <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
+                      <el-button type="danger" text size="default" @click="deleteTestReport"
+                                 :disabled="echoTestPlan.isArchive">删除
+                      </el-button>
+                    </div>
+                  </el-card>
+                  <a-empty description="暂未上传测试报告" v-else/>
+                </div>
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <el-scrollbar height="37vh">
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingMessage">
+                <a-spin size="large"/>
+              </div>
+              <div v-else>
+                <div class="post-comment-form"
+                     style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end; flex-direction: column">
+                  <a-textarea
+                      :auto-size="{ minRows: 4, maxRows: 4 }"
+                      placeholder="友善发言，文明评论~"
+                      v-model:value="postComment.content"
+                      id="postCommentInput"
+                      @keydown.enter.native="submitComment"
+                  />
+                  <a-button style="margin: 10px 0" type="primary" @click="submitComment"
+                            :disabled="postComment.content === ''">评论
+                  </a-button>
+                </div>
                 <div v-if="firstLevelComment.length <= 0">
                   <a-empty description="暂无评论"/>
                 </div>
-                <div style="width: 90%" v-else>
-                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
-                    <template #actions>
-                      <span>{{ item.createTime }}</span>
-                      <span @click="beforeReply(item,'fromTest')">回复</span>
-                    </template>
-                    <template #author>
-                      <a>{{ item.nickName }}</a>
-                    </template>
-                    <template #avatar>
-                      <a-avatar :src="item.avatar" :alt="item.nickName"/>
-                    </template>
-                    <template #content>
-                      <p>
-                        {{ item.content }}
-                      </p>
-                    </template>
-                    <div v-for="(r,i) in notFirstLevelComment" :key="i">
-                      <a-comment v-if="r.toCommentId === item.commentId">
-                        <template #actions>
-                          <span>{{ item.createTime }}</span>
-                          <span @click="beforeReply(r,'fromTest')">回复</span>
-                        </template>
-                        <template #author>
-                          <a style="font-size: 14px">{{ r.nickName }}</a>
-                          <span style="margin: 0 5px; font-size: 12px">回复了</span>
-                          <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
-                        </template>
-                        <template #avatar>
-                          <a-avatar :src="r.avatar" :alt="r.nickName"/>
-                        </template>
-                        <template #content>
-                          <p>
-                            {{ r.content }}
-                          </p>
-                        </template>
-                      </a-comment>
-                    </div>
-                  </a-comment>
-
-                  <a-modal v-model:open="openTestRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                <div style="width: 100%" v-else>
+                  <el-scrollbar max-height="38vh">
+                    <a-comment v-for="(item,index) in firstLevelComment" :key="index"
+                               v-if="firstLevelComment.length > 0">
+                      <template #actions>
+                        <span>{{ item.createTime }}</span>
+                        <span @click="beforeReply(item)">回复</span>
+                      </template>
+                      <template #author>
+                        <a style="font-size: 14px">{{ item.nickName }}</a>
+                      </template>
+                      <template #avatar>
+                        <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                      </template>
+                      <template #content>
+                        <p>
+                          {{ item.content }}
+                        </p>
+                      </template>
+                      <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                        <a-comment v-if="r.toCommentId === item.commentId">
+                          <template #actions>
+                            <span>{{ r.createTime }}</span>
+                            <span @click="beforeReply(r)">回复</span>
+                          </template>
+                          <template #author>
+                            <a style="font-size: 14px">{{ r.nickName }}</a>
+                            <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                            <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                          </template>
+                          <template #avatar>
+                            <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                          </template>
+                          <template #content>
+                            <p>
+                              {{ r.content }}
+                            </p>
+                          </template>
+                        </a-comment>
+                      </div>
+                    </a-comment>
+                  </el-scrollbar>
+                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
                     <div class="rep-box">
                       <a-textarea
                           class="rep-con"
@@ -1749,39 +1790,23 @@
                           placeholder="友善发言，文明评论~"
                           :auto-size="{ minRows: 3, maxRows: 5 }"
                           id="repCommentInput"
-                          @keydown.enter.native="replyComment('fromTest')"
+                          @keydown.enter.native="replyComment"
                       />
                     </div>
                     <a-form-item>
-                      <a-button style="float: right" type="primary" @click="replyComment('fromTest')"
+                      <a-button style="float: right" type="primary" @click="replyComment()"
                                 :disabled="replyContent === ''">回复
                       </a-button>
                     </a-form-item>
                   </a-modal>
                 </div>
-                <div style="width: 55vw; position: fixed; bottom: 15vh">
-                  <div class="post-comment-form"
-                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
-                    <a-textarea
-                        :auto-size="{ minRows: 3, maxRows: 6 }"
-                        placeholder="友善发言，文明评论~"
-                        v-model:value="postComment.content"
-                        id="postCommentInput"
-                        @keydown.enter.native="submitComment(echoTestPlan.testPlanId)"
-                    />
-
-                    <a-button style="margin-left: 30px" type="primary" @click="submitComment(echoTestPlan.testPlanId)"
-                              :disabled="postComment.content === ''">评论
-                    </a-button>
-                  </div>
-                </div>
-              </el-scrollbar>
+              </div>
             </el-tab-pane>
           </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
           <el-form-item label="负责人" required v-loading="loadingTestMembers">
-            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
+            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人" :disabled="echoTestPlan.isArchive">
               <el-option
                   v-for="item in projectTestMember"
                   :key="item.userId"
@@ -1803,6 +1828,7 @@
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="echoTestPlan.isArchive"
                 placeholder="选择开始日期">
             </el-date-picker>
             <span style="margin: 0 18px">-</span>
@@ -1812,6 +1838,7 @@
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="echoTestPlan.isArchive"
                 placeholder="选择结束日期">
             </el-date-picker>
           </el-form-item>
@@ -1819,7 +1846,6 @@
             <el-input v-model="echoTestPlan.creatorName" disabled/>
           </el-form-item>
           <el-progress
-              style="margin-top: 10px"
               :percentage="echoTestPlan.progress"
               :color="colors"
               stroke-width="15"
@@ -1830,9 +1856,14 @@
             </template>
           </el-progress>
           <div class="dialog-footer">
-            <el-button @click="handleCloseEditTestPlan">取消</el-button>
+            <el-button type="success"
+                       v-if="echoTestPlan.isArchive"
+                       disabled
+                       size="large"
+                       style="width: 90px;">已存档
+            </el-button>
             <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable"
-                       :loading="loadingEditTestPlan">
+                       :loading="loadingEditTestPlan" v-if="!echoTestPlan.isArchive">
               {{ editTestPlanBtnText }}
             </el-button>
           </div>
@@ -1953,7 +1984,6 @@
 
 </template>
 
-
 <script setup lang="ts">
 import {onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
@@ -1971,7 +2001,7 @@ import {
   updateDemandHeadId,
   updateDemandPriority,
   updateDemandSource, updateDemandStartTime,
-  updateDemandStatus, updateDemandTitle,
+  updateDemandStatus,
   updateDemandType
 } from "../../../api/demandApi.ts";
 import {recordVisit} from "../../../api/RecentVisitApi.ts";
@@ -2502,9 +2532,9 @@ const postComment = ref({
   toUserId: '',
   toUserNickName: '',
 })
-const loadingComments = ref(false)
+const loadingMessage = ref(false)
 const getComments = (workItemId) => {
-  loadingComments.value = true
+  loadingMessage.value = true
   getCommentList(workItemId).then((res) => {
     if (res.data.code === 2001) {
       let comments = res.data.data
@@ -2531,12 +2561,12 @@ const getComments = (workItemId) => {
 
       firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
       notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
-      loadingComments.value = false
     } else {
       firstLevelComment.value = []
       notFirstLevelComment.value = []
-      loadingComments.value = false
     }
+  }).finally(() => {
+    loadingMessage.value = false
   })
 }
 
@@ -2693,7 +2723,7 @@ const form = ref({
 const addTestPlanBtnText = ref('提交')
 const addTestPlanBtnDisable = ref(false)
 const loadingAddTestPlan = ref(false)
-
+const loadingTestReport = ref(true)
 
 const openAddTestPlanDialog = () => {
   form.value.projectId = currentProInfo.value.proId
@@ -2911,6 +2941,7 @@ const handleTabClick = (tab) => {
 }
 
 const queryTestReport = () => {
+  loadingTestReport.value = true
   queryTestReportByPlanId(echoTestPlan.value.testPlanId)
       .then(res => {
         if (res.data.code === 200) {
@@ -2919,6 +2950,9 @@ const queryTestReport = () => {
         } else {
           testReport.value = null
         }
+      })
+      .finally(() => {
+        loadingTestReport.value = false
       })
 }
 
@@ -3090,7 +3124,6 @@ const handleUpload = (file) => {
           })
         }
       })
-
 }
 
 const updateTestReportApprovalStatus = () => {
@@ -3137,35 +3170,40 @@ const deleteTestReport = () => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    deleteTestReportById(testReport.value.testReportId)
-        .then(res => {
-          if (res.data.code === 200) {
-            ElNotification({
-              title: '成功',
-              message: res.data.message,
-              type: 'success'
-            })
-            queryTestReport()
-          } else {
-            ElNotification({
-              title: '提示',
-              message: res.data.message,
-              type: 'warning'
-            })
-          }
-        })
-  }).catch(() => {
-    ElNotification({
-      title: '提示',
-      message: '已取消删除',
-      type: 'info'
-    })
   })
+      .then(() => {
+        deleteTestReportById(testReport.value.testReportId)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                queryTestReport()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消删除',
+          type: 'info'
+        })
+      })
 }
 
 const handleCloseEditTestPlan = () => {
-  openTestPlanDialog.value = false
+  loadTestPlanList(clickedDemand.value.demandId)
+}
+
+const clearEchoPlan = () => {
   echoTestPlan.value = {}
   testCaseTableData.value = []
   activeName.value = 'caseList'
@@ -3183,7 +3221,6 @@ const handleCloseEditTestPlan = () => {
   }
   replyContent.value = ''
   getComments(clickedDemand.value.demandId)
-  loadTestPlanList(clickedDemand.value.demandId)
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -3480,4 +3517,53 @@ window.addEventListener('beforeunload', (e) => {
   margin-right: 5px
 }
 
+.percentage-value {
+  display: block;
+  margin-top: 10px;
+  font-size: 28px;
+}
+
+.percentage-label {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+}
+
+.test-report-card {
+  margin-top: 20px;
+}
+
+.test-report-top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.test-report-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.approval {
+  width: 110px;
+}
+
+.test-report-footer {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.add-test-case-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
 </style>

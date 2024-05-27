@@ -1,14 +1,13 @@
 <template>
   <div class="user-list-container">
     <div class="user-query-form-container">
-      <el-form class="form-inline" size="default" :inline="true" :model="queryConditionForm">
-        <el-form-item label="字典分类名称">
-          <el-input v-model="queryConditionForm.dictionaryTypeName" placeholder="请输入字典分类名称" clearable/>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="loadDictionaryTypeList">查询</el-button>
-        </el-form-item>
-      </el-form>
+      <el-input v-model="queryConditionForm.dictionaryTypeName" @keydown.enter="loadDictionaryTypeList"
+                placeholder="请输入字典分类名称" clearable style="width: 200px;">
+        <template #prefix>
+          <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
+        </template>
+      </el-input>
+      <el-button type="primary" @click="loadDictionaryTypeList" style="margin-left: 10px">查询</el-button>
     </div>
     <div class="user-list-table">
       <el-table
@@ -21,25 +20,18 @@
         <el-table-column
             prop="no"
             label="序号"
+            width="200"
         >
         </el-table-column>
         <el-table-column
             prop="dictionaryTypeName"
             label="字典分类名称"
-        >
-        </el-table-column>
-        <el-table-column
-            prop="createTime"
-            label="创建时间"
-        >
-        </el-table-column>
-        <el-table-column
-            prop="updateTime"
-            label="上次更新时间"
+            width="300"
         >
         </el-table-column>
         <el-table-column
             label="操作"
+            align="center"
         >
           <template #default="{row}">
             <el-button
@@ -129,6 +121,7 @@ import {
   queryDictionaryDataByTypeId,
   queryDictionaryTypeList
 } from "../../api/dictionaryApi.ts";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 const loading = ref(true)
 const dictionaryTypeList = ref([])
@@ -295,7 +288,11 @@ onMounted(() => {
 }
 
 .user-query-form-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
   margin-left: 20px;
+  margin-bottom: 20px;
 }
 
 .addDictionaryData .el-input {

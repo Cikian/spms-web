@@ -158,18 +158,28 @@
       :show-close="false"
       :close-on-press-escape="false"
       :close-on-click-modal="false"
-      @close="closeTestPlanDialog"
+      @close="loadTestPlanList"
+      @closed="clearEchoPlan"
   >
+    <template #title>
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <div style="font-size: 18px;">测试计划详情</div>
+        <el-button type="info" text @click="openDialog = false" size="large">
+          <font-awesome-icon :icon="['fas', 'xmark']" size="lg"/>
+        </el-button>
+      </div>
+    </template>
     <el-form
         :model="echoTestPlan"
         label-width="auto"
         label-position="top"
         require-asterisk-position="right"
         size="large">
-      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
+      <div style="width: 100%; margin: 0 auto; display: flex; justify-content: space-between">
         <div style="width: 73%;">
           <el-form-item label="标题" required>
-            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable></el-input>
+            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable
+                      :disabled="echoTestPlan.isArchive"/>
           </el-form-item>
           <el-tabs type="border-card" @tab-click="handleTabClick" v-model="activeName">
             <el-tab-pane label="测试用例" name="caseList">
@@ -195,24 +205,29 @@
                 </el-table-column>
                 <el-table-column label="操作">
                   <template #default="scope">
-                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)">编辑</el-button>
-                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)">删除
+                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)"
+                               :disabled="echoTestPlan.isArchive">编辑
+                    </el-button>
+                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)"
+                               :disabled="echoTestPlan.isArchive">删除
                     </el-button>
                   </template>
                 </el-table-column>
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="添加测试用例" name="addCase">
-              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top" style="max-height: 704px">
+              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top">
                 <el-form-item label="用例名称" required>
-                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable></el-input>
+                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable
+                            :disabled="echoTestPlan.isArchive"/>
                 </el-form-item>
                 <el-form-item label="用例描述" required>
                   <el-input v-model="addTestCaseForm.caseContent" placeholder="请输入用例描述" type="textarea"
-                            :rows="12" resize="none" clearable></el-input>
+                            :rows="12" resize="none" clearable :disabled="echoTestPlan.isArchive"/>
                 </el-form-item>
                 <el-form-item label="优先级" required>
-                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级" clearable>
+                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级" clearable
+                             :disabled="echoTestPlan.isArchive">
                     <el-option label="低" value="0"></el-option>
                     <el-option label="中" value="1"></el-option>
                     <el-option label="高" value="2"></el-option>
@@ -220,54 +235,65 @@
                 </el-form-item>
               </el-form>
               <div class="add-test-case-footer">
-                <el-button type="primary" @click="submitAddTestCase" :disabled="addTestCaseBtnDisable"
+                <el-button type="primary" @click="submitAddTestCase"
+                           :disabled="addTestCaseBtnDisable || echoTestPlan.isArchive"
                            :loading="loadingAddTestCase">
                   {{ addTestCaseBtnText }}
                 </el-button>
               </div>
             </el-tab-pane>
             <el-tab-pane label="测试报告" name="testReport">
-              <el-upload
-                  class="upload-report"
-                  :show-file-list="false"
-                  :before-upload="beforeUpload"
-                  :http-request="handleUpload"
-                  drag>
-                <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
-                <div class="el-upload__text">
-                  将文件拖动到此或<em>点击上传</em>
-                </div>
-                <template #tip>
-                  <div class="el-upload__tip" style="font-size: 15px">
-                    仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
-                  </div>
-                </template>
-              </el-upload>
-              <div class="upload-progress">
-                <el-progress v-if="uploadProgress > 0"
-                             :percentage="uploadProgress"
-                             :color="colors"
-                             :stroke-width="15"
-                             type="line"/>
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingTestReport">
+                <a-spin size="large"/>
               </div>
-              <div class="test-report-card">
-                <el-card v-if="testReport !== null" class="test-report">
-                  <div class="test-report-top">
-                    <div class="test-report-title">{{ testReport.testReportName }}</div>
-                    <div class="approval">
-                      <el-select v-model="testReport.approvalStatus" @change="updateTestReportApprovalStatus">
-                        <el-option label="待审批" :value="0"/>
-                        <el-option label="已通过" :value="1"/>
-                        <el-option label="未通过" :value="2"/>
-                      </el-select>
+              <div v-else>
+                <el-upload
+                    class="upload-report"
+                    :show-file-list="false"
+                    :before-upload="beforeUpload"
+                    :http-request="handleUpload"
+                    :disabled="echoTestPlan.isArchive"
+                    drag>
+                  <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
+                  <div class="el-upload__text">
+                    将文件拖动到此或<em>点击上传</em>
+                  </div>
+                  <template #tip>
+                    <div class="el-upload__tip" style="font-size: 15px">
+                      仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
                     </div>
-                  </div>
-                  <div class="test-report-footer">
-                    <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
-                    <el-button type="danger" text size="default" @click="deleteTestReport">删除</el-button>
-                  </div>
-                </el-card>
-                <el-empty description="暂未上传测试报告" v-else/>
+                  </template>
+                </el-upload>
+                <div class="upload-progress">
+                  <el-progress v-if="uploadProgress > 0"
+                               :percentage="uploadProgress"
+                               :color="colors"
+                               :stroke-width="15"
+                               type="line"/>
+                </div>
+                <div class="test-report-card">
+                  <el-card v-if="testReport !== null" class="test-report">
+                    <div class="test-report-top">
+                      <div class="test-report-title">{{ testReport.testReportName }}</div>
+                      <div class="approval">
+                        <el-select v-model="testReport.reviewStatus" @change="updateTestReportApprovalStatus"
+                                   :disabled="echoTestPlan.isArchive">
+                          <el-option label="待审批" :value="0"/>
+                          <el-option label="已通过" :value="1"/>
+                          <el-option label="未通过" :value="2"/>
+                        </el-select>
+                      </div>
+                    </div>
+                    <div class="test-report-footer">
+                      <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
+                      <el-button type="danger" text size="default" @click="deleteTestReport"
+                                 :disabled="echoTestPlan.isArchive">删除
+                      </el-button>
+                    </div>
+                  </el-card>
+                  <a-empty description="暂未上传测试报告" v-else/>
+                </div>
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
@@ -358,7 +384,7 @@
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
           <el-form-item label="负责人" required v-loading="loadingTestMembers">
-            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
+            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人" :disabled="echoTestPlan.isArchive">
               <el-option
                   v-for="item in projectTestMember"
                   :key="item.userId"
@@ -380,6 +406,7 @@
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="echoTestPlan.isArchive"
                 placeholder="选择开始日期">
             </el-date-picker>
             <span style="margin: 0 18px">-</span>
@@ -389,6 +416,7 @@
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="echoTestPlan.isArchive"
                 placeholder="选择结束日期">
             </el-date-picker>
           </el-form-item>
@@ -407,9 +435,15 @@
             </template>
           </el-progress>
           <div class="dialog-footer">
-            <el-button @click="handleCloseEditTestPlan">取消</el-button>
+            <el-button type="success"
+                       v-if="echoTestPlan.isArchive"
+                       disabled
+                       size="large"
+                       style="width: 90px;">已存档
+            </el-button>
+            <div></div>
             <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable"
-                       :loading="loadingEditTestPlan">
+                       :loading="loadingEditTestPlan" v-if="!echoTestPlan.isArchive">
               {{ editTestPlanBtnText }}
             </el-button>
           </div>
@@ -484,6 +518,7 @@ import {
 import {addComment, getCommentList, queryDemandByProId, queryProByProId} from "../../api/demandApi.ts";
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
+import {message} from "ant-design-vue";
 
 const proId = ref('')
 
@@ -547,6 +582,7 @@ const echoTestCase = ref({})
 const loadingEditTestCase = ref(false)
 
 //测试报告
+const loadingTestReport = ref(true)
 const testReport = ref(null)
 const uploadProgress = ref(0)
 
@@ -635,7 +671,7 @@ const handleCloseAddTestPlanDialog = () => {
 }
 
 const submitForm = () => {
-  addTestPlanBtnText.value = '提交中...'
+  addTestPlanBtnText.value = '提交'
   addTestPlanBtnDisable.value = true
   loadingAddTestPlan.value = true
   form.value.projectId = proId.value
@@ -777,24 +813,28 @@ const getProjectTestMember = (projectId) => {
 }
 
 const getTestPlanDetailById = (planId) => {
+  message.loading("加载中...", 0)
   queryTestPlanById(planId)
       .then(res => {
         if (res.data.code === 200) {
           echoTestPlan.value = res.data.data
           getTestCaseData()
           getProjectTestMember(echoTestPlan.value.projectId)
+          openDialog.value = true
         }
+      })
+      .finally(() => {
+        message.destroy()
       })
 }
 
 const rowClick = (row) => {
-  openDialog.value = true
   getTestPlanDetailById(row.testPlanId)
   recordVisit(row.testPlanId, 3)
 }
 
 const submitAddTestCase = () => {
-  addTestCaseBtnText.value = '提交中'
+  addTestCaseBtnText.value = '提交'
   addTestCaseBtnDisable.value = true
   loadingAddTestCase.value = true
 
@@ -879,7 +919,6 @@ const getTestCaseData = () => {
 
 const handleCloseEditTestPlan = () => {
   openDialog.value = false
-  echoTestPlan.value = {}
   testCaseTableData.value = []
   activeName.value = 'caseList'
   testReport.value = null
@@ -895,6 +934,7 @@ const handleCloseEditTestPlan = () => {
     toUserNickName: '',
   }
   replyContent.value = ''
+  echoTestPlan.value = {}
 }
 
 const handleSubmitEditTestPlan = () => {
@@ -1034,7 +1074,7 @@ const deleteTestCase = (row) => {
 }
 
 const submitEditTestCase = () => {
-  editTestCaseBtnText.value = '提交中'
+  editTestCaseBtnText.value = '提交'
   editTestCaseBtnDisable.value = true
   loadingEditTestCase.value = true
 
@@ -1175,6 +1215,7 @@ const handleUpload = (file) => {
 }
 
 const queryTestReport = () => {
+  loadingTestReport.value = true
   queryTestReportByPlanId(echoTestPlan.value.testPlanId)
       .then(res => {
         if (res.data.code === 200) {
@@ -1183,6 +1224,9 @@ const queryTestReport = () => {
         } else {
           testReport.value = null
         }
+      })
+      .finally(() => {
+        loadingTestReport.value = false
       })
 }
 
@@ -1229,7 +1273,7 @@ const updateTestReportApprovalStatus = () => {
     type: 'warning'
   })
       .then(() => {
-        updateTestReportApprovalStatusById(testReport.value.testReportId, testReport.value.approvalStatus)
+        updateTestReportApprovalStatusById(testReport.value.testReportId, testReport.value.reviewStatus)
             .then(res => {
               if (res.data.code === 200) {
                 ElNotification({
@@ -1401,8 +1445,23 @@ const isFromRecentVisit = () => {
   }
 }
 
-const closeTestPlanDialog = () => {
-  loadTestPlanList()
+const clearEchoPlan = () =>{
+  echoTestPlan.value = {}
+  testCaseTableData.value = []
+  activeName.value = 'caseList'
+  testReport.value = null
+  uploadProgress.value = 0
+  postComment.value = {
+    toCommentId: '',
+    content: '',
+    workItemId: '',
+    userId: '',
+    avatar: '',
+    nickName: '',
+    toUserId: '',
+    toUserNickName: '',
+  }
+  replyContent.value = ''
 }
 
 onMounted(() => {
@@ -1464,14 +1523,14 @@ onMounted(() => {
 
 .dialog-footer {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 43px;
+  justify-content: space-between;
+  margin-top: 40px;
 }
 
 .add-test-case-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 30px;
+  margin-top: 28px;
 }
 
 .percentage-value {
@@ -1496,6 +1555,8 @@ onMounted(() => {
 }
 
 .test-report-title {
+  display: flex;
+  align-items: center;
   font-size: 18px;
   font-weight: bold;
 }

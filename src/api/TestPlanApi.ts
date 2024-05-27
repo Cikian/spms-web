@@ -134,3 +134,11 @@ export function listMySubmit(data, condition) {
         data: condition
     })
 }
+
+
+export function finishTestPlan(data) {
+    return request({
+        url: '/testPlan/finishTestPlan/' + data,
+        method: 'post',
+    })
+}

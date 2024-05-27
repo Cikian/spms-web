@@ -454,6 +454,27 @@ const customColors = [
   { color: '#a0cc5e', percentage: 90 },
   { color: '#67c23a', percentage: 100 },
 ]
+
+// const customColors = [
+//   { color: '#FF0000', percentage: 20 },
+//   { color: '#FF8000', percentage: 40 },
+//   { color: '#FFFF00', percentage: 60 },
+//   { color: '#80FF00', percentage: 80 },
+//   { color: '#00FF00', percentage: 100 }
+// ]
+
+// const customColors = [
+//   { color: '#FF0000', percentage: 10 },
+//   { color: '#FF3D00', percentage: 20 },
+//   { color: '#FF7A00', percentage: 30 },
+//   { color: '#FFB700', percentage: 40 },
+//   { color: '#FFF200', percentage: 50 },
+//   { color: '#D4FF00', percentage: 60 },
+//   { color: '#A7FF00', percentage: 70 },
+//   { color: '#7AFF00', percentage: 80 },
+//   { color: '#4DFF00', percentage: 90 },
+//   { color: '#00FF00', percentage: 100 },
+// ]
 </script>
 
 <style scoped>

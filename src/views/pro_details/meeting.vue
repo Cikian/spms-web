@@ -1,7 +1,7 @@
 <template>
   <div class="overView-title"
-       style="display: flex; align-items: center; justify-content: space-between; padding-right: 220px">
-    会议列表
+       style="display: flex; align-items: center; justify-content: space-between;">
+    会议记录
     <el-button type="primary" @click="openAddDialog" size="large">
       <font-awesome-icon style="margin-right: 10px" :icon="['fas', 'plus']"/>
       新增会议
@@ -14,13 +14,12 @@
       <el-table
           :data="tableData"
           stripe
-          style="width: 90%"
           size="large"
           @row-click="clickRow"
       >
-        <el-table-column type="index"/>
-        <el-table-column prop="title" label="会议名称" width="180"/>
-        <el-table-column align="center" prop="createTime" label="日期"/>
+        <el-table-column type="index" label="序号" width="70" align="center"/>
+        <el-table-column prop="title" label="会议名称" width="300" show-overflow-tooltip/>
+        <el-table-column prop="createTime" label="日期" align="center"/>
       </el-table>
 
     </div>
@@ -40,45 +39,45 @@
         require-asterisk-position="right"
         size="large"
     >
-      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
-        <div style="width: 73%; ">
-          <el-form-item label="会议名称" required>
-            <el-input v-model="formData.title" placeholder="请输入会议名称"></el-input>
-          </el-form-item>
-          <el-form-item label="描述">
-            <el-input
-                v-model="formData.meetingAbstract"
-                type="textarea"
-                placeholder="请输入会议描述"
-                :autosize="{ minRows: 5, maxRows: 8 }"
-            ></el-input>
-          </el-form-item>
-          <el-form-item label="会议记录">
-            <el-upload
-                class="upload-report"
-                :show-file-list="false"
-                :before-upload="beforeUpload"
-                :http-request="handleUpload"
-                drag>
-              <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
-              <div class="el-upload__text">
-                将文件拖动到此或<em>点击上传</em>
-              </div>
-              <template #tip>
-                <div class="el-upload__tip" style="font-size: 15px">
-                  仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
-                </div>
-              </template>
-            </el-upload>
-          </el-form-item>
-        </div>
-      </div>
+
+      <el-form-item label="会议名称" required>
+        <el-input v-model="formData.title" placeholder="请输入会议名称"></el-input>
+      </el-form-item>
+      <el-form-item label="描述">
+        <el-input
+            v-model="formData.meetingAbstract"
+            type="textarea"
+            :resize="'none'"
+            placeholder="请输入会议描述"
+            :autosize="{ minRows: 8, maxRows: 8 }"
+            show-word-limit
+            maxlength="1000"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="会议记录">
+        <el-upload
+            class="upload-report"
+            :show-file-list="false"
+            :before-upload="beforeUpload"
+            :http-request="handleUpload"
+            drag>
+          <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
+          <div class="el-upload__text">
+            将文件拖动到此或<em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip" style="font-size: 15px">
+              仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
+            </div>
+          </template>
+        </el-upload>
+      </el-form-item>
     </el-form>
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="addDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitAdd">
+        <el-button size="large" @click="addDialogVisible = false">取消</el-button>
+        <el-button size="large" type="primary" @click="submitAdd">
           提交
         </el-button>
       </div>
@@ -107,14 +106,13 @@
       <div style="margin: 20px 20px; font-size: 18px; ">
         <el-link :href="clickedMeeting.reportFile"
                  target="_blank">
-          <font-awesome-icon v-if="getFileName(clickedMeeting.reportFile) === '.pdf'" style="width: 18px; color: #ff0000" :icon="['fas', 'file-pdf']" />
-          <font-awesome-icon v-else style="width: 18px; color: #0084ff" :icon="['fas', 'file-word']" />
-          “{{ clickedMeeting.title }}”-会议记录{{ getFileName(clickedMeeting.reportFile)}}
+          <font-awesome-icon v-if="getFileName(clickedMeeting.reportFile) === '.pdf'"
+                             style="width: 18px; color: #ff0000" :icon="['fas', 'file-pdf']"/>
+          <font-awesome-icon v-else style="width: 18px; color: #0084ff" :icon="['fas', 'file-word']"/>
+          “{{ clickedMeeting.title }}”-会议记录{{ getFileName(clickedMeeting.reportFile) }}
         </el-link>
       </div>
     </div>
-
-
 
   </el-dialog>
 </template>
@@ -246,6 +244,9 @@ const getMeetingList = (selectedProId) => {
         console.log(res)
         if (res.data.code === 2001) {
           tableData.value = res.data.data
+          for (let i = 0; i < tableData.value.length; i++) {
+            tableData.value[i].createTime = tableData.value[i].createTime.replace('T', ' ')
+          }
         } else {
           ElNotification({
             title: '提示',
