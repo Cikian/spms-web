@@ -2142,9 +2142,9 @@ const addDemandFatherDemandIdChange = (val) => {
 const submitAddDemand = () => {
   if (newDemandFormData.value.title === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '需求标题不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return
   }
@@ -2155,7 +2155,7 @@ const submitAddDemand = () => {
   insertNewDemand(newDemandFormData.value).then((res) => {
     if (res.data.code === 3001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
@@ -2163,9 +2163,9 @@ const submitAddDemand = () => {
       getDemandsList(proId.value)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2236,15 +2236,15 @@ const demandStatusChange = (row) => {
   updateDemandStatus(row.demandId, row.demandStatus).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2253,15 +2253,15 @@ const demandHeadIdChange = (row) => {
   updateDemandHeadId(row.demandId, row.headId).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2270,15 +2270,15 @@ const demandPriorityChange = (row) => {
   updateDemandPriority(row.demandId, row.priority).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2287,15 +2287,15 @@ const demandTypeChange = (row) => {
   updateDemandType(row.demandId, row.type).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2304,15 +2304,15 @@ const demandSourceChange = (row) => {
   updateDemandSource(row.demandId, row.source).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2325,15 +2325,15 @@ const demandStartTimeChange = (row) => {
   updateDemandStartTime(demand).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2346,15 +2346,15 @@ const demandEndTimeChange = (row) => {
   updateDemandEndTime(demand).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2436,7 +2436,7 @@ const submitClickEditor = (demandId) => {
   updateDemandDesc(demand).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
@@ -2446,9 +2446,9 @@ const submitClickEditor = (demandId) => {
       clickedDemand.value.demandDesc = clickValueHtml.value
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2490,9 +2490,9 @@ const getComments = (workItemId) => {
 const submitComment = (workItemId) => {
   if (postComment.value.content === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return;
   }
@@ -2510,16 +2510,16 @@ const submitComment = (workItemId) => {
     if (res.data.code === 3001) {
       postComment.value.content = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
       getComments(workItemId)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2553,9 +2553,9 @@ const beforeReply = (comment, flag) => {
 const replyComment = (flag) => {
   if (replyContent.value === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return;
   }
@@ -2566,7 +2566,7 @@ const replyComment = (flag) => {
       postComment.value.content = '';
       replyContent.value = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
@@ -2584,9 +2584,9 @@ const replyComment = (flag) => {
 
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })

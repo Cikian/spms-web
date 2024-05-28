@@ -1418,7 +1418,7 @@ const replyComment = () => {
       postComment.value.content = '';
       replyContent.value = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })

@@ -428,15 +428,15 @@ const proStatusChange = (row) => {
   updateProStatus(row.proId, row.proStatus).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })

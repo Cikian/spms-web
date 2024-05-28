@@ -1632,7 +1632,7 @@ const submitAddDefect = () => {
   insertNewDefect(newDemandFormData.value).then((res) => {
     if (res.data.code === 3001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
@@ -1640,9 +1640,9 @@ const submitAddDefect = () => {
       getDefectList(proId.value)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1699,15 +1699,15 @@ const defectStatusChange = (row) => {
   updateDefectStatus(row.demandId, row.demandStatus).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1716,15 +1716,15 @@ const defectHeadIdChange = (row) => {
   updateDefectHeadId(row.demandId, row.headId).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1733,15 +1733,15 @@ const defectPriorityChange = (row) => {
   updateDefectPriority(row.demandId, row.priority).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1750,15 +1750,15 @@ const defectSeverityChange = (row) => {
   updateDefectSeverity(row.demandId, row.severity).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1767,15 +1767,15 @@ const defectProbabilityChange = (row) => {
   updateDefectProbability(row.demandId, row.probability).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1784,15 +1784,15 @@ const defectTypeChange = (row) => {
   updateDefectType(row.demandId, row.type).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1805,15 +1805,15 @@ const defectStartTimeChange = (row) => {
   updateDefectStartTime(demand).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1826,15 +1826,15 @@ const defectEndTimeChange = (row) => {
   updateDemandEndTime(demand).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1896,7 +1896,7 @@ const submitClickEditor = (demandId) => {
   updateDefectDesc(demand).then((res) => {
     if (res.data.code === 4001) {
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
@@ -1906,9 +1906,9 @@ const submitClickEditor = (demandId) => {
       clickedDemand.value.demandDesc = clickValueHtml.value
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -1950,9 +1950,9 @@ const getComments = (workItemId) => {
 const submitComment = (workItemId) => {
   if (postComment.value.content === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return;
   }
@@ -1970,16 +1970,16 @@ const submitComment = (workItemId) => {
     if (res.data.code === 3001) {
       postComment.value.content = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
       getComments(workItemId)
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
@@ -2004,9 +2004,9 @@ const beforeReply = (comment) => {
 const replyComment = () => {
   if (replyContent.value === '') {
     ElNotification({
-      title: 'Error',
+      title: '提示',
       message: '评论内容不能为空',
-      type: 'error',
+      type: 'warning',
     })
     return;
   }
@@ -2017,7 +2017,7 @@ const replyComment = () => {
       postComment.value.content = '';
       replyContent.value = '';
       ElNotification({
-        title: 'Success',
+        title: '成功',
         message: res.data.message,
         type: 'success',
       })
@@ -2028,9 +2028,9 @@ const replyComment = () => {
 
     } else {
       ElNotification({
-        title: 'Error',
+        title: '提示',
         message: res.data.message,
-        type: 'error',
+        type: 'warning',
       })
     }
   })
