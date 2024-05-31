@@ -491,7 +491,7 @@
         </el-select>
       </el-form-item>
     </el-form>
-    <div slot="footer" class="dialog-footer">
+    <div slot="footer" style="display: flex;justify-content: flex-end">
       <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
       <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
                  :disabled="editTestCaseBtnDisable" :loading="loadingEditTestCase">
@@ -938,7 +938,7 @@ const handleCloseEditTestPlan = () => {
 }
 
 const handleSubmitEditTestPlan = () => {
-  editTestPlanBtnText.value = '提交中'
+  editTestPlanBtnText.value = '提交'
   editTestPlanBtnDisable.value = true
   loadingEditTestPlan.value = true
 

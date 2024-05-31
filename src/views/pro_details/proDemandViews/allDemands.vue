@@ -1909,7 +1909,7 @@
         </el-select>
       </el-form-item>
     </el-form>
-    <div slot="footer" class="dialog-footer">
+    <div slot="footer" style="display: flex;justify-content: flex-end">
       <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
       <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
                  :disabled="editTestCaseBtnDisable" :loading="loadingEditTestCase">
@@ -3531,7 +3531,7 @@ window.addEventListener('beforeunload', (e) => {
 
 .dialog-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 50px;
 }
 

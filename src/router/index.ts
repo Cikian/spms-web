@@ -10,17 +10,22 @@ const router = createRouter({
         },
         {
             path: '/login',
-            name: 'login',
+            name: '登录',
             component: () => import('../views/Login.vue')
         },
         {
             path: '/resetPassword',
-            name: 'resetPassword',
+            name: '重置密码',
             component: () => import('../views/resetPwd.vue')
         },
         {
+            path: '/retrievePwd',
+            name: '找回密码',
+            component: () => import('../views/retrievePwd.vue')
+        },
+        {
             path: '/home',
-            name: 'home',
+            name: '首页',
             component: () => import('../views/home.vue'),
             children: [
                 {
@@ -433,15 +438,18 @@ router.beforeEach((to, from, next) => {
     let token = localStorage.getItem("token")
     let isFirstLogin = localStorage.getItem("isFirstLogin")
 
-    if (!token && to.path !== '/login') {
-        ElNotification({
-            title: '提示',
-            message: '登录失效，请重新登录',
-            type: 'warning',
-        })
-
-        next('/login')
-    } else {
+    if (!token){
+        if (to.path === '/login' || to.path === '/retrievePwd') {
+            next()
+        }else {
+            ElNotification({
+                title: '提示',
+                message: '登录失效，请重新登录',
+                type: 'warning',
+            })
+            next('/login')
+        }
+    }else {
         if (isFirstLogin === 'true' && to.path !== '/resetPassword') {
             ElNotification({
                 title: '提示',
@@ -449,10 +457,10 @@ router.beforeEach((to, from, next) => {
                 type: 'warning',
             })
             next('/resetPassword')
+        }else {
+            next()
         }
-        next()
     }
-
 })
 
 

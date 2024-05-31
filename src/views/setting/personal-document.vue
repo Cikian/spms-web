@@ -54,7 +54,7 @@
           <el-form-item label="用户名">
             <el-input class="form-control-input" v-model="userDetails.userName" disabled/>
           </el-form-item>
-          <el-form-item label="昵称">
+          <el-form-item label="姓名">
             <el-input class="form-control-input" v-model="userDetails.nickName" disabled="disabled"/>
           </el-form-item>
           <el-form-item label="性别">
@@ -84,7 +84,6 @@ const userDetails = ref({
 })
 const submitText = ref('确定')
 const isDisabled = ref(false)
-const isAdmin = ref(false)
 
 const loadUserDerail = () => {
   queryCurrentUser()

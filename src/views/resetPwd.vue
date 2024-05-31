@@ -78,18 +78,15 @@
 
 <script setup lang="ts">
 import {ref, watch} from 'vue'
-import {sendEmailCode, updatePassword, verifyEmail} from "../api/userApi.ts";
+import {updatePassword} from "../api/userApi.ts";
 import router from "../router";
 
 const emailInput = ref('')
-const emailCode = ref('')
 const oldPasswordInput = ref('')
 const newPasswordInput = ref('')
 const confirmPasswordInput = ref('')
 const isDisabled = ref(false)
 const getCodeBtn = ref(true)
-const getCodeBtnText = ref('获取验证码')
-
 
 watch(emailInput, (val) => {
   getCodeBtn.value = !val;

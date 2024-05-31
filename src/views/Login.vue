@@ -53,7 +53,7 @@
                 </el-button>
               </div>
               <div class="form-footer">
-                <a href="forget-password.vue" class="forget-password">忘记密码？</a>
+                <el-button text @click="router.push('/retrievePwd')" class="forget-password">忘记密码？</el-button>
               </div>
             </div>
           </div>
