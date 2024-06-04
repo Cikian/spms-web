@@ -38,7 +38,7 @@
           </el-upload>
         </div>
         <div class="avatar-container-tip">
-          <span>仅支持JPG、PNG格式图片，头像不超过1M，封面不超过5M</span>
+          <span>仅支持JPG、PNG格式图片，头像不超过1M</span>
         </div>
       </div>
     </div>

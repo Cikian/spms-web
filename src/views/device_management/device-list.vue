@@ -123,7 +123,7 @@
       title="新增设备"
       class="add-user-dialog"
       v-model="addDeviceDialogVisible"
-      width="30%"
+      width="40%"
       :show-close="false"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -161,6 +161,7 @@
         clearable
         placeholder="选择购买日期"
         value-format="YYYY-MM-DD HH:mm:ss"
+        size="large"
     />
     <label class="form-label">保修到期日期</label>
     <el-date-picker
@@ -170,6 +171,7 @@
         type="datetime"
         placeholder="选择保修到期日期"
         value-format="YYYY-MM-DD HH:mm:ss"
+        size="large"
     />
     <label class="form-label">购买价格（元）</label>
     <el-input
@@ -197,10 +199,10 @@
       :close-on-press-escape="false"
   >
     <el-form label-position="top" label-width="100px">
-      <el-form-item label="设备名称">
+      <el-form-item label="设备名称" size="large">
         <el-input v-model="deviceDetails.devName"/>
       </el-form-item>
-      <el-form-item label="设备类型">
+      <el-form-item label="设备类型" size="large">
         <el-select
             v-model="deviceDetails.typeId"
             clearable
@@ -215,13 +217,13 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="购买日期">
+      <el-form-item label="购买日期" size="large">
         <el-input v-model="deviceDetails.purchaseDate" disabled/>
       </el-form-item>
-      <el-form-item label="保修到期日期">
+      <el-form-item label="保修到期日期" size="large">
         <el-input v-model="deviceDetails.warrantyExpiryDate" disabled/>
       </el-form-item>
-      <el-form-item label="购买价格（元）">
+      <el-form-item label="购买价格（元）" size="large">
         <el-input v-model="deviceDetails.purchaseCost" disabled/>
       </el-form-item>
     </el-form>
@@ -407,50 +409,6 @@ const handleSubmitAddDevice = () => {
     ElNotification({
       title: '提示',
       message: '设备名称不能为空',
-      type: 'warning'
-    })
-    addDeviceIsDisabled.value = false
-    addDeviceSubmitText.value = '提交'
-    return
-  }
-
-  if (!deviceFormData.purchaseDate) {
-    ElNotification({
-      title: '提示',
-      message: '购买日期不能为空',
-      type: 'warning'
-    })
-    addDeviceIsDisabled.value = false
-    addDeviceSubmitText.value = '提交'
-    return
-  }
-
-  if (!deviceFormData.warrantyExpiryDate) {
-    ElNotification({
-      title: '提示',
-      message: '保修到期日期不能为空',
-      type: 'warning'
-    })
-    addDeviceIsDisabled.value = false
-    addDeviceSubmitText.value = '提交'
-    return
-  }
-
-  if (new Date(deviceFormData.warrantyExpiryDate).getTime() < new Date(deviceFormData.purchaseDate).getTime()) {
-    ElNotification({
-      title: '提示',
-      message: '保修到期日期不能小于购买日期',
-      type: 'warning'
-    })
-    addDeviceIsDisabled.value = false
-    addDeviceSubmitText.value = '提交'
-    return
-  }
-
-  if (!deviceFormData.purchaseCost) {
-    ElNotification({
-      title: '提示',
-      message: '购买价格不能为空',
       type: 'warning'
     })
     addDeviceIsDisabled.value = false
