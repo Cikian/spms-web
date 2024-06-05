@@ -129,7 +129,7 @@
       :close-on-press-escape="false"
   >
     <div class="add-user-tip">
-      <span class="add-user-tip-text">系统会将用户账号和密码发送到填写的邮箱，您可以编辑用户为其分配角色</span>
+      <span class="add-user-tip-text">系统会将用户账号和密码发送至邮箱，系统管理员可以为用户分配角色</span>
     </div>
     <label class="form-label">姓名</label>
     <el-input
@@ -146,7 +146,9 @@
         placeholder="请输入邮箱"
     />
     <div style="text-align: center; margin-top: 20px;">
-      <el-button size="large" type="primary" @click="handleSubmit" :disabled="isDisabled">{{ submitText }}</el-button>
+      <el-button size="large" type="primary" @click="handleSubmit" :loading="loadingAddUser" :disabled="isDisabled">
+        提交
+      </el-button>
       <el-button size="large" @click="handleCloseAddUserDialog">取消</el-button>
     </div>
   </el-dialog>
@@ -171,9 +173,7 @@
       </el-form-item>
     </el-form>
     <div style="text-align: center; margin-top: 20px;">
-      <el-button size="large" type="primary" @click="handleSubmitUserInfo" :disabled="isDisabled">{{
-          submitText
-        }}
+      <el-button size="large" type="primary" @click="handleSubmitUserInfo" :loading="loadingSubmitUserInfo" :disabled="isDisabled">提交
       </el-button>
       <el-button size="large" @click="handleCloseEditUserDialog">取消</el-button>
     </div>
@@ -190,8 +190,9 @@ import {message} from "ant-design-vue";
 const loading = ref(true)
 const userList = ref([])
 const dialogVisible = ref(false)
-const submitText = ref('提交')
 const isDisabled = ref(false)
+const loadingAddUser = ref(false)
+const loadingSubmitUserInfo = ref(false)
 const email = ref('')
 const nickName = ref('')
 const tablePage = {
@@ -214,16 +215,27 @@ const openDialog = () => {
 
 const handleSubmit = () => {
   isDisabled.value = true
-  submitText.value = '提交中...'
+  loadingAddUser.value = true
 
   if (email.value === '') {
     ElNotification({
-      title: '警告',
+      title: '提示',
       message: '邮箱不能为空',
       type: 'warning'
     })
     isDisabled.value = false
-    submitText.value = '提交'
+    loadingAddUser.value = false
+    return
+  }
+
+  if (nickName.value === '') {
+    ElNotification({
+      title: '提示',
+      message: '用户姓名不能为空',
+      type: 'warning'
+    })
+    isDisabled.value = false
+    loadingAddUser.value = false
     return
   }
 
@@ -250,8 +262,10 @@ const handleSubmit = () => {
             type: 'warning'
           })
         }
+      })
+      .finally(() => {
         isDisabled.value = false
-        submitText.value = '提交'
+        loadingAddUser.value = false
       })
 }
 
@@ -516,7 +530,7 @@ const queryAllRole = () => {
 
 const handleSubmitUserInfo = () => {
   isDisabled.value = true
-  submitText.value = '提交中...'
+  loadingSubmitUserInfo.value = true
 
   let userHasRoleIds = []
   for (let i = 0; i < userHasRoles.value.length; i++) {
@@ -525,7 +539,7 @@ const handleSubmitUserInfo = () => {
 
   if (userHasRoleIds.toString() === userOldRoles.value.toString()) {
     isDisabled.value = false
-    submitText.value = '提交'
+    loadingSubmitUserInfo.value = false
     userDetailDialogVisible.value = false
     return
   }
@@ -543,8 +557,6 @@ const handleSubmitUserInfo = () => {
             message: res.data.message,
             type: 'success'
           })
-          isDisabled.value = false
-          submitText.value = '提交'
           handleCloseEditUserDialog()
           loadUserList()
         } else {
@@ -553,9 +565,11 @@ const handleSubmitUserInfo = () => {
             message: res.data.message,
             type: 'warning'
           })
-          isDisabled.value = false
-          submitText.value = '提交'
         }
+      })
+      .finally(() => {
+        isDisabled.value = false
+        loadingSubmitUserInfo.value = false
       })
 }
 
