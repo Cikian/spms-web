@@ -149,11 +149,6 @@ const router = createRouter({
                                     path: '/role/management/roleList',
                                     name: 'roleList',
                                     component: () => import('../views/role_management/role-list.vue')
-                                },
-                                {
-                                    path: '/role/management/roleQuery',
-                                    name: 'roleQuery',
-                                    component: () => import('../views/role_management/role-info.vue')
                                 }
                             ]
                         }
@@ -369,6 +364,11 @@ const router = createRouter({
                                     component: () => import('../views/pro_details/proAuditViews/auditTest.vue')
                                 }
                             ]
+                        },
+                        {
+                            path: '/proDetail/proTarget',
+                            name: '目标',
+                            component: () => import('../views/pro_details/proTarget.vue')
                         },
                         {
                             path: '/proDetail/meeting',

@@ -16,7 +16,6 @@
             <el-divider style="margin: 0 16px" direction="vertical"/>
           </span>
           <el-menu-item class="h-menu-item" index="/role/management/roleList">角色列表</el-menu-item>
-          <el-menu-item class="h-menu-item" index="/role/management/roleQuery">查询角色</el-menu-item>
           <Notification/>
           <AvatarMenu/>
         </el-menu>

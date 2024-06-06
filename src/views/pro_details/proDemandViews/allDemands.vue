@@ -1568,9 +1568,6 @@
           :icon="['fas', 'square-check']"/></span>
       <span>{{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}</span>
     </template>
-    <template #footer>
-
-    </template>
   </el-dialog>
 
   <!--  编辑测试计划dialog-->
@@ -2021,6 +2018,7 @@ import {
   updateTestReportApprovalStatusById,
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
+import {queryTargetList} from "../../../api/qualityTargetApi.ts";
 
 const searchInput = ref('')
 const searchDemands = () => {
@@ -2283,6 +2281,7 @@ const handleCloseClickRow = () => {
   notFirstLevelComment.value = []
   childrenWorkItem.value = []
   testTableData.value = []
+  allTarget.value = []
 }
 
 const clickIcon = ref(false)
@@ -2435,7 +2434,6 @@ const clickRow = (row) => {
   getChildrenWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
   loadTestPlanList(clickedDemand.value.demandId)
-
   getProjectTestMember(currentProInfo.value.proId)
 
   firstTagName.value = 'baseInfo'
@@ -3391,7 +3389,6 @@ const submitEditTestCase = () => {
         loadingEditTestCase.value = false
       })
 }
-
 
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
