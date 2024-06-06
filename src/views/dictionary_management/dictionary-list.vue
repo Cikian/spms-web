@@ -165,8 +165,6 @@ const loadDictionaryTypeList = () => {
 
           for (let i = 0; i < pageInfo.records.length; i++) {
             pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
-            pageInfo.records[i].createTime = new Date(pageInfo.records[i].createTime).toLocaleString()
-            pageInfo.records[i].updateTime = new Date(pageInfo.records[i].updateTime).toLocaleString()
           }
 
           dictionaryTypeList.value = pageInfo.records

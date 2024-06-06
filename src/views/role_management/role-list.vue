@@ -649,7 +649,7 @@ const loadRoleList = () => {
         }
 
         if (pageInfo.records[i].createTime) {
-          pageInfo.records[i].createTime = new Date(pageInfo.records[i].createTime).toLocaleString()
+          pageInfo.records[i].createTime = pageInfo.records[i].createTime.replace('T', ' ')
         }
       }
 

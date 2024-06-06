@@ -195,7 +195,7 @@ const loadResourceList = () => {
 
           for (let i = 0; i < pageInfo.records.length; i++) {
             pageInfo.records[i].no = (tablePage.pageNum - 1) * tablePage.pageSize + i + 1
-            pageInfo.records[i].updateTime = new Date(pageInfo.records[i].updateTime).toLocaleString()
+            pageInfo.records[i].updateTime = pageInfo.records[i].updateTime.replace('T', ' ')
             pageInfo.records[i].dailyCost = pageInfo.records[i].dailyCost.toFixed(2)
           }
 

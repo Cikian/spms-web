@@ -306,11 +306,11 @@ const loadDeviceList = () => {
             }
 
             if (pageInfo.records[i].purchaseDate) {
-              pageInfo.records[i].purchaseDate = new Date(pageInfo.records[i].purchaseDate).toLocaleString()
+              pageInfo.records[i].purchaseDate = pageInfo.records[i].purchaseDate.replace('T', ' ')
             }
 
             if (pageInfo.records[i].warrantyExpiryDate) {
-              pageInfo.records[i].warrantyExpiryDate = new Date(pageInfo.records[i].warrantyExpiryDate).toLocaleString()
+              pageInfo.records[i].warrantyExpiryDate = pageInfo.records[i].warrantyExpiryDate.replace('T', ' ')
             }
 
             if (pageInfo.records[i].purchaseCost) {
