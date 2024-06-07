@@ -117,17 +117,12 @@ const loadUserDetail = () => {
 }
 
 const resetPassword = () => {
-  submitText.value = '提交中...'
-  isDisabled.value = true
-
   if (updatePasswordForm.value.oldPassword === '') {
     ElNotification({
       title: '警告',
       message: '请输入原密码',
       type: 'warning',
     })
-    submitText.value = '确定'
-    isDisabled.value = false
     return
   }
 
@@ -137,8 +132,6 @@ const resetPassword = () => {
       message: '请输入新密码',
       type: 'warning',
     })
-    submitText.value = '确定'
-    isDisabled.value = false
     return
   }
 
@@ -148,8 +141,16 @@ const resetPassword = () => {
       message: '请再次输入新密码',
       type: 'warning',
     })
-    submitText.value = '确定'
-    isDisabled.value = false
+    return
+  }
+
+  const pattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?])[A-Za-z\d!@#$%^&*()_\-+=<>?]{12,}$/;
+  if (!pattern.test(updatePasswordForm.value.newPassword)) {
+    ElNotification({
+      title: "提示",
+      message: "密码必须包含大小写字母、数字、特殊字符，且长度不少于12位",
+      type: "warning"
+    })
     return
   }
 
@@ -159,12 +160,11 @@ const resetPassword = () => {
       message: '两次输入的密码不一致',
       type: 'warning',
     })
-    submitText.value = '确定'
-    isDisabled.value = false
     return
   }
 
-
+  submitText.value = '提交中...'
+  isDisabled.value = true
   let formData = {
     oldPassword: updatePasswordForm.value.oldPassword,
     newPassword: updatePasswordForm.value.newPassword,

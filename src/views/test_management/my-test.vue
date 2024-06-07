@@ -84,12 +84,12 @@
           <el-table-column prop="endTime" label="计划结束时间" align="center">
             <template #default="scope">
               <span>{{ scope.row.endTime }}</span>
-              <el-tag style="margin-left: 5px" v-if="new Date().getTime() > new Date(scope.row.endTime).getTime()"
+              <el-tag style="margin-left: 5px" v-if="!scope.row.isArchive && (new Date().getTime() > new Date(scope.row.endTime).getTime())"
                       type="danger" round size="default"
                       effect="dark">超时
               </el-tag>
               <el-tag style="margin-left: 5px"
-                      v-else-if="new Date(scope.row.endTime).getTime() - new Date().getTime() < 259200000"
+                      v-else-if="!scope.row.isArchive && (new Date(scope.row.endTime).getTime() - new Date().getTime() < 259200000)"
                       type="warning" round size="default"
                       effect="dark">临期
               </el-tag>
@@ -270,21 +270,24 @@
                 <el-form-item label="优先级" required>
                   <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级"
                              :disabled="echoTestPlan.isArchive" clearable>
-                    <el-option label="低" value="0"></el-option>
-                    <el-option label="中" value="1"></el-option>
-                    <el-option label="高" value="2"></el-option>
+                    <el-option label="低" value="0"/>
+                    <el-option label="中" value="1"/>
+                    <el-option label="高" value="2"/>
                   </el-select>
                 </el-form-item>
               </el-form>
               <div class="add-test-case-footer">
-                <el-button type="primary" @click="submitAddTestCase" :disabled="addTestCaseBtnDisable"
+                <el-button type="primary"
+                           @click="submitAddTestCase"
+                           :disabled="addTestCaseBtnDisable"
                            :loading="loadingAddTestCase">
                   {{ addTestCaseBtnText }}
                 </el-button>
               </div>
             </el-tab-pane>
             <el-tab-pane label="测试报告" name="testReport">
-              <div style="height: 200px;display: flex; justify-content: center; align-items: center" v-if="loadingTestReport">
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingTestReport">
                 <a-spin size="large"/>
               </div>
               <div v-else>
@@ -478,10 +481,13 @@
                        :loading="loadingArchive"
                        :disabled="echoTestPlan.isArchive"
                        @click="archiveTestPlan" size="large"
-                       style="width: 90px;">{{ !echoTestPlan.isArchive ? "存档" : "已存档"}}
+                       style="width: 90px;">{{ !echoTestPlan.isArchive ? "存档" : "已存档" }}
             </el-button>
-            <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable"
-                       :loading="loadingEditTestPlan" v-if="!echoTestPlan.isArchive">
+            <el-button type="primary"
+                       @click="handleSubmitEditTestPlan"
+                       :disabled="editTestPlanBtnDisable"
+                       :loading="loadingEditTestPlan"
+                       v-if="!echoTestPlan.isArchive">
               {{ editTestPlanBtnText }}
             </el-button>
           </div>
@@ -529,7 +535,7 @@
         </el-select>
       </el-form-item>
     </el-form>
-    <div slot="footer" class="dialog-footer">
+    <div slot="footer" style="display: flex;justify-content: flex-end">
       <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
       <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
                  :disabled="editTestCaseBtnDisable" :loading="loadingEditTestCase">
@@ -982,7 +988,7 @@ const getTestCaseData = () => {
 }
 
 const handleSubmitEditTestPlan = () => {
-  editTestPlanBtnText.value = '提交中'
+  editTestPlanBtnText.value = '提交'
   editTestPlanBtnDisable.value = true
   loadingEditTestPlan.value = true
 
@@ -1050,7 +1056,7 @@ const handleSubmitEditTestPlan = () => {
             message: res.data.message,
             type: 'success'
           })
-          handleCloseEditTestPlan()
+          openDialog.value = false
           loadTestPlanList()
         } else {
           ElNotification({
@@ -1059,6 +1065,8 @@ const handleSubmitEditTestPlan = () => {
             type: 'warning'
           })
         }
+      })
+      .finally(() => {
         editTestPlanBtnText.value = '提交'
         editTestPlanBtnDisable.value = false
         loadingEditTestPlan.value = false
@@ -1490,7 +1498,7 @@ const isFromRecentVisit = () => {
   }
 }
 
-const clearEchoPlan = () =>{
+const clearEchoPlan = () => {
   echoTestPlan.value = {}
   testCaseTableData.value = []
   activeName.value = 'caseList'

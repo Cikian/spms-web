@@ -6,11 +6,11 @@
   <div>
     <el-skeleton v-if="loadingVisitPro" style="width: 100%;display: flex;padding: 0 40px 32px 40px" animated>
       <template #template>
-        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
-        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
-        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
-        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
-        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px;border-radius: 5px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px;border-radius: 5px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px;border-radius: 5px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px;border-radius: 5px"/>
+        <el-skeleton-item variant="image" style="width: 200px; height: 130px; margin-right: 16px;border-radius: 5px"/>
       </template>
     </el-skeleton>
     <a-empty v-else-if="emptyVisitPro" description="暂无数据"/>

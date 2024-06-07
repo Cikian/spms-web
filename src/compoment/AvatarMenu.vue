@@ -22,25 +22,18 @@
       <el-divider class="my-divider"/>
 
       <el-menu>
-        <el-menu-item class="user-menu-item" index="/user/management/userList">
+        <el-menu-item class="user-menu-item" @click="router.push('/setting/list/account')">
           <font-awesome-icon class="user-menu-icon" :icon="['far', 'user']"/>
           账号设置
         </el-menu-item>
       </el-menu>
       <el-divider class="my-divider"/>
       <el-menu>
-        <el-menu-item class="user-menu-item" index="/user/management/userList">
-          <font-awesome-icon class="user-menu-icon" :icon="['fas', 'sliders']"/>
-          配置中心
-        </el-menu-item>
-      </el-menu>
-
-      <el-divider class="my-divider"/>
-      <el-menu>
-        <el-menu-item class="user-menu-item" index="/user/management/userList">
+        <el-menu-item class="user-menu-item" @click="aboutDialogVisible = true">
           <font-awesome-icon class="user-menu-icon" :icon="['far', 'bookmark']"/>
           关于
         </el-menu-item>
+        <el-divider class="my-divider"/>
         <el-menu-item class="user-menu-item user-logout" @click="userLogout">
           <font-awesome-icon class="user-menu-icon" :icon="['fas', 'arrow-right-from-bracket']"/>
           退出登录
@@ -48,6 +41,14 @@
       </el-menu>
     </div>
   </el-popover>
+
+  <el-dialog title="关于" v-model="aboutDialogVisible" width="30%">
+    <div style="text-align: center">
+      <img src="../../public/logo.png" alt="">
+      <div style="margin-top: 20px">SPMS</div>
+      <div style="margin-top: 20px">版本号：1.0.0</div>
+    </div>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -60,6 +61,8 @@ let userInfo = ref({
   userName: '',
   avatar: ''
 })
+
+let aboutDialogVisible = ref(false)
 
 const getUserInfo = () => {
   let userDetail = localStorage.getItem("userInfo")

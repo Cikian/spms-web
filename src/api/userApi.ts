@@ -32,6 +32,14 @@ export function updatePassword(data) {
     })
 }
 
+export function retrievePassword(data) {
+    return request({
+        url: '/user/retrievePassword',
+        method: 'post',
+        data: data
+    })
+}
+
 export function addUser(data) {
     return request({
         url: '/user/add',

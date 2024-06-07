@@ -10,17 +10,22 @@ const router = createRouter({
         },
         {
             path: '/login',
-            name: 'login',
+            name: '登录',
             component: () => import('../views/Login.vue')
         },
         {
             path: '/resetPassword',
-            name: 'resetPassword',
+            name: '重置密码',
             component: () => import('../views/resetPwd.vue')
         },
         {
+            path: '/retrievePwd',
+            name: '找回密码',
+            component: () => import('../views/retrievePwd.vue')
+        },
+        {
             path: '/home',
-            name: 'home',
+            name: '首页',
             component: () => import('../views/home.vue'),
             children: [
                 {
@@ -144,11 +149,6 @@ const router = createRouter({
                                     path: '/role/management/roleList',
                                     name: 'roleList',
                                     component: () => import('../views/role_management/role-list.vue')
-                                },
-                                {
-                                    path: '/role/management/roleQuery',
-                                    name: 'roleQuery',
-                                    component: () => import('../views/role_management/role-info.vue')
                                 }
                             ]
                         }
@@ -366,6 +366,11 @@ const router = createRouter({
                             ]
                         },
                         {
+                            path: '/proDetail/proTarget',
+                            name: '目标',
+                            component: () => import('../views/pro_details/proTarget.vue')
+                        },
+                        {
                             path: '/proDetail/meeting',
                             name: '会议',
                             component: () => import('../views/pro_details/meeting.vue')
@@ -433,15 +438,20 @@ router.beforeEach((to, from, next) => {
     let token = localStorage.getItem("token")
     let isFirstLogin = localStorage.getItem("isFirstLogin")
 
-    if (!token && to.path !== '/login') {
-        ElNotification({
-            title: '提示',
-            message: '登录失效，请重新登录',
-            type: 'warning',
-        })
-
-        next('/login')
-    } else {
+    if (!token){
+        // 如果没有token并且访问的不是登录页面或者重置密码页面，跳转到登录页面并给出提示，如果是直接放行
+        if (to.path === '/login' || to.path === '/retrievePwd') {
+            next()
+        }else {
+            ElNotification({
+                title: '提示',
+                message: '登录失效，请重新登录',
+                type: 'warning',
+            })
+            next('/login')
+        }
+    }else {
+        // 如果已经登录，但是是首次登录，跳转到修改密码页面，并给出提示，如果不是直接放行
         if (isFirstLogin === 'true' && to.path !== '/resetPassword') {
             ElNotification({
                 title: '提示',
@@ -449,10 +459,10 @@ router.beforeEach((to, from, next) => {
                 type: 'warning',
             })
             next('/resetPassword')
+        }else {
+            next()
         }
-        next()
     }
-
 })
 
 

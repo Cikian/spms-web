@@ -38,7 +38,7 @@
           </el-upload>
         </div>
         <div class="avatar-container-tip">
-          <span>仅支持JPG、PNG格式图片，头像不超过1M，封面不超过5M</span>
+          <span>仅支持JPG、PNG格式图片，头像不超过1M</span>
         </div>
       </div>
     </div>
@@ -54,7 +54,7 @@
           <el-form-item label="用户名">
             <el-input class="form-control-input" v-model="userDetails.userName" disabled/>
           </el-form-item>
-          <el-form-item label="昵称">
+          <el-form-item label="姓名">
             <el-input class="form-control-input" v-model="userDetails.nickName" disabled="disabled"/>
           </el-form-item>
           <el-form-item label="性别">
@@ -84,7 +84,6 @@ const userDetails = ref({
 })
 const submitText = ref('确定')
 const isDisabled = ref(false)
-const isAdmin = ref(false)
 
 const loadUserDerail = () => {
   queryCurrentUser()

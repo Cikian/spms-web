@@ -49,11 +49,12 @@
                 </div>
               </div>
               <div class="form-submit">
-                <el-button :loading="loadingLogin" color="#6698ff" :disabled="isDisabled" class="form-submit-button" @click="userLogin()">登录
+                <el-button :loading="loadingLogin" color="#6698ff" :disabled="isDisabled" class="form-submit-button"
+                           @click="userLogin()">登录
                 </el-button>
               </div>
               <div class="form-footer">
-                <a href="forget-password.vue" class="forget-password">忘记密码？</a>
+                <el-button text @click="router.push('/retrievePwd')" class="forget-password">忘记密码？</el-button>
               </div>
             </div>
           </div>
@@ -107,8 +108,9 @@ const userLogin = () => {
   }
 
   const usernameRegex = /^spms\d{6}$/;
-  const passwordRegex = /^[a-zA-Z0-9]{6,32}$/;
-  if (usernameInput.value !== "admin" && usernameInput.value !== "cikian") {
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=<>?])[A-Za-z\d!@#$%^&*()_\-+=<>?]{12,}$/;
+  if (usernameInput.value !== 'cikian' && usernameInput.value !== 'admin'){
+    console.log(123)
     if (!usernameRegex.test(usernameInput.value) || !passwordRegex.test(passwordInput.value)) {
       ElNotification({
         title: '提示',
@@ -175,7 +177,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #fafafa!important;
+  background-color: #fafafa !important;
   min-height: 100vh;
 }
 

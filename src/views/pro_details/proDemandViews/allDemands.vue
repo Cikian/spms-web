@@ -1842,9 +1842,6 @@
           :icon="['fas', 'square-check']"/></span>
       <span>{{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}</span>
     </template>
-    <template #footer>
-
-    </template>
   </el-dialog>
 
   <!--  编辑测试计划dialog-->
@@ -2183,7 +2180,7 @@
         </el-select>
       </el-form-item>
     </el-form>
-    <div slot="footer" class="dialog-footer">
+    <div slot="footer" style="display: flex;justify-content: flex-end">
       <el-button @click="editTestCaseDialogVisible = false" size="large" style="width: 90px;">取 消</el-button>
       <el-button type="primary" @click="submitEditTestCase" size="large" style="width: 90px;"
                  :disabled="editTestCaseBtnDisable" :loading="loadingEditTestCase">
@@ -2303,6 +2300,7 @@ import {
   updateTestReportApprovalStatusById,
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
+import {queryTargetList} from "../../../api/qualityTargetApi.ts";
 
 const searchInput = ref('')
 const searchDemands = () => {
@@ -2568,6 +2566,7 @@ const handleCloseClickRow = () => {
   childrenWorkItem.value = []
   dependenceWorkItem.value = []
   testTableData.value = []
+  allTarget.value = []
 }
 
 const clickIcon = ref(false)
@@ -2721,7 +2720,6 @@ const clickRow = (row) => {
   getDependenceWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
   loadTestPlanList(clickedDemand.value.demandId)
-
   getProjectTestMember(currentProInfo.value.proId)
 
   firstTagName.value = 'baseInfo'
@@ -3694,7 +3692,6 @@ const submitEditTestCase = () => {
       })
 }
 
-
 // 组件销毁时，也及时销毁编辑器
 onBeforeUnmount(() => {
   const editor = editorRef.value
@@ -3833,7 +3830,7 @@ window.addEventListener('beforeunload', (e) => {
 
 .dialog-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 50px;
 }
 

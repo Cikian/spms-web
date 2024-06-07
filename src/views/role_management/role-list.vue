@@ -37,7 +37,8 @@
             label="状态"
         >
           <template #default="{row}">
-            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success" :disabled="row.isSystem">
+            <el-button size="small" plain @click="handleStatus(row)" v-if="row.status === '启用'" type="success"
+                       :disabled="row.isSystem">
               {{ row.status }}
             </el-button>
             <el-button size="small" plain @click="handleStatus(row)" v-else type="danger">{{ row.status }}</el-button>
@@ -161,18 +162,163 @@
   <el-dialog
       title="角色权限选择"
       v-model="roleMenuDialogVisible"
-      width="80%"
+      width="70%"
       :show-close="false"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
   >
-    <el-checkbox-group v-model="roleHasMenus">
-      <el-checkbox v-for="menu in allMenus" :key="menu.menuId" :label="menu.menuId" :disabled="!menu.status">{{ menu.menuName }}
-      </el-checkbox>
-    </el-checkbox-group>
+    <!--      分组展示-->
+    <el-scrollbar style="height: 60vh;font-size: 15px">
+      <div>
+        <span>项目管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in projectMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>需求管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in demandMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>测试管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in testMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>缺陷管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in defectMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>设备管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in deviceMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>成本管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in costMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>会议管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in meetingMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>需求质量关联管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in demandQualityMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>用户管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in userMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>角色管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in roleMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>角色用户管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in roleUserMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>角色权限管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in roleMenuMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+      <el-divider style="margin: 10px auto"/>
+      <div>
+        <span>字典数据管理</span>
+        <el-checkbox-group v-model="roleHasMenus" style="margin: 10px 0 0 50px">
+          <el-row>
+            <el-col v-for="menu in dictionaryDataMenu" :key="menu.menuId" :span="6">
+              <el-checkbox :label="menu.menuId">{{ menu.menuName }}</el-checkbox>
+            </el-col>
+          </el-row>
+        </el-checkbox-group>
+      </div>
+
+
+    </el-scrollbar>
+
     <div style="text-align: center; margin-top: 20px;">
-      <el-button size="large" type="primary" @click="handleSelectedMenuDialog" :disabled="canSubmitSelectMenu">
-        {{ selectMenuSubmitText }}
+      <el-button size="large" type="primary" @click="handleSelectedMenuDialog" :loading="loadingSelectMenu"
+                 :disabled="canSubmitSelectMenu">
+        提交
       </el-button>
       <el-button size="large" @click="handleCloseSelectMenuDialog">取消</el-button>
     </div>
@@ -185,7 +331,7 @@
     }"
   >
     <template #icon>
-      <font-awesome-icon icon="fa-regular fa-circle-question" />
+      <font-awesome-icon icon="fa-regular fa-circle-question"/>
     </template>
     <template #tooltip>
       <div>所有系统角色均不可进行操作</div>
@@ -204,12 +350,12 @@ import {
 } from "../../api/roleApi.ts";
 import {assignPermissions, queryAllMenus, queryRoleHasMenu} from "../../api/menuApi.ts";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {message} from "ant-design-vue";
 
 const loading = ref(true)
 const dialogVisible = ref(false)
 const roleList = ref([])
 const submitText = ref('提交')
-const selectMenuSubmitText = ref('提交')
 const isDisabled = ref(false)
 const role = ref({
   roleName: '',
@@ -227,13 +373,27 @@ const selectedRows = ref([]);
 const roleDetailDialogVisible = ref(false)
 const roleMenuDialogVisible = ref(false)
 const canSubmitSelectMenu = ref(false)
+const loadingSelectMenu = ref(false)
 const roleDetails = ref()
-const roleOldMenus = ref([])
 const roleHasMenus = ref([])
-const allMenus = ref([])
+
+const userMenu = ref([])
+const roleMenu = ref([])
+const roleUserMenu = ref([])
+const roleMenuMenu = ref([])
+const testMenu = ref([])
+const costMenu = ref([])
+const deviceMenu = ref([])
+const defectMenu = ref([])
+const demandMenu = ref([])
+const dictionaryDataMenu = ref([])
+const meetingMenu = ref([])
+const projectMenu = ref([])
+const demandQualityMenu = ref([])
 
 //打开编辑角色dialog
 const handleEdit = (row) => {
+  message.loading("加载中...", 0)
   let roleId = row.roleId
   queryById(roleId)
       .then(res => {
@@ -248,7 +408,9 @@ const handleEdit = (row) => {
             type: 'warning'
           })
         }
-
+      })
+      .finally(() => {
+        message.destroy()
       })
 }
 
@@ -306,7 +468,33 @@ const loadAllMenus = () => {
       .then(res => {
         if (res.data.code === 200) {
           for (let i = 0; i < res.data.data.length; i++) {
-            allMenus.value.push(res.data.data[i])
+            if (res.data.data[i].type === 1) {
+              userMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 2) {
+              roleMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 3) {
+              roleUserMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 4) {
+              roleMenuMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 5) {
+              testMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 6) {
+              costMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 8) {
+              deviceMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 9) {
+              defectMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 10) {
+              demandMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 11) {
+              dictionaryDataMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 12) {
+              meetingMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 13) {
+              projectMenu.value.push(res.data.data[i])
+            } else if (res.data.data[i].type === 14) {
+              demandQualityMenu.value.push(res.data.data[i])
+            }
           }
         } else {
           ElNotification({
@@ -320,13 +508,14 @@ const loadAllMenus = () => {
 
 //打开权限分配dialog
 const openSelectMenuDialog = (roleId) => {
+  message.loading("加载中...", 0)
   queryRoleHasMenu(roleId)
       .then(res => {
         if (res.data.code === 200) {
           for (let i = 0; i < res.data.data.length; i++) {
-            roleOldMenus.value.push(res.data.data[i].menuId)
             roleHasMenus.value.push(res.data.data[i].menuId)
           }
+          roleMenuDialogVisible.value = true
         } else {
           ElNotification({
             title: '提示',
@@ -335,32 +524,25 @@ const openSelectMenuDialog = (roleId) => {
           })
         }
       })
-  roleMenuDialogVisible.value = true
+      .finally(() => {
+        message.destroy()
+      })
 }
 
 //关闭权限分配dialog
 const handleCloseSelectMenuDialog = () => {
   roleHasMenus.value = []
-  roleOldMenus.value = []
   roleMenuDialogVisible.value = false
 }
 
 //确定提交权限分配
 const handleSelectedMenuDialog = () => {
   canSubmitSelectMenu.value = true
-  selectMenuSubmitText.value = '提交中...'
+  loadingSelectMenu.value = true
 
   let roleHasMenuIds = []
   for (let i = 0; i < roleHasMenus.value.length; i++) {
     roleHasMenuIds.push(roleHasMenus.value[i])
-  }
-
-  console.log(roleHasMenuIds.toString() + "....." + roleOldMenus.value.toString())
-  if (roleHasMenuIds.toString() === roleOldMenus.value.toString()) {
-    canSubmitSelectMenu.value = false
-    selectMenuSubmitText.value = '提交'
-    handleCloseSelectMenuDialog()
-    return
   }
 
   let formData = {
@@ -376,8 +558,6 @@ const handleSelectedMenuDialog = () => {
             message: res.data.message,
             type: 'success'
           })
-          canSubmitSelectMenu.value = false
-          selectMenuSubmitText.value = '提交'
           handleCloseSelectMenuDialog()
         } else {
           ElNotification({
@@ -385,10 +565,11 @@ const handleSelectedMenuDialog = () => {
             message: res.data.message,
             type: 'warning'
           })
-          canSubmitSelectMenu.value = false
-          selectMenuSubmitText.value = '提交'
         }
-
+      })
+      .finally(() => {
+        canSubmitSelectMenu.value = false
+        loadingSelectMenu.value = false
       })
 }
 
@@ -468,7 +649,7 @@ const loadRoleList = () => {
         }
 
         if (pageInfo.records[i].createTime) {
-          pageInfo.records[i].createTime = new Date(pageInfo.records[i].createTime).toLocaleString()
+          pageInfo.records[i].createTime = pageInfo.records[i].createTime.replace('T', ' ')
         }
       }
 
