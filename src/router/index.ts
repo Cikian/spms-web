@@ -439,6 +439,7 @@ router.beforeEach((to, from, next) => {
     let isFirstLogin = localStorage.getItem("isFirstLogin")
 
     if (!token){
+        // 如果没有token并且访问的不是登录页面或者重置密码页面，跳转到登录页面并给出提示，如果是直接放行
         if (to.path === '/login' || to.path === '/retrievePwd') {
             next()
         }else {
@@ -450,6 +451,7 @@ router.beforeEach((to, from, next) => {
             next('/login')
         }
     }else {
+        // 如果已经登录，但是是首次登录，跳转到修改密码页面，并给出提示，如果不是直接放行
         if (isFirstLogin === 'true' && to.path !== '/resetPassword') {
             ElNotification({
                 title: '提示',
