@@ -212,7 +212,6 @@ const handleUpload = (file) => {
 }
 
 const submitAdd = () => {
-  console.log(formData.value)
   formData.value.proId = proId.value
   addMeeting(formData.value)
       .then(res => {

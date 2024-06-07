@@ -153,6 +153,13 @@ export function getChildrenWorkItemList(workItemId) {
     })
 }
 
+export function getDependenceWorkItemList(workItemId) {
+    return request({
+        url: '/demand/dependence/' + workItemId,
+        method: 'get',
+    })
+}
+
 export function getDemandById(workItemId) {
     return request({
         url: '/demand/' + workItemId,
