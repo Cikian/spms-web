@@ -2019,6 +2019,7 @@ import {
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
 import {queryTargetList} from "../../../api/qualityTargetApi.ts";
+import axios from "axios";
 
 const searchInput = ref('')
 const searchDemands = () => {
@@ -2578,33 +2579,46 @@ const submitComment = (workItemId) => {
     return;
   }
 
-  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
-
-  postComment.value.workItemId = workItemId;
-  postComment.value.toCommentId = '0';
-  postComment.value.toUserId = '0';
-  postComment.value.toUserNickName = '';
-  postComment.value.avatar = userInfo.avatar;
-  postComment.value.nickName = userInfo.nickName;
-
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-      getComments(workItemId)
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
+  axios.post('https://api.wordscheck.com/check', {
+    key: "aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N",
+    content: postComment.value.content
   })
+      .then(res => {
+        if (res.data.word_list.length !== 0) {
+          ElNotification({
+            title: '提示',
+            message: '请文明发言',
+            type: 'warning',
+          })
+        } else{
+          let userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
+          postComment.value.workItemId = workItemId;
+          postComment.value.toCommentId = '0';
+          postComment.value.toUserId = '0';
+          postComment.value.toUserNickName = '';
+          postComment.value.avatar = userInfo.avatar;
+          postComment.value.nickName = userInfo.nickName;
+
+          addComment(postComment.value).then((res) => {
+            if (res.data.code === 3001) {
+              postComment.value.content = '';
+              ElNotification({
+                title: '成功',
+                message: res.data.message,
+                type: 'success',
+              })
+              getComments(workItemId)
+            } else {
+              ElNotification({
+                title: '提示',
+                message: res.data.message,
+                type: 'warning',
+              })
+            }
+          })
+        }
+      })
 }
 
 const beforeReply = (comment, flag) => {
@@ -2640,37 +2654,53 @@ const replyComment = (flag) => {
     })
     return;
   }
-  postComment.value.content = replyContent.value;
 
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      replyContent.value = '';
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-      openRep.value = false;
-      openTestRep.value = false;
-      if (flag === 'fromDemand') {
-        console.log("从需求")
-        console.log(clickedDemand.value)
-        getComments(clickedDemand.value.demandId)
-      } else if (flag === 'fromTest') {
-        console.log("从测试")
-        console.log(echoTestPlan.value)
-        getComments(echoTestPlan.value.testPlanId)
-      }
-
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
+  axios.post('https://api.wordscheck.com/check', {
+    key: "aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N",
+    content: replyContent.value
   })
+      .then(res => {
+        if (res.data.word_list.length !== 0) {
+          ElNotification({
+            title: '提示',
+            message: '请文明发言',
+            type: 'warning',
+          })
+        } else{
+          postComment.value.content = replyContent.value;
+
+          addComment(postComment.value).then((res) => {
+            if (res.data.code === 3001) {
+              postComment.value.content = '';
+              replyContent.value = '';
+              ElNotification({
+                title: '成功',
+                message: res.data.message,
+                type: 'success',
+              })
+              openRep.value = false;
+              openTestRep.value = false;
+              if (flag === 'fromDemand') {
+                console.log("从需求")
+                console.log(clickedDemand.value)
+                getComments(clickedDemand.value.demandId)
+              } else if (flag === 'fromTest') {
+                console.log("从测试")
+                console.log(echoTestPlan.value)
+                getComments(echoTestPlan.value.testPlanId)
+              }
+
+            } else {
+              ElNotification({
+                title: '提示',
+                message: res.data.message,
+                type: 'warning',
+              })
+            }
+          })
+        }
+      })
+
 }
 
 const firstLevelComment = ref([]);

@@ -58,7 +58,7 @@
                 text
                 size="default"
                 @click="handleEdit(row)"
-                :disabled="!row.isSystem"
+                :disabled="row.isSystem"
             >
               编辑
             </el-button>
@@ -828,20 +828,11 @@ const validateRoleInfo = (roleName, remark) => {
   }
 
   let roleNameReg = /^[a-zA-Z_]+$/;
-  let remarkReg = /^[\u4e00-\u9fa5]+$/;
+
   if (!roleNameReg.test(roleName)) {
     ElNotification({
       title: '提示',
       message: '角色标识只能使用英文单词，多个单词使用下划线（ _ ）分割',
-      type: 'warning'
-    })
-    return false
-  }
-
-  if (!remarkReg.test(remark)) {
-    ElNotification({
-      title: '提示',
-      message: '角色名称只能使用中文',
       type: 'warning'
     })
     return false

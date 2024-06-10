@@ -171,14 +171,14 @@
     <el-table-column min-width="180px" align="center" label="操作">
       <template #default="scope">
         <el-button
-            size="small"
+            size="large"
             type="danger"
             round
             @click="clickButton=true;handleDelete(scope.row)"
         >
           拒绝
         </el-button>
-        <el-button size="small"
+        <el-button size="large"
                    type="success"
                    round
                    @click="clickButton=true;handleEdit(scope.row)"

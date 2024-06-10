@@ -519,6 +519,7 @@ import {addComment, getCommentList, queryDemandByProId, queryProByProId} from ".
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
 import {message} from "ant-design-vue";
+import axios from "axios";
 
 const proId = ref('')
 
@@ -1357,32 +1358,48 @@ const submitComment = () => {
     return;
   }
 
-  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
-
-  postComment.value.workItemId = echoTestPlan.value.testPlanId;
-  postComment.value.toCommentId = '0';
-  postComment.value.toUserId = '0';
-  postComment.value.toUserNickName = '';
-  postComment.value.avatar = userInfo.avatar;
-  postComment.value.nickName = userInfo.nickName;
-
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-      getComments(echoTestPlan.value.testPlanId)
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
+  axios.post('https://api.wordscheck.com/check', {
+    key: "aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N",
+    content: postComment.value.content
   })
+      .then(res => {
+        if (res.data.word_list.length !== 0) {
+          ElNotification({
+            title: '提示',
+            message: '请文明发言',
+            type: 'warning',
+          })
+        } else{
+          let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+          postComment.value.workItemId = echoTestPlan.value.testPlanId;
+          postComment.value.toCommentId = '0';
+          postComment.value.toUserId = '0';
+          postComment.value.toUserNickName = '';
+          postComment.value.avatar = userInfo.avatar;
+          postComment.value.nickName = userInfo.nickName;
+
+          addComment(postComment.value).then((res) => {
+            if (res.data.code === 3001) {
+              postComment.value.content = '';
+              ElNotification({
+                title: '成功',
+                message: res.data.message,
+                type: 'success',
+              })
+              getComments(echoTestPlan.value.testPlanId)
+            } else {
+              ElNotification({
+                title: '提示',
+                message: res.data.message,
+                type: 'warning',
+              })
+            }
+          })
+        }
+      })
+
+
 
 }
 
@@ -1411,27 +1428,42 @@ const replyComment = () => {
     })
     return;
   }
-  postComment.value.content = replyContent.value;
 
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      replyContent.value = '';
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-      openRep.value = false;
-      getComments(echoTestPlan.value.testPlanId)
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
+  axios.post('https://api.wordscheck.com/check', {
+    key: "aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N",
+    content: replyContent.value
   })
+      .then(res => {
+        if (res.data.word_list.length !== 0) {
+          ElNotification({
+            title: '提示',
+            message: '请文明发言',
+            type: 'warning',
+          })
+        } else{
+          postComment.value.content = replyContent.value;
+
+          addComment(postComment.value).then((res) => {
+            if (res.data.code === 3001) {
+              postComment.value.content = '';
+              replyContent.value = '';
+              ElNotification({
+                title: '成功',
+                message: res.data.message,
+                type: 'success',
+              })
+              openRep.value = false;
+              getComments(echoTestPlan.value.testPlanId)
+            } else {
+              ElNotification({
+                title: '提示',
+                message: res.data.message,
+                type: 'warning',
+              })
+            }
+          })
+        }
+      })
 }
 
 const isFromRecentVisit = () => {

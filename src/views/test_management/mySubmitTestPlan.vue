@@ -41,7 +41,7 @@
                   v-loading="loading"
                   empty-text="暂无数据"
         >
-          <el-table-column prop="planName" label="测试计划名称">
+          <el-table-column prop="planName" label="测试计划名称" show-overflow-tooltip>
             <template #default="scope">
               <div style="display: flex; align-items: center">
                 <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']"/>

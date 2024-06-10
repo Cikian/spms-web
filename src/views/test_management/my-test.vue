@@ -42,7 +42,7 @@
                   @row-click="rowClick"
                   empty-text="暂无数据"
         >
-          <el-table-column prop="planName" label="测试计划名称">
+          <el-table-column prop="planName" label="测试计划名称" show-overflow-tooltip>
             <template #default="scope">
               <div style="display: flex; align-items: center">
                 <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']"/>
@@ -84,7 +84,8 @@
           <el-table-column prop="endTime" label="计划结束时间" align="center">
             <template #default="scope">
               <span>{{ scope.row.endTime }}</span>
-              <el-tag style="margin-left: 5px" v-if="!scope.row.isArchive && (new Date().getTime() > new Date(scope.row.endTime).getTime())"
+              <el-tag style="margin-left: 5px"
+                      v-if="!scope.row.isArchive && (new Date().getTime() > new Date(scope.row.endTime).getTime())"
                       type="danger" round size="default"
                       effect="dark">超时
               </el-tag>
@@ -579,6 +580,7 @@ import {addComment, getCommentList, queryDemandByProId} from "../../api/demandAp
 import {queryProjectTestMember} from "../../api/userApi.ts";
 import {recordVisit} from "../../api/RecentVisitApi.ts";
 import {message} from "ant-design-vue";
+import axios from "axios";
 
 const colors = [
   {color: '#f56c6c', percentage: 25},
@@ -1400,7 +1402,7 @@ const getComments = (workItemId) => {
       })
 }
 
-const submitComment = () => {
+const  submitComment = () => {
   if (postComment.value.content === '') {
     ElNotification({
       title: '提示',
@@ -1410,33 +1412,47 @@ const submitComment = () => {
     return;
   }
 
-  let userInfo = JSON.parse(localStorage.getItem("userInfo"))
-
-  postComment.value.workItemId = echoTestPlan.value.testPlanId;
-  postComment.value.toCommentId = '0';
-  postComment.value.toUserId = '0';
-  postComment.value.toUserNickName = '';
-  postComment.value.avatar = userInfo.avatar;
-  postComment.value.nickName = userInfo.nickName;
-
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-      getComments(echoTestPlan.value.testPlanId)
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
+  axios.post('https://api.wordscheck.com/check', {
+    key: "aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N",
+    content: postComment.value.content
   })
+      .then(res => {
+        if (res.data.word_list.length !== 0) {
+          ElNotification({
+            title: '提示',
+            message: '请文明发言',
+            type: 'warning',
+          })
+        } else{
+          let userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
+          postComment.value.workItemId = echoTestPlan.value.testPlanId;
+          postComment.value.toCommentId = '0';
+          postComment.value.toUserId = '0';
+          postComment.value.toUserNickName = '';
+          postComment.value.avatar = userInfo.avatar;
+          postComment.value.nickName = userInfo.nickName;
+
+          addComment(postComment.value)
+              .then((res) => {
+                if (res.data.code === 3001) {
+                  postComment.value.content = '';
+                  ElNotification({
+                    title: '成功',
+                    message: res.data.message,
+                    type: 'success',
+                  })
+                  getComments(echoTestPlan.value.testPlanId)
+                } else {
+                  ElNotification({
+                    title: '提示',
+                    message: res.data.message,
+                    type: 'warning',
+                  })
+                }
+              })
+        }
+      })
 }
 
 const beforeReply = (comment) => {
@@ -1464,27 +1480,43 @@ const replyComment = () => {
     })
     return;
   }
-  postComment.value.content = replyContent.value;
 
-  addComment(postComment.value).then((res) => {
-    if (res.data.code === 3001) {
-      postComment.value.content = '';
-      replyContent.value = '';
-      ElNotification({
-        title: '成功',
-        message: res.data.message,
-        type: 'success',
-      })
-      openRep.value = false;
-      getComments(echoTestPlan.value.testPlanId)
-    } else {
-      ElNotification({
-        title: '提示',
-        message: res.data.message,
-        type: 'warning',
-      })
-    }
+  axios.post('https://api.wordscheck.com/check', {
+    key: "aQprzN0lqqxQeW67Qg6qHBUnfJ7W4C6N",
+    content: replyContent.value
   })
+      .then(res => {
+        if (res.data.word_list.length !== 0) {
+          ElNotification({
+            title: '提示',
+            message: '请文明发言',
+            type: 'warning',
+          })
+        } else{
+          postComment.value.content = replyContent.value;
+
+          addComment(postComment.value).then((res) => {
+            if (res.data.code === 3001) {
+              postComment.value.content = '';
+              replyContent.value = '';
+              ElNotification({
+                title: '成功',
+                message: res.data.message,
+                type: 'success',
+              })
+              openRep.value = false;
+              getComments(echoTestPlan.value.testPlanId)
+            } else {
+              ElNotification({
+                title: '提示',
+                message: res.data.message,
+                type: 'warning',
+              })
+            }
+          })
+        }
+      })
+
 }
 
 const isFromRecentVisit = () => {

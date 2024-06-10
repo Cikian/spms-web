@@ -98,14 +98,14 @@
     >
       <template #default="scope">
         <el-button
-            size="small"
+            size="large"
             type="danger"
             round
             @click="clickButton=true;handleReview(scope.row,2)"
         >
           拒绝
         </el-button>
-        <el-button size="small"
+        <el-button size="large"
                    type="success"
                    round
                    @click="clickButton=true;handleReview(scope.row,1)"
