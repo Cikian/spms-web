@@ -2,12 +2,18 @@
   <div
       style="
       display: flex;
-      justify-content: right;
+      justify-content: space-between;
       align-items: center;
       height: 60px;
       padding: 0 30px;
 "
   >
+    <el-input v-model="searchInput" placeholder="请输入需求编号或标题" size="large" style="height: 38px; width: 260px"
+              clearable @change="searchDemands" @clear="clearSearchInput">
+      <template #prefix>
+        <font-awesome-icon :icon="['fas', 'magnifying-glass']"/>
+      </template>
+    </el-input>
     <el-button type="primary" @click="openAddDemandDialog">发布需求</el-button>
   </div>
 
@@ -101,6 +107,7 @@
             placeholder="请选择优先级"
             class="demand-status-select"
             @change="demandStatusChange(scope.row)"
+            :disabled="scope.row.demandStatus === -9"
         >
           <el-option
               class="demand-table-select-options-menu"
@@ -154,14 +161,9 @@
             <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成
             </div>
             <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>
+            <div class="table-statue" style="background-color: #ff7575;" v-show="scope.row.demandStatus===-9">无法进行</div>
           </template>
         </el-select>
-
-
-        <!--        <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>-->
-        <!--        <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中</div>-->
-        <!--        <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成</div>-->
-        <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
       </template>
     </el-table-column>
     <el-table-column min-width="150px" align="center" prop="headId" label="负责人">
@@ -424,6 +426,37 @@
               </template>
             </el-select>
           </el-form-item>
+          <el-form-item label="依赖项目">
+            <el-select
+                v-model="newDemandFormData.dependences"
+                placeholder="请选择依赖工作项"
+                size="large"
+                multiple
+                clearable
+                @change="dependenceChange"
+            >
+              <el-option
+                  v-for="item in allDemands"
+                  :key="item.demandId"
+                  :label="item.title"
+                  :value="item.demandId"
+              >
+                <div style="display: flex; align-items: center; text-align: center">
+                  <div style="display: flex; align-items: center;">
+                    <font-awesome-icon style="color: #ff877b;width: 18px" :icon="['fas', 'bolt-lightning']"
+                                       v-show="item.workItemType===0"/>
+                    <font-awesome-icon style="color: #9191f9;width: 18px" :icon="['fas', 'flag']"
+                                       v-show="item.workItemType===1"/>
+                    <font-awesome-icon style="color: #30d1fc;width: 18px" :icon="['fas', 'book-open']"
+                                       v-show="item.workItemType===2"/>
+                    <font-awesome-icon style="color: #73d897;width: 18px" :icon="['fas', 'square-check']"
+                                       v-show="item.workItemType===3"/>
+                  </div>
+                  <span style="margin-left: 10px">{{ item.title }}</span>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="负责人">
             <el-select
                 v-model="newDemandFormData.headId"
@@ -621,8 +654,7 @@
         <div style="width: 100%; padding: 20px 20px;">
           <el-descriptions
               direction="vertical"
-              :column="4"
-          >
+              :column="4">
             <el-descriptions-item width="25%" label="负责人">
               <el-select
                   v-model="clickedDemand.headId"
@@ -754,7 +786,6 @@
                   @change="demandEndTimeChange(clickedDemand)"
               />
             </el-descriptions-item>
-
           </el-descriptions>
         </div>
 
@@ -817,6 +848,7 @@
                   <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0"
                              style="background-color: rgba(234,234,234,0.12); border-radius: 10px; margin-bottom: 10px; padding: 10px 10px">
                     <template #actions>
+                      <span>{{ item.createTime }}</span>
                       <span @click="beforeReply(item, 'fromDemand')">回复</span>
                     </template>
                     <template #author>
@@ -833,6 +865,7 @@
                     <div v-for="(r,i) in notFirstLevelComment" :key="i">
                       <a-comment v-if="r.toCommentId === item.commentId" style="margin: -20px 0">
                         <template #actions>
+                          <span>{{ item.createTime }}</span>
                           <span @click="beforeReply(r, 'fromDemand')">回复</span>
                         </template>
                         <template #author>
@@ -1081,8 +1114,7 @@
               </el-tab-pane>
             </el-tabs>
           </el-tab-pane>
-          <el-tab-pane label="子工作项" name="childrenWorkItem"
-                       @click="clickDemandChildWorkItem(clickedDemand.demandId)">
+          <el-tab-pane label="子工作项" name="childrenWorkItem">
             <div v-if="childrenWorkItem.length <= 0">
               <a-empty description="无子工作项"/>
             </div>
@@ -1324,21 +1356,261 @@
 
             </el-table>
           </el-tab-pane>
+          <el-tab-pane label="依赖工作项" name="dependence">
+            <div v-if="dependenceWorkItem.length <= 0">
+              <a-empty description="无依赖工作项"/>
+            </div>
+            <el-table
+                v-else
+                :data="dependenceWorkItem"
+                row-key="demandId"
+                :indent="40"
+                border
+                style="width: 100%"
+                size="large"
+                @selection-change="handleSelectionChange"
+                :header-cell-style="{'text-align': 'center',}"
+                @row-click="clickRow"
+            >
+              <el-table-column align="center" type="selection"/>
+              <el-table-column align="center" label="序号" type="index" min-width="30px"/>
+              <el-table-column align="center" prop="demandNo" label="编号" sortable type="">
+                <template #default="scope">
+                  <span>{{ currentProInfo.proFlag }}—{{ scope.row.demandNo }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="left" prop="title" label="标题" min-width="150px">
+                <template #default="scope">
+                  <span v-show="scope.row.workItemType===0"><font-awesome-icon
+                      style="color: #ff877b;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'bolt-lightning']"/>{{ scope.row.title }}</span>
+                  <span v-show="scope.row.workItemType===1"><font-awesome-icon
+                      style="color: #9191f9;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'flag']"/>{{ scope.row.title }}</span>
+                  <span v-show="scope.row.workItemType===2"><font-awesome-icon
+                      style="color: #30d1fc;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'book-open']"/>{{ scope.row.title }}</span>
+                  <span v-show="scope.row.workItemType===3"><font-awesome-icon
+                      style="color: #73d897;width: 18px; margin-right: 5px"
+                      :icon="['fas', 'square-check']"/>{{ scope.row.title }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="demandStatus" label="状态" class-name="table-statue-column">
+                <template #default="scope">
+                  <el-select
+                      v-model="scope.row.demandStatus"
+                      placeholder="请选择状态"
+                      class="demand-status-select"
+                      @change="demandStatusChange(scope.row)"
+                  >
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="0"
+                        label="打开"
+                        :value="0"
+                        :disabled="scope.row.demandStatus === 0"
+                    >
+                      <div v-if="scope.row.demandStatus === 0" class="table-statue" style="background-color: #b5d8fa;">
+                        打开
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #56abfb;">打开</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="1"
+                        label="进行中"
+                        :value="1"
+                        :disabled="scope.row.demandStatus === 1 || scope.row.demandStatus === -1"
+                    >
+                      <div v-if="scope.row.demandStatus === 1 || scope.row.demandStatus === -1" class="table-statue"
+                           style="background-color: #fae3b2;">进行中
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #f6c659;">进行中</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="2"
+                        label="已完成"
+                        :value="2"
+                        :disabled="scope.row.demandStatus === 2 || scope.row.demandStatus === -1"
+                    >
+                      <div v-if="scope.row.demandStatus === 2 || scope.row.demandStatus === -1" class="table-statue"
+                           style="background-color: #c0fad5;">已完成
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #9de4b6;">已完成</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="-1"
+                        label="关闭"
+                        :value="-1"
+                        :disabled="scope.row.demandStatus === -1"
+                    >
+                      <div v-if="scope.row.demandStatus === -1" class="table-statue" style="background-color: #e0dede;">
+                        关闭
+                      </div>
+                      <div v-else class="table-statue" style="background-color: #c3c3c3;">关闭</div>
+                    </el-option>
+
+                    <template #prefix>
+                      <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">
+                        打开
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">
+                        进行中
+                      </div>
+                      <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">
+                        已完成
+                      </div>
+                      <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">
+                        关闭
+                      </div>
+                    </template>
+                  </el-select>
+
+
+                  <!--        <div class="table-statue" style="background-color: #56abfb;" v-show="scope.row.demandStatus===0">打开</div>-->
+                  <!--        <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.demandStatus===1">进行中</div>-->
+                  <!--        <div class="table-statue" style="background-color: #9de4b6;" v-show="scope.row.demandStatus===2">已完成</div>-->
+                  <!--        <div class="table-statue" style="background-color: #c3c3c3;" v-show="scope.row.demandStatus===-1">关闭</div>-->
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="headId" label="负责人" min-width="100px">
+                <template #default="scope">
+                  <el-select
+                      v-model="scope.row.headId"
+                      placeholder="—"
+                      class="demand-headId-select"
+                      @change="demandHeadIdChange(scope.row)"
+                  >
+                    <el-option
+                        class="member-select-options-menu"
+                        v-for="item in members"
+                        :key="item.userId"
+                        :label="item.nickName"
+                        :value="item.userId"
+                    >
+                      <div style="display: flex; align-items: center; text-align: center">
+                        <div style="display: flex; align-items: center;">
+                          <el-avatar :size="'small'" :src="item.avatar" style="position: relative; top: 0.2vh;"/>
+                        </div>
+
+                        <span style="margin-left: 10px">{{ item.nickName }}</span>
+                      </div>
+                    </el-option>
+
+                    <template #prefix>
+                      <div v-for="member in members"
+                           v-show="member.userId === scope.row.headId"
+                           style="display: flex; align-items: center"
+                      >
+                        <el-avatar :size="'small'" :src="member.avatar" style="position: relative; top: 0.2vh;"/>
+                      </div>
+                    </template>
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="priority" label="优先级">
+                <template #default="scope">
+                  <el-select
+                      v-model="scope.row.priority"
+                      placeholder="请选择优先级"
+                      class="demand-status-select"
+                      @change="demandPriorityChange(scope.row)"
+                  >
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="4"
+                        label="最高"
+                        :value="4"
+                    >
+                      <div class="table-statue" style="background-color: #ff7575;">最高</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="3"
+                        label="较高"
+                        :value="3"
+                    >
+                      <div class="table-statue" style="background-color: #ff9f73;">较高</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="2"
+                        label="普通"
+                        :value="2"
+                    >
+                      <div class="table-statue" style="background-color: #f6c659;">普通</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="1"
+                        label="较低"
+                        :value="1"
+                    >
+                      <div class="table-statue" style="background-color: #5dcfff;">较低</div>
+                    </el-option>
+                    <el-option
+                        class="demand-table-select-options-menu"
+                        :key="0"
+                        label="最低"
+                        :value="0"
+                    >
+                      <div class="table-statue" style="background-color: #73d897;">最低</div>
+                    </el-option>
+
+
+                    <template #prefix>
+                      <div class="table-statue" style="background-color: #73d897;" v-show="scope.row.priority===0">
+                        最低
+                      </div>
+                      <div class="table-statue" style="background-color: #5dcfff;" v-show="scope.row.priority===1">
+                        较低
+                      </div>
+                      <div class="table-statue" style="background-color: #f6c659;" v-show="scope.row.priority===2">
+                        普通
+                      </div>
+                      <div class="table-statue" style="background-color: #ff9f73;" v-show="scope.row.priority===3">
+                        较高
+                      </div>
+                      <div class="table-statue" style="background-color: #ff7575;" v-show="scope.row.priority===4">
+                        最高
+                      </div>
+                    </template>
+                  </el-select>
+
+
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="type" label="需求类型">
+                <template #default="scope">
+                  <span v-for="type in demandTypes" v-show="type.dictionaryDataId === scope.row.type">{{
+                      type.label
+                    }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" prop="storyPoint" label="故事点"/>
+              <el-table-column align="center" prop="updateTime" label="更新时间">
+                <template #default="scope">
+                  {{ formatDate(new Date(scope.row.updateTime), 'YYYY-MM-DD HH:mm:ss') }}
+                </template>
+              </el-table-column>
+
+            </el-table>
+          </el-tab-pane>
           <el-tab-pane label="测试" name="tests">
-            <div style="display: flex; justify-content: right; padding: 0 50px"  class="addTest" v-show="!hasTestPlan">
+            <div style="display: flex; justify-content: right; padding: 0 50px" class="addTest" v-show="!hasTestPlan">
               <el-button type="primary" size="large" @click="openAddTestPlanDialog"><span
                   style="font-size: 20px; margin-right: 5px;">+</span>新建测试
               </el-button>
             </div>
             <div v-if="hasTestPlan" class="table">
               <el-table :data="testTableData"
-                        style="width: 100%"
                         size="large"
                         stripe
                         v-loading="loading"
-                        @row-click="clickTest"
-              >
-                <el-table-column prop="planName" label="测试计划名称">
+                        @row-click="clickTest">
+                <el-table-column prop="planName" show-overflow-tooltip label="测试计划名称">
                   <template #default="scope">
                     <div style="display: flex; align-items: center">
                       <font-awesome-icon style="color:#56abfb;" :icon="['fas', 'file-lines']"/>
@@ -1366,7 +1638,7 @@
                         status="success"
                         :text-inside="true"
                         :stroke-width="24"
-                        color="green"/>
+                        :color="colors"/>
                   </template>
                 </el-table-column>
                 <el-table-column prop="startTime" label="计划开始时间" align="center">
@@ -1568,7 +1840,7 @@
       <span v-show="clickedDemand.workItemType===3"><font-awesome-icon
           style="color: #73d897;width: 18px; margin-right: 5px"
           :icon="['fas', 'square-check']"/></span>
-      {{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}
+      <span>{{ currentProInfo.proFlag }} - {{ clickedDemand.demandNo }}</span>
     </template>
     <template #footer>
 
@@ -1583,17 +1855,27 @@
       top="8vh"
       :show-close="false"
       @close="handleCloseEditTestPlan"
+      @closed="clearEchoPlan"
   >
+    <template #title>
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <div style="font-size: 18px;">测试计划详情</div>
+        <el-button type="info" text @click="openTestPlanDialog = false" size="large">
+          <font-awesome-icon :icon="['fas', 'xmark']" size="lg"/>
+        </el-button>
+      </div>
+    </template>
     <el-form
         :model="echoTestPlan"
         label-width="auto"
         label-position="top"
         require-asterisk-position="right"
         size="large">
-      <div style="width: 100%; height: 70vh; margin: 0 auto; display: flex; justify-content: space-between">
+      <div style="width: 100%; margin: 0 auto; display: flex; justify-content: space-between">
         <div style="width: 73%;">
           <el-form-item label="标题" required>
-            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable></el-input>
+            <el-input v-model="echoTestPlan.planName" placeholder="请输入需求标题" clearable
+                      :disabled="echoTestPlan.isArchive"/>
           </el-form-item>
           <el-tabs type="border-card" @tab-click="handleTabClick" v-model="activeName">
             <el-tab-pane label="测试用例" name="caseList">
@@ -1602,6 +1884,7 @@
                         size="large"
                         v-loading="loadTestCase"
                         max-height="535px"
+                        empty-text="暂无数据"
                         stripe>
                 <el-table-column prop="caseName" label="用例名称"/>
                 <el-table-column prop="priorityLabel" label="优先级" sortable>
@@ -1619,24 +1902,29 @@
                 </el-table-column>
                 <el-table-column label="操作">
                   <template #default="scope">
-                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)">编辑</el-button>
-                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)">删除
+                    <el-button type="primary" text size="large" @click="editTestCase(scope.row)"
+                               :disabled="echoTestPlan.isArchive">编辑
+                    </el-button>
+                    <el-button type="danger" text size="large" @click="deleteTestCase(scope.row)"
+                               :disabled="echoTestPlan.isArchive">删除
                     </el-button>
                   </template>
                 </el-table-column>
               </el-table>
             </el-tab-pane>
             <el-tab-pane label="添加测试用例" name="addCase">
-              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top" style="max-height: 704px">
+              <el-form v-model="addTestCaseForm" label-width="100px" label-position="top">
                 <el-form-item label="用例名称" required>
-                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable></el-input>
+                  <el-input v-model="addTestCaseForm.caseName" placeholder="请输入用例名称" clearable
+                            :disabled="echoTestPlan.isArchive"/>
                 </el-form-item>
                 <el-form-item label="用例描述" required>
                   <el-input v-model="addTestCaseForm.caseContent" placeholder="请输入用例描述" type="textarea"
-                            :rows="12" resize="none" clearable></el-input>
+                            :rows="12" resize="none" clearable :disabled="echoTestPlan.isArchive"/>
                 </el-form-item>
                 <el-form-item label="优先级" required>
-                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级" clearable>
+                  <el-select v-model="addTestCaseForm.priority" placeholder="请选择优先级"
+                             :disabled="echoTestPlan.isArchive" clearable>
                     <el-option label="低" value="0"></el-option>
                     <el-option label="中" value="1"></el-option>
                     <el-option label="高" value="2"></el-option>
@@ -1651,93 +1939,124 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="测试报告" name="testReport">
-              <el-upload
-                  class="upload-report"
-                  :show-file-list="false"
-                  :before-upload="beforeUpload"
-                  :http-request="handleUpload"
-                  drag>
-                <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
-                <div class="el-upload__text">
-                  将文件拖动到此或<em>点击上传</em>
-                </div>
-                <template #tip>
-                  <div class="el-upload__tip" style="font-size: 15px">
-                    仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
-                  </div>
-                </template>
-              </el-upload>
-              <div class="upload-progress">
-                <el-progress v-if="uploadProgress > 0"
-                             :percentage="uploadProgress"
-                             :color="colors"
-                             :stroke-width="15"
-                             type="line"/>
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingTestReport">
+                <a-spin size="large"/>
               </div>
-              <div class="test-report-card">
-                <el-card v-if="testReport !== null" class="test-report">
-                  <div class="test-report-top">
-                    <div class="test-report-title">{{ testReport.testReportName }}</div>
-                    <div class="approval">
-                      <el-select v-model="testReport.approvalStatus" @change="updateTestReportApprovalStatus">
-                        <el-option label="待审批" :value="0"/>
-                        <el-option label="已通过" :value="1"/>
-                        <el-option label="未通过" :value="2"/>
-                      </el-select>
+              <div v-else>
+                <el-upload
+                    class="upload-report"
+                    :show-file-list="false"
+                    :before-upload="beforeUpload"
+                    :http-request="handleUpload"
+                    :disabled="echoTestPlan.isArchive"
+                    drag>
+                  <font-awesome-icon style="font-size: 50px;margin: 20px auto;" icon="fa-solid fa-cloud-arrow-up"/>
+                  <div class="el-upload__text">
+                    将文件拖动到此或<em>点击上传</em>
+                  </div>
+                  <template #tip>
+                    <div class="el-upload__tip" style="font-size: 15px">
+                      仅支持上传 <em>doc</em>、<em>docx</em>、<em>pdf</em> 格式文件
                     </div>
-                  </div>
-                  <div class="test-report-footer">
-                    <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
-                    <el-button type="danger" text size="default" @click="deleteTestReport">删除</el-button>
-                  </div>
-                </el-card>
-                <el-empty description="暂未上传测试报告" v-else/>
+                  </template>
+                </el-upload>
+                <div class="upload-progress">
+                  <el-progress v-if="uploadProgress > 0"
+                               :percentage="uploadProgress"
+                               :color="colors"
+                               :stroke-width="15"
+                               type="line"/>
+                </div>
+                <div class="test-report-card">
+                  <el-card v-if="testReport !== null" class="test-report">
+                    <div class="test-report-top">
+                      <div class="test-report-title">{{ testReport.testReportName }}</div>
+                      <div class="approval">
+                        <el-select v-model="testReport.reviewStatus" @change="updateTestReportApprovalStatus"
+                                   :disabled="echoTestPlan.isArchive">
+                          <el-option label="待审批" :value="0"/>
+                          <el-option label="已通过" :value="1"/>
+                          <el-option label="未通过" :value="2"/>
+                        </el-select>
+                      </div>
+                    </div>
+                    <div class="test-report-footer">
+                      <el-button type="primary" text size="default" @click="downloadTestReport">下载</el-button>
+                      <el-button type="danger" text size="default" @click="deleteTestReport"
+                                 :disabled="echoTestPlan.isArchive">删除
+                      </el-button>
+                    </div>
+                  </el-card>
+                  <a-empty description="暂未上传测试报告" v-else/>
+                </div>
               </div>
             </el-tab-pane>
             <el-tab-pane label="留言" name="message">
-              <el-scrollbar height="37vh">
+              <div style="height: 200px;display: flex; justify-content: center; align-items: center"
+                   v-if="loadingMessage">
+                <a-spin size="large"/>
+              </div>
+              <div v-else>
+                <div class="post-comment-form"
+                     style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end; flex-direction: column">
+                  <a-textarea
+                      :auto-size="{ minRows: 4, maxRows: 4 }"
+                      placeholder="友善发言，文明评论~"
+                      v-model:value="postComment.content"
+                      id="postCommentInput"
+                      @keydown.enter.native="submitComment"
+                  />
+                  <a-button style="margin: 10px 0" type="primary" @click="submitComment"
+                            :disabled="postComment.content === ''">评论
+                  </a-button>
+                </div>
                 <div v-if="firstLevelComment.length <= 0">
                   <a-empty description="暂无评论"/>
                 </div>
-                <div style="width: 90%" v-else>
-                  <a-comment v-for="(item,index) in firstLevelComment" :key="index" v-if="firstLevelComment.length > 0">
-                    <template #actions>
-                      <span @click="beforeReply(item, 'fromTest')">回复</span>
-                    </template>
-                    <template #author>
-                      <a>{{ item.nickName }}</a>
-                    </template>
-                    <template #avatar>
-                      <a-avatar :src="item.avatar" :alt="item.nickName"/>
-                    </template>
-                    <template #content>
-                      <p>
-                        {{ item.content }}
-                      </p>
-                    </template>
-                    <div v-for="(r,i) in notFirstLevelComment" :key="i">
-                      <a-comment v-if="r.toCommentId === item.commentId">
-                        <template #actions>
-                          <span @click="beforeReply(r,'fromTest')">回复</span>
-                        </template>
-                        <template #author>
-                          <a style="font-size: 14px">{{ r.nickName }}</a>
-                          <span style="margin: 0 5px; font-size: 12px">回复了</span>
-                          <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
-                        </template>
-                        <template #avatar>
-                          <a-avatar :src="r.avatar" :alt="r.nickName"/>
-                        </template>
-                        <template #content>
-                          <p>
-                            {{ r.content }}
-                          </p>
-                        </template>
-                      </a-comment>
-                    </div>
-                  </a-comment>
-
-                  <a-modal v-model:open="openTestRep" width="60%" :footer="null" :closable="false" z-index="9999">
+                <div style="width: 100%" v-else>
+                  <el-scrollbar max-height="38vh">
+                    <a-comment v-for="(item,index) in firstLevelComment" :key="index"
+                               v-if="firstLevelComment.length > 0">
+                      <template #actions>
+                        <span>{{ item.createTime }}</span>
+                        <span @click="beforeReply(item)">回复</span>
+                      </template>
+                      <template #author>
+                        <a style="font-size: 14px">{{ item.nickName }}</a>
+                      </template>
+                      <template #avatar>
+                        <a-avatar :src="item.avatar" :alt="item.nickName"/>
+                      </template>
+                      <template #content>
+                        <p>
+                          {{ item.content }}
+                        </p>
+                      </template>
+                      <div v-for="(r,i) in notFirstLevelComment" :key="i">
+                        <a-comment v-if="r.toCommentId === item.commentId">
+                          <template #actions>
+                            <span>{{ r.createTime }}</span>
+                            <span @click="beforeReply(r)">回复</span>
+                          </template>
+                          <template #author>
+                            <a style="font-size: 14px">{{ r.nickName }}</a>
+                            <span style="margin: 0 5px; font-size: 12px">回复了</span>
+                            <a><span style="color: #16acff; font-size: 14px"> @{{ r.toUserNickName }}</span></a>
+                          </template>
+                          <template #avatar>
+                            <a-avatar :src="r.avatar" :alt="r.nickName"/>
+                          </template>
+                          <template #content>
+                            <p>
+                              {{ r.content }}
+                            </p>
+                          </template>
+                        </a-comment>
+                      </div>
+                    </a-comment>
+                  </el-scrollbar>
+                  <a-modal v-model:open="openRep" width="60%" :footer="null" :closable="false" z-index="9999">
                     <div class="rep-box">
                       <a-textarea
                           class="rep-con"
@@ -1745,39 +2064,23 @@
                           placeholder="友善发言，文明评论~"
                           :auto-size="{ minRows: 3, maxRows: 5 }"
                           id="repCommentInput"
-                          @keydown.enter.native="replyComment('fromTest')"
+                          @keydown.enter.native="replyComment"
                       />
                     </div>
                     <a-form-item>
-                      <a-button style="float: right" type="primary" @click="replyComment('fromTest')"
+                      <a-button style="float: right" type="primary" @click="replyComment()"
                                 :disabled="replyContent === ''">回复
                       </a-button>
                     </a-form-item>
                   </a-modal>
                 </div>
-                <div style="width: 55vw; position: fixed; bottom: 15vh">
-                  <div class="post-comment-form"
-                       style="width: 100%; display: flex; justify-content: space-between; align-items: flex-end">
-                    <a-textarea
-                        :auto-size="{ minRows: 3, maxRows: 6 }"
-                        placeholder="友善发言，文明评论~"
-                        v-model:value="postComment.content"
-                        id="postCommentInput"
-                        @keydown.enter.native="submitComment(echoTestPlan.testPlanId)"
-                    />
-
-                    <a-button style="margin-left: 30px" type="primary" @click="submitComment(echoTestPlan.testPlanId)"
-                              :disabled="postComment.content === ''">评论
-                    </a-button>
-                  </div>
-                </div>
-              </el-scrollbar>
+              </div>
             </el-tab-pane>
           </el-tabs>
         </div>
         <el-scrollbar style="width: 25%; padding-left: 20px; border-left: rgba(0,0,0,0.1) solid 1px">
           <el-form-item label="负责人" required v-loading="loadingTestMembers">
-            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人">
+            <el-select v-model="echoTestPlan.head" placeholder="请选择负责人" :disabled="echoTestPlan.isArchive">
               <el-option
                   v-for="item in projectTestMember"
                   :key="item.userId"
@@ -1799,6 +2102,7 @@
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="echoTestPlan.isArchive"
                 placeholder="选择开始日期">
             </el-date-picker>
             <span style="margin: 0 18px">-</span>
@@ -1808,6 +2112,7 @@
                 type="date"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled="echoTestPlan.isArchive"
                 placeholder="选择结束日期">
             </el-date-picker>
           </el-form-item>
@@ -1815,7 +2120,6 @@
             <el-input v-model="echoTestPlan.creatorName" disabled/>
           </el-form-item>
           <el-progress
-              style="margin-top: 10px"
               :percentage="echoTestPlan.progress"
               :color="colors"
               stroke-width="15"
@@ -1826,9 +2130,14 @@
             </template>
           </el-progress>
           <div class="dialog-footer">
-            <el-button @click="handleCloseEditTestPlan">取消</el-button>
+            <el-button type="success"
+                       v-if="echoTestPlan.isArchive"
+                       disabled
+                       size="large"
+                       style="width: 90px;">已存档
+            </el-button>
             <el-button type="primary" @click="handleSubmitEditTestPlan" :disabled="editTestPlanBtnDisable"
-                       :loading="loadingEditTestPlan">
+                       :loading="loadingEditTestPlan" v-if="!echoTestPlan.isArchive">
               {{ editTestPlanBtnText }}
             </el-button>
           </div>
@@ -1906,7 +2215,8 @@
         </el-input>
       </el-form-item>
       <el-form-item label="关联需求">
-        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled no-data-text="暂无需求">
+        <el-input size="large" v-model="clickedDemand.title" placeholder="请选择关联需求" disabled
+                  no-data-text="暂无需求">
         </el-input>
       </el-form-item>
       <el-form-item label="负责人">
@@ -1948,7 +2258,6 @@
 
 </template>
 
-
 <script setup lang="ts">
 import {onMounted, ref, shallowRef, onBeforeUnmount} from "vue";
 import {IToolbarConfig} from "@wangeditor/editor";
@@ -1956,16 +2265,24 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {
   addComment,
-  getAllDemandByProId, getChildrenWorkItemList, getCommentList, getDemandActiveList, getDemandById,
+  getAllDemandByProId,
+  getChildrenWorkItemList,
+  getCommentList,
+  getDemandActiveList,
+  getDemandById,
+  getDependenceWorkItemList,
   insertNewDemand,
   queryDemandMembers,
   queryDemandSource,
   queryDemandTypes,
   queryProByProId,
-  updateDemandDesc, updateDemandEndTime,
+  searchDemandList,
+  updateDemandDesc,
+  updateDemandEndTime,
   updateDemandHeadId,
   updateDemandPriority,
-  updateDemandSource, updateDemandStartTime,
+  updateDemandSource,
+  updateDemandStartTime,
   updateDemandStatus,
   updateDemandType
 } from "../../../api/demandApi.ts";
@@ -1986,6 +2303,36 @@ import {
   updateTestReportApprovalStatusById,
   uploadTestReport
 } from "../../../api/TestPlanApi.ts";
+
+const searchInput = ref('')
+const searchDemands = () => {
+  loadingWorkItems.value = true
+  demandsByLevel.value = []
+
+  if (searchInput.value === '') {
+    getDemandsList(proId.value)
+  }
+
+  searchDemandList(proId.value, searchInput.value).then((res) => {
+    console.log(res)
+    if (res.data.code === 2001) {
+      demandsByLevel.value = res.data.data.allDemands
+    } else {
+      ElNotification({
+        title: '通知',
+        message: res.data.message,
+        duration: 2000,
+      })
+    }
+    loadingWorkItems.value = false
+  })
+}
+
+const clearSearchInput = () => {
+  demandsByLevel.value = []
+  searchInput.value = ''
+  getDemandsList(proId.value)
+}
 
 const proId = ref('')
 const currentProInfo = ref({})
@@ -2026,7 +2373,7 @@ const newDemandFormData = ref({
   proId: '',
   title: '',
   demandDesc: '',
-  demandStatus: 0,
+  demandStatus: -2,
   headId: '',
   priority: 2, // 默认普通优先级
   fatherDemandId: '',
@@ -2034,6 +2381,7 @@ const newDemandFormData = ref({
   workItemType: 0,
   source: '',
   storyPoint: 0,
+  dependences: []
 })
 
 const addDemandDialogVisible = ref(false)
@@ -2049,12 +2397,10 @@ const getCurrentProInfo = (proId) => {
       console.log(currentProInfo.value)
 
 
-
       if (localStorage.getItem("recentVisit")) {
         clickRow(clickedDemand.value)
         localStorage.removeItem("recentVisit")
       }
-
 
 
     } else {
@@ -2066,7 +2412,6 @@ const getCurrentProInfo = (proId) => {
 const getDemandMembers = (proId) => {
   queryDemandMembers(proId).then((res) => {
     members.value = res.data.data
-    console.log(res)
   })
 }
 
@@ -2085,7 +2430,9 @@ const getDemandSource = () => {
 }
 
 const getDemandsList = (proId) => {
+  loadingWorkItems.value = true
   getAllDemandByProId(proId).then((res) => {
+    console.log(res.data.data)
     if (res.data.code === 2001) {
       demandsByLevel.value = res.data.data.demandsByLevel
       allDemands.value = res.data.data.allDemands.filter((item) => item.workItemType === 1)
@@ -2146,6 +2493,7 @@ const submitAddDemand = () => {
     })
     return
   }
+
   if (newDemandFormData.value.fatherDemandId === "") {
     newDemandFormData.value.fatherDemandId = "0"
   }
@@ -2154,7 +2502,7 @@ const submitAddDemand = () => {
     if (res.data.code === 3001) {
       ElNotification({
         title: '成功',
-        message: res.data.message,
+        message: res.data.message + '，请等待项目负责人审核',
         type: 'success',
       })
       addDemandDialogVisible.value = false
@@ -2218,6 +2566,7 @@ const handleCloseClickRow = () => {
   firstLevelComment.value = []
   notFirstLevelComment.value = []
   childrenWorkItem.value = []
+  dependenceWorkItem.value = []
   testTableData.value = []
 }
 
@@ -2369,6 +2718,7 @@ const clickRow = (row) => {
   clickedDemand.value = row
   getComments(clickedDemand.value.demandId)
   getChildrenWorkItem(clickedDemand.value.demandId)
+  getDependenceWorkItem(clickedDemand.value.demandId)
   getDemandActive(clickedDemand.value.demandId)
   loadTestPlanList(clickedDemand.value.demandId)
 
@@ -2405,6 +2755,7 @@ const getDemandActive = (demandId) => {
 
 const childrenWorkItem = ref([])
 
+
 const getChildrenWorkItem = (workItemId) => {
   getChildrenWorkItemList(workItemId).then((res) => {
     if (res.data.code === 2001) {
@@ -2414,6 +2765,17 @@ const getChildrenWorkItem = (workItemId) => {
     }
   })
 }
+const dependenceWorkItem = ref([])
+const getDependenceWorkItem = (workItemId) => {
+  getDependenceWorkItemList(workItemId).then((res) => {
+    if (res.data.code === 2001) {
+      dependenceWorkItem.value = res.data.data
+    } else {
+      dependenceWorkItem.value = []
+    }
+  })
+}
+
 
 const openClickEditor = () => {
   showDesc.value = false
@@ -2468,20 +2830,41 @@ const postComment = ref({
   toUserId: '',
   toUserNickName: '',
 })
-const loadingComments = ref(false)
+const loadingMessage = ref(false)
 const getComments = (workItemId) => {
-  loadingComments.value = true
+  loadingMessage.value = true
   getCommentList(workItemId).then((res) => {
     if (res.data.code === 2001) {
       let comments = res.data.data
+
+      for (let i = 0; i < comments.length; i++) {
+        comments[i].createTime = comments[i].createTime.replace('T', ' ')
+      }
+
+      for (let i = 0; i < comments.length; i++) {
+        let now = new Date().getTime()
+        let createTime = new Date(comments[i].createTime).getTime()
+        let diff = now - createTime
+        if (diff < 86400000) {
+          if (diff < 60000) {
+            comments[i].createTime = '刚刚'
+          } else if (diff < 3600000) {
+            console.log(diff / 60000)
+            comments[i].createTime = Math.floor(diff / 60000) + '分钟前'
+          } else {
+            comments[i].createTime = Math.floor(diff / 3600000) + '小时前'
+          }
+        }
+      }
+
       firstLevelComment.value = comments.filter((item) => item.toCommentId === '0')
       notFirstLevelComment.value = comments.filter((item) => item.toCommentId !== '0')
-      loadingComments.value = false
     } else {
       firstLevelComment.value = []
       notFirstLevelComment.value = []
-      loadingComments.value = false
     }
+  }).finally(() => {
+    loadingMessage.value = false
   })
 }
 
@@ -2570,7 +2953,7 @@ const replyComment = (flag) => {
       })
       openRep.value = false;
       openTestRep.value = false;
-      if (flag === 'fromDemand'){
+      if (flag === 'fromDemand') {
         console.log("从需求")
         console.log(clickedDemand.value)
         getComments(clickedDemand.value.demandId)
@@ -2638,13 +3021,17 @@ const form = ref({
 const addTestPlanBtnText = ref('提交')
 const addTestPlanBtnDisable = ref(false)
 const loadingAddTestPlan = ref(false)
-
+const loadingTestReport = ref(true)
 
 const openAddTestPlanDialog = () => {
   form.value.projectId = currentProInfo.value.proId
   form.value.demandId = clickedDemand.value.demandId
   // projectTestMember.value = []
   addTestPlanDialogVisible.value = true
+}
+
+const dependenceChange = () => {
+  console.log(newDemandFormData.value.dependences)
 }
 
 const handleCloseAddTestPlanDialog = () => {
@@ -2775,6 +3162,18 @@ const loadTestPlanList = (demandId) => {
       .then(res => {
         if (res.data.code === 200) {
           testTableData.value = res.data.data
+
+          if (testTableData.value !== null) {
+            testTableData.value[0].startTime = testTableData.value[0].startTime.replace('T', ' ').substring(0, 10)
+            testTableData.value[0].endTime = testTableData.value[0].endTime.replace('T', ' ').substring(0, 10)
+
+            for (let i = 0; i < members.value.length; i++) {
+              if (testTableData.value[0].head === members.value[i].userId) {
+                testTableData.value[0].headName = members.value[i].nickName
+                break
+              }
+            }
+          }
           hasTestPlan.value = testTableData.value !== null && testTableData.value.length > 0
         } else {
           ElNotification({
@@ -2844,6 +3243,7 @@ const handleTabClick = (tab) => {
 }
 
 const queryTestReport = () => {
+  loadingTestReport.value = true
   queryTestReportByPlanId(echoTestPlan.value.testPlanId)
       .then(res => {
         if (res.data.code === 200) {
@@ -2852,6 +3252,9 @@ const queryTestReport = () => {
         } else {
           testReport.value = null
         }
+      })
+      .finally(() => {
+        loadingTestReport.value = false
       })
 }
 
@@ -3023,7 +3426,6 @@ const handleUpload = (file) => {
           })
         }
       })
-
 }
 
 const updateTestReportApprovalStatus = () => {
@@ -3070,35 +3472,40 @@ const deleteTestReport = () => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    deleteTestReportById(testReport.value.testReportId)
-        .then(res => {
-          if (res.data.code === 200) {
-            ElNotification({
-              title: '成功',
-              message: res.data.message,
-              type: 'success'
-            })
-            queryTestReport()
-          } else {
-            ElNotification({
-              title: '提示',
-              message: res.data.message,
-              type: 'warning'
-            })
-          }
-        })
-  }).catch(() => {
-    ElNotification({
-      title: '提示',
-      message: '已取消删除',
-      type: 'info'
-    })
   })
+      .then(() => {
+        deleteTestReportById(testReport.value.testReportId)
+            .then(res => {
+              if (res.data.code === 200) {
+                ElNotification({
+                  title: '成功',
+                  message: res.data.message,
+                  type: 'success'
+                })
+                queryTestReport()
+              } else {
+                ElNotification({
+                  title: '提示',
+                  message: res.data.message,
+                  type: 'warning'
+                })
+              }
+            })
+      })
+      .catch(() => {
+        ElNotification({
+          title: '提示',
+          message: '已取消删除',
+          type: 'info'
+        })
+      })
 }
 
 const handleCloseEditTestPlan = () => {
-  openTestPlanDialog.value = false
+  loadTestPlanList(clickedDemand.value.demandId)
+}
+
+const clearEchoPlan = () => {
   echoTestPlan.value = {}
   testCaseTableData.value = []
   activeName.value = 'caseList'
@@ -3273,6 +3680,7 @@ const submitEditTestCase = () => {
           })
           editTestCaseDialogVisible.value = false
           getTestCaseData()
+          getTestPlanDetailById(formData.testPlanId)
         } else {
           ElNotification({
             title: '提示',
@@ -3299,6 +3707,10 @@ onBeforeUnmount(() => {
   clickEditor.destroy()
   clickReadOnlyEditor.destroy()
 })
+
+window.addEventListener('beforeunload', (e) => {
+  console.log('页面刷新')
+});
 </script>
 
 <style scoped>
@@ -3407,4 +3819,53 @@ onBeforeUnmount(() => {
   margin-right: 5px
 }
 
+.percentage-value {
+  display: block;
+  margin-top: 10px;
+  font-size: 28px;
+}
+
+.percentage-label {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+}
+
+.test-report-card {
+  margin-top: 20px;
+}
+
+.test-report-top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.test-report-title {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.approval {
+  width: 110px;
+}
+
+.test-report-footer {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.add-test-case-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
 </style>

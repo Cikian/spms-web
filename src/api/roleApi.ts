@@ -59,3 +59,11 @@ export function updateRoleInfo(data) {
         data
     })
 }
+
+export function uploadImportUser(data) {
+    return request({
+        url: '/upload/importUser',
+        method: 'post',
+        data
+    })
+}

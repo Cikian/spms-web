@@ -5,8 +5,12 @@
         <el-button type="primary" @click="openDialog">新增用户</el-button>
       </div>
       <div class="batch-delete">
+        <el-button type="primary" @click="openImportUserDialog()">批量导入</el-button>
+      </div>
+      <div class="batch-delete">
         <el-button type="danger" @click="handleBatchDelete" :disabled="selectedRows.length === 0">批量删除</el-button>
       </div>
+
     </div>
     <div class="user-list-table">
       <el-table
@@ -153,6 +157,59 @@
     </div>
   </el-dialog>
 
+  <!--  导入用户dialog-->
+  <el-dialog
+      title="新增用户"
+      class="add-user-dialog"
+      v-model="importUserDialog"
+      width="35%"
+  >
+    <el-popover
+        placement="right"
+        title="注意"
+        :width="374"
+        trigger="hover"
+    >
+      导入的文件仅支持<span style="font-weight: bold">.xlsx</span>文件或<span style="font-weight: bold">.xls</span>文件<br>
+      其中必须包含“姓名”、“邮箱”两列<br>
+      示例：<br>
+      <img style="width: 350px; margin: 0 auto" src="../../assets/example.png"  />
+
+      <template #reference>
+        <el-upload
+            class="upload-demo"
+            ref="importUserRef"
+            drag
+            :http-request="importUserReq"
+            :auto-upload="false"
+            :limit="1"
+            :on-exceed="handleExceed"
+        >
+          <font-awesome-icon style="font-size: 50px; margin-bottom: 20px" :icon="['fas', 'cloud-arrow-up']"/>
+          <div class="el-upload__text">
+            将文件拖动到此或<em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip" style="font-size: 15px">
+              仅支持上传 <em>xlsx</em>、<em>xls</em> 格式文件
+            </div>
+          </template>
+        </el-upload>
+      </template>
+    </el-popover>
+
+
+    <el-progress :percentage="uploadProgress" :format="format"/>
+
+    <div v-if="uploadProgress === 100">
+      导入成功：<span style="color: #6bed7a">{{uploadResult.success}}</span>
+      导入失败：<span style="color: #ff3232">{{uploadResult.fail}}</span>
+    </div>
+    <template #footer>
+      <el-button type="success" size="large" @click="submitImportUser()">导入</el-button>
+    </template>
+  </el-dialog>
+
   <!--  用户信息dialog-->
   <el-dialog
       title="分配角色"
@@ -184,8 +241,10 @@
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
 import {addUser, deleteUsers, queryById, queryUserList, updateStatus} from "../../api/userApi.ts";
-import {assignRole, queryRoleList, queryUserHasRole} from "../../api/roleApi.ts";
+import {assignRole, queryRoleList, queryUserHasRole, uploadImportUser} from "../../api/roleApi.ts";
 import {message} from "ant-design-vue";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {genFileId, UploadInstance, UploadProps, UploadRawFile} from 'element-plus'
 
 const loading = ref(true)
 const userList = ref([])
@@ -574,6 +633,80 @@ const handleSubmitUserInfo = () => {
         loadingSubmitUserInfo.value = false
       })
 }
+
+const importUserRef = ref<UploadInstance>()
+
+const importUserDialog = ref(false)
+
+const uploadProgress = ref(0)
+
+const uploadResult = ref({
+  success: 0,
+  fail: 0
+})
+
+const addUploadProgress = () => {
+  if (uploadProgress.value < 99) {
+    uploadProgress.value += 1
+  }
+}
+const addUploadProgressSuccess = () => {
+  if (uploadProgress.value < 100) {
+    uploadProgress.value += 1
+  } else {
+    clearInterval(timerSuccess)
+  }
+}
+
+let timerSuccess;
+const importUserReq = (file) => {
+  uploadProgress.value = 0
+
+  let formData1 = new FormData();
+  formData1.append('file', file.file);
+
+  let timer = setInterval(addUploadProgress, 190);
+
+  uploadImportUser(formData1)
+      .then(res => {
+        if (res.data.code === 1001) {
+          console.log("导入返回：" + res)
+          ElNotification({
+            title: '成功',
+            message: res.data.message,
+            type: 'success'
+          })
+          uploadResult.value.success = res.data.data.success
+          uploadResult.value.fail = res.data.data.fail
+          importUserRef.value!.clearFiles()
+          clearInterval(timer)
+          timerSuccess = setInterval(addUploadProgressSuccess, 20);
+        } else {
+          ElNotification({
+            title: '提示',
+            message: res.data.message,
+            type: 'warning'
+          })
+        }
+      })
+}
+
+const openImportUserDialog = () => {
+  importUserDialog.value = true
+}
+
+const submitImportUser = () => {
+  importUserRef.value!.submit()
+}
+
+const handleExceed: UploadProps['onExceed'] = (files) => {
+  importUserRef.value!.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  importUserRef.value!.handleStart(file)
+}
+
+const format = (percentage) => (percentage === 100 ? '完成' : `${percentage}%`)
 
 onMounted(() => {
   loadUserList()
