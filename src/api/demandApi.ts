@@ -194,3 +194,17 @@ export function searchDemandList(proId, data) {
         method: 'get',
     })
 }
+
+export function getGanttRowList(proId) {
+    return request({
+        url: '/pro/gantt?proId=' + proId,
+        method: 'get',
+    })
+}
+
+export function getProTime(proId) {
+    return request({
+        url: '/pro/getProTime?proId=' + proId,
+        method: 'get',
+    })
+}

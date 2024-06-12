@@ -695,6 +695,7 @@
                   placeholder="请选择优先级"
                   class="demand-status-select"
                   @change="demandStatusChange(clickedDemand)"
+                  :disabled="clickedDemand.demandStatus === -9"
                   style="width: 80%"
               >
                 <el-option
@@ -759,6 +760,7 @@
                   <div class="table-statue" style="background-color: #c3c3c3;" v-show="clickedDemand.demandStatus===-1">
                     关闭
                   </div>
+                  <div class="table-statue" style="background-color: #ff7575;" v-show="clickedDemand.demandStatus===-9">无法进行</div>
                 </template>
               </el-select>
             </el-descriptions-item>

@@ -375,6 +375,11 @@ const router = createRouter({
                             name: '会议',
                             component: () => import('../views/pro_details/meeting.vue')
                         },
+                        {
+                            path: '/proDetail/gantt',
+                            name: '图表',
+                            component: () => import('../views/pro_details/gantt.vue')
+                        },
                     ]
                 },
                 {

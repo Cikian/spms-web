@@ -695,6 +695,7 @@
                   placeholder="请选择优先级"
                   class="demand-status-select"
                   @change="demandStatusChange(clickedDemand)"
+                  :disabled="clickedDemand.demandStatus === -9"
                   style="width: 80%"
               >
                 <el-option
@@ -759,6 +760,7 @@
                   <div class="table-statue" style="background-color: #c3c3c3;" v-show="clickedDemand.demandStatus===-1">
                     关闭
                   </div>
+                  <div class="table-statue" style="background-color: #ff7575;" v-show="clickedDemand.demandStatus===-9">无法进行</div>
                 </template>
               </el-select>
             </el-descriptions-item>
@@ -2554,6 +2556,7 @@ const closeAddDemandDialog = () => {
   newDemandFormData.value.storyPoint = 0
   newDemandFormData.value.startTime = ''
   newDemandFormData.value.endTime = ''
+  newDemandFormData.value.dependences = []
 
   addDemandFatherDemandSelected.value = {}
 
@@ -2567,7 +2570,7 @@ const handleCloseClickRow = () => {
   childrenWorkItem.value = []
   dependenceWorkItem.value = []
   testTableData.value = []
-  allTarget.value = []
+  // allTarget.value = []
 }
 
 const clickIcon = ref(false)

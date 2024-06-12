@@ -279,6 +279,14 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
+      if (proDate.value === '') {
+        ElNotification({
+          title: '错误',
+          message: '请选择项目时间',
+          type: 'error',
+        })
+        return
+      }
       getMembers()
       theFirst.value = false
     } else {
@@ -331,8 +339,6 @@ const handleSelectionChange = (val: User[]) => {
 }
 
 const submitAddPro = () => {
-  console.log('提交表单')
-
   proData.proMembersIds = []
   for (let i = 0; i < selectionMembers.value.length; i++) {
     proData.proMembersIds.push(selectionMembers.value[i].userId)

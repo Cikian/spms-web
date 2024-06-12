@@ -19,6 +19,7 @@
           <el-menu-item class="h-menu-item" index="/proDetail/proResources">资源</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proTarget">目标</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/meeting">会议</el-menu-item>
+          <el-menu-item class="h-menu-item" index="/proDetail/gantt">图表</el-menu-item>
           <el-menu-item class="h-menu-item" index="/proDetail/proAudit" v-if="isProHeader">审批</el-menu-item>
 
           <Notification/>
