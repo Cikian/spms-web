@@ -208,3 +208,11 @@ export function getProTime(proId) {
         method: 'get',
     })
 }
+
+export function updateTimeByGantt(proId, data) {
+    return request({
+        url: '/demand/changeTime?demandId=' + proId,
+        method: 'put',
+        data
+    })
+}

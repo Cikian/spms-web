@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
 import {GGanttChart, GGanttRow} from "@infectoone/vue-ganttastic";
-import {getGanttRowList, getProTime} from "../../api/demandApi.ts";
+import {getGanttRowList, getProTime, updateTimeByGantt} from "../../api/demandApi.ts";
 import router from "../../router";
 
 const proId = ref('')
@@ -59,6 +59,16 @@ const onClickBar = (bar) => {
   localStorage.setItem("recentVisit", bar.bar.ganttBarConfig.id)
   router.push('/proDetail/proDemand/allDemands')
 }
+
+// const onDragendBar = (bar) => {
+//   console.log('dragend')
+//   console.log(bar.movedBars)
+//   console.log(bar.movedBars.get(Proxy(Object)))
+//   // updateTimeByGantt(proId.value, bar.movedBars).then(res => {
+//   //
+//   //   console.log('res', res)
+//   // })
+// }
 
 
 </script>
